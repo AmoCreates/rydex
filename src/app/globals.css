@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+button {
+    cursor: pointer;
+    transition: scale 0.3s;
+}
+
+button:hover {
+    scale: 1.05;
+}
+
+button:active {
+    scale: 0.95;
+}
