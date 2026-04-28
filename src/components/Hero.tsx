@@ -39,7 +39,7 @@ const Hero = () => {
 					<Bus size={30} />
 					<Truck size={30} />
 				</motion.div>
-				<motion.button className="mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl">
+				<motion.button className="mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition">
 					Book Now
 				</motion.button>
 			</div>

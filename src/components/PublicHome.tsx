@@ -1,16 +1,20 @@
 "use client";
-import React, { useState } from "react";
 import Hero from "./Hero";
 import Slider from "./Slider";
 import AuthModel from "./AuthModel";
 
-const PublicHome = () => {
-	const [authOpen, setAuthOpen] = useState(true);
+type Props = {
+	open: boolean;
+	onClose: () => void;
+};
+
+const PublicHome = ({ open, onClose }: Props) => {
+	
 	return (
 		<>
 			<Hero/>
 			<Slider />
-			<AuthModel open={authOpen} onClose={() => setAuthOpen(false)} />
+			<AuthModel open={open} onClose={onClose} />
 		</>
 	);
 };
