@@ -2,9 +2,9 @@
 import axios from "axios";
 import { Lock, Mail, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { div } from "motion/react-client";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {
@@ -18,6 +18,11 @@ const AuthModel = ({ open, onClose }: Props) => {
 	const [step, setStep] = useState<Steps>("login");
 	const [err, setErr] = useState("");
 	const [loading, setLoading] = useState(false);
+	const router = useRouter();
+	const [email, setEmail] = useState("");
+	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+	const { data } = useSession();
+	console.log(data);
 
 	async function handleSignup(formData: FormData) {
 		const name = formData.get("name");
@@ -33,6 +38,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 		setErr("");
 
 		try {
+			setEmail(email as string);
 			const response = await axios.post("/api/auth/signup", {
 				name,
 				email,
@@ -72,7 +78,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 				password,
 				redirect: false,
 			});
-			console.log(res)
+			if (res.status === 200) {
+				router.push("/");
+			}
 		} catch (error: unknown) {
 			let message = "An unexpected error occurred";
 			if (error instanceof Error) {
@@ -96,6 +104,23 @@ const AuthModel = ({ open, onClose }: Props) => {
 		else if (step === "signup")
 			await handleSignup(new FormData(e.currentTarget));
 	};
+
+	const handleChangeOtp = (idx:number, value:string) => {
+		if (!/^[0-9]*$/.test(value)) return;
+		const newOtp = [...otp];
+		newOtp[idx] = value;
+		setOtp(newOtp);
+
+		if(value && idx<otp.length-1) {
+			document.getElementById(`otp-${idx+1}`)?.focus();
+			return;
+		}
+
+		if(!value && idx>0) {
+			document.getElementById(`otp-${idx-1}`)?.focus();
+			return;
+		}
+	}
 
 	return (
 		<AnimatePresence>
@@ -137,15 +162,19 @@ const AuthModel = ({ open, onClose }: Props) => {
 									setLoading(false);
 								}}
 							>
-								{loading ? "Logging in..." : (
-									<><Image
-									src="/google.png"
-									width={20}
-									height={20}
-									alt="google"
-									priority
-								/>{" "}
-								Continue with Google</>
+								{loading ? (
+									"Logging in..."
+								) : (
+									<>
+										<Image
+											src="/google.png"
+											width={20}
+											height={20}
+											alt="google"
+											priority
+										/>{" "}
+										Continue with Google
+									</>
 								)}
 							</button>
 							<div className="flex items-center justify-center my-6 gap-4">
@@ -182,12 +211,14 @@ const AuthModel = ({ open, onClose }: Props) => {
 												id="pass"
 												placeholder="Password"
 												name="password"
+												maxLength={16}
+												minLength={6}
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
 										{err && <div className="text-red-500">*{err}</div>}
 										<button
-											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center gap-3${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
 											{loading ? "Logging in..." : "Login"}
@@ -226,6 +257,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 												id="name"
 												placeholder="Name"
 												name="name"
+												minLength={3}
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
@@ -250,6 +282,8 @@ const AuthModel = ({ open, onClose }: Props) => {
 												id="pass"
 												placeholder="Password"
 												name="password"
+												maxLength={16}
+												minLength={6}
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
@@ -257,8 +291,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 										<button
 											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
+											onClick={() => setStep("otp")}
 										>
-											{loading ? "Signing up..." : "Sign Up"}
+											{loading ? "Sending OTP..." : "Send OTP"}
 										</button>
 
 										<div className="flex mt-5 items-center flex-col text-[15px]">
@@ -274,6 +309,32 @@ const AuthModel = ({ open, onClose }: Props) => {
 											</button>
 										</div>
 									</form>
+								</motion.div>
+							)}
+
+							{step === "otp" && (
+								<motion.div
+									key="otp"
+									initial={{ opacity: 0, x: 20 }}
+									animate={{ opacity: 1, x: 0 }}
+									exit={{ opacity: 0, x: -20 }}
+								>
+									<h1 className="text-xl font-semibold">Enter OTP</h1>
+									<p className="text-gray-500 text-sm">Sent to <span className="text-green-600 font-medium">{email}</span></p>
+									<div className="mt-5 space-y-4 flex justify-between gap-2">
+										{otp.map((digit, idx) => (
+											<input
+												key={idx}
+												id={`otp-${idx}`}
+												value={digit}
+												name={`otp-${idx}`}
+												maxLength={1}
+												onChange={(e)=>handleChangeOtp(idx, e.target.value)}
+												className="w-10 h-10 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outlilne-none"
+											/>
+										))}
+									</div>
+									<button className="mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer">Verify Email</button>
 								</motion.div>
 							)}
 						</div>

@@ -37,9 +37,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						throw new Error("user doesn't exist!");
 					}
 
+					if (!user.password) {
+						throw new Error(
+							"This account does not have a password. Please use Google sign-in or reset your password.",
+						);
+					}
+
 					const isMatch = await bcrypt.compare(password, user.password);
 					if (!isMatch) {
-						throw new Error("either email or password is incorrect");
+						throw new Error("password is incorrect");
 					}
 
 					return {

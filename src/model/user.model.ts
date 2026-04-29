@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 // extends with mongoose doucment will resolve the upcoming id type and timestamps
 interface IUser extends mongoose.Document {
   name: string;
-  image: string;
+  image?: string;
   email: string;
   password?: string;
   role: "user" | "partner" | "admin";
-  createdAt?: Date;
+  createdAt?: Date; // no need to add these becaues extends above, only for more secureness
   updatedAt?: Date;
 }
 
