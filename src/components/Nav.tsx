@@ -37,7 +37,7 @@ const Nav = ({ onOpen }: Props) => {
 					})}
 				</div>
 
-        <button className="px-4 py-1.5 rounded-full bg-white text-black text-sm cursor-pointer transition active:scale-95"
+        <button className=" px-4 py-1.5 rounded-full bg-white text-black text-sm cursor-pointer transition active:scale-95"
         onClick={onOpen}>Login</button>
 			</div>
 		</motion.div>

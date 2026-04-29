@@ -89,7 +89,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				token.email = user.email;
 				token.image = user.image;
 			} else {
-				throw Error("jwt-callback: either user or token is missing");
+				throw Error("jwt-callback: token is missing");
 			}
 			return token;
 		},
