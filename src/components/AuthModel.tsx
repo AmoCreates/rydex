@@ -45,6 +45,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 				password,
 			});
 			console.log(response?.data?.user);
+			if (response.status == 201) {
+				setStep("otp");
+			}
 		} catch (error: unknown) {
 			let message = "An unexpected error occurred";
 			if (error instanceof Error) {
@@ -90,7 +93,10 @@ const AuthModel = ({ open, onClose }: Props) => {
 				error !== null &&
 				"response" in error
 			) {
-				message = (error as any).response?.data?.message || message;
+				message =
+					(error as any).response?.data?.error ||
+					(error as any).response?.data?.message ||
+					message;
 			}
 			setErr(`Signup failed: ${message}`);
 		} finally {
@@ -105,22 +111,41 @@ const AuthModel = ({ open, onClose }: Props) => {
 			await handleSignup(new FormData(e.currentTarget));
 	};
 
-	const handleChangeOtp = (idx:number, value:string) => {
+	async function verifyEmail() {
+		setErr("");
+		setLoading(true);
+
+		try {
+			const { data } = await axios.post("/api/auth/verify-email", {
+				email,
+				otp: otp.join(""),
+			});
+			console.log(data);
+			setStep("otp");
+		} catch (error) {
+			setLoading(false);
+			setErr("Invalid OTP");
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	const handleChangeOtp = (idx: number, value: string) => {
 		if (!/^[0-9]*$/.test(value)) return;
 		const newOtp = [...otp];
 		newOtp[idx] = value;
 		setOtp(newOtp);
 
-		if(value && idx<otp.length-1) {
-			document.getElementById(`otp-${idx+1}`)?.focus();
+		if (value && idx < otp.length - 1) {
+			document.getElementById(`otp-${idx + 1}`)?.focus();
 			return;
 		}
 
-		if(!value && idx>0) {
-			document.getElementById(`otp-${idx-1}`)?.focus();
+		if (!value && idx > 0) {
+			document.getElementById(`otp-${idx - 1}`)?.focus();
 			return;
 		}
-	}
+	};
 
 	return (
 		<AnimatePresence>
@@ -153,30 +178,32 @@ const AuthModel = ({ open, onClose }: Props) => {
 								</h1>
 								<p className="text-sm text-gray-500">Premium Vehicle Booking</p>
 							</div>
-							<button
-								className={`w-full h-11 mt-4 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition ${loading ? "cursor-not-allowed bg-black" : "cursor-pointer active:scale-95 transition"}`}
-								disabled={loading}
-								onClick={async () => {
-									setLoading(true);
-									await signIn("google", { callbackUrl: "/" });
-									setLoading(false);
-								}}
-							>
-								{loading ? (
-									"Logging in..."
-								) : (
-									<>
-										<Image
-											src="/google.png"
-											width={20}
-											height={20}
-											alt="google"
-											priority
-										/>{" "}
-										Continue with Google
-									</>
-								)}
-							</button>
+							{step !== "otp" && (
+								<button
+									className={`w-full h-11 mt-4 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition ${loading ? "cursor-not-allowed bg-black" : "cursor-pointer active:scale-95 transition"}`}
+									disabled={loading}
+									onClick={async () => {
+										setLoading(true);
+										await signIn("google", { callbackUrl: "/" });
+										setLoading(false);
+									}}
+								>
+									{loading ? (
+										"Logging in..."
+									) : (
+										<>
+											<Image
+												src="/google.png"
+												width={20}
+												height={20}
+												alt="google"
+												priority
+											/>{" "}
+											Continue with Google
+										</>
+									)}
+								</button>
+							)}
 							<div className="flex items-center justify-center my-6 gap-4">
 								<hr className="grow border-black/20" />
 								<p className="text-gray-500 text-sm">OR</p>
@@ -291,20 +318,13 @@ const AuthModel = ({ open, onClose }: Props) => {
 										<button
 											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
-											onClick={() => setStep("otp")}
 										>
 											{loading ? "Sending OTP..." : "Send OTP"}
 										</button>
 
 										<div className="flex mt-5 items-center flex-col text-[15px]">
 											<p className="text-gray-500">Already have an account?</p>
-											<button
-												onClick={() => {
-													setStep("login");
-													setErr("");
-												}}
-												className="font-semibold hover:underline cursor-pointer"
-											>
+											<button className="font-semibold hover:underline cursor-pointer">
 												Login
 											</button>
 										</div>
@@ -320,7 +340,10 @@ const AuthModel = ({ open, onClose }: Props) => {
 									exit={{ opacity: 0, x: -20 }}
 								>
 									<h1 className="text-xl font-semibold">Enter OTP</h1>
-									<p className="text-gray-500 text-sm">Sent to <span className="text-green-600 font-medium">{email}</span></p>
+									<p className="text-gray-500 text-sm">
+										Sent to{" "}
+										<span className="text-green-600 font-medium">{email}</span>
+									</p>
 									<div className="mt-5 space-y-4 flex justify-between gap-2">
 										{otp.map((digit, idx) => (
 											<input
@@ -329,12 +352,14 @@ const AuthModel = ({ open, onClose }: Props) => {
 												value={digit}
 												name={`otp-${idx}`}
 												maxLength={1}
-												onChange={(e)=>handleChangeOtp(idx, e.target.value)}
+												onChange={(e) => handleChangeOtp(idx, e.target.value)}
 												className="w-10 h-10 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outlilne-none"
 											/>
 										))}
 									</div>
-									<button className="mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer">Verify Email</button>
+									<button className="mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer">
+										Verify Email
+									</button>
 								</motion.div>
 							)}
 						</div>

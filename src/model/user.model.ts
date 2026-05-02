@@ -5,6 +5,9 @@ interface IUser extends mongoose.Document {
   name: string;
   image?: string;
   email: string;
+  isEmailVerified?: boolean;
+  otp?: string;
+  otpExpiry?: Date;
   password?: string;
   role: "user" | "partner" | "admin";
   createdAt?: Date; // no need to add these becaues extends above, only for more secureness
@@ -27,6 +30,21 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: true,
       unique: true,
+    },
+
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    otp: {
+      type: String,
+      required: false,
+    },
+
+    otpExpiry: {
+      type: Date,
+      required: false,
     },
 
     password: {
