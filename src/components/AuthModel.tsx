@@ -121,7 +121,13 @@ const AuthModel = ({ open, onClose }: Props) => {
 				otp: otp.join(""),
 			});
 			console.log(data);
-			setStep("otp");
+			setTimeout(() => {
+				setStep("login");
+			}, 600)
+			setErr("Email Verified Successfully");
+			setTimeout(() => {
+				setErr("");
+			}, 5000);
 		} catch (error) {
 			setLoading(false);
 			setErr("Invalid OTP");
@@ -154,7 +160,6 @@ const AuthModel = ({ open, onClose }: Props) => {
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					exit={{ opacity: 0 }}
-					onClick={onClose}
 					className="fixed inset-0 z-90 bg-black/80 backdrop-blur-sm"
 				>
 					<motion.div
@@ -164,10 +169,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 						exit={{ opacity: 0, scale: 0.95, y: 80 }}
 						className="fixed inset-0 z-100 flex items-center justify-center px-4"
 					>
-						<div
-							className="relative w-full max-w-md rounded-3xl bg-white border border-black/10 shadow-[0_40px_100px_rgba(0, 0, 0, 0.35)] p-6 sm:p-8 text-black"
-							onClick={(e) => e.stopPropagation()}
-						>
+						<div className="relative w-full max-w-md rounded-3xl bg-white border border-black/10 shadow-[0_40px_100px_rgba(0, 0, 0, 0.35)] p-6 sm:p-8 text-black">
 							<X
 								className="absolute cursor-pointer right-4 top-4 text-gray-500 hover:text-black transition"
 								onClick={onClose}
@@ -178,33 +180,33 @@ const AuthModel = ({ open, onClose }: Props) => {
 								</h1>
 								<p className="text-sm text-gray-500">Premium Vehicle Booking</p>
 							</div>
-							{step !== "otp" && (
-								<button
-									className={`w-full h-11 mt-4 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition ${loading ? "cursor-not-allowed bg-black" : "cursor-pointer active:scale-95 transition"}`}
-									disabled={loading}
-									onClick={async () => {
-										setLoading(true);
-										await signIn("google", { callbackUrl: "/" });
-										setLoading(false);
-									}}
-								>
-									{loading ? (
-										"Logging in..."
-									) : (
-										<>
-											<Image
-												src="/google.png"
-												width={20}
-												height={20}
-												alt="google"
-												priority
-											/>{" "}
-											Continue with Google
-										</>
-									)}
-								</button>
-							)}
-							<div className="flex items-center justify-center my-6 gap-4">
+
+							<button
+								className={`w-full h-11 mt-4 rounded-xl border border-black/20 flex items-center justify-center gap-3 text-sm font-semibold hover:bg-black hover:text-white transition duration-300 ${loading ? "cursor-not-allowed bg-black text-white" : "cursor-pointer active:scale-95 transition"}`}
+								disabled={loading}
+								onClick={async () => {
+									setLoading(true);
+									await signIn("google", { callbackUrl: "/" });
+									setLoading(false);
+								}}
+							>
+								{loading ? (
+									"Logging in..."
+								) : (
+									<>
+										<Image
+											src="/google.png"
+											width={20}
+											height={20}
+											alt="google"
+											priority
+										/>{" "}
+										Continue with Google
+									</>
+								)}
+							</button>
+
+							<div className="flex items-center justify-center my-6 gap-3">
 								<hr className="grow border-black/20" />
 								<p className="text-gray-500 text-sm">OR</p>
 								<hr className="grow border-black/20" />
@@ -243,7 +245,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
-										{err && <div className="text-red-500">*{err}</div>}
+										{err && <div className={`${err=="Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}>*{err}</div>}
 										<button
 											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center gap-3${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
@@ -357,8 +359,13 @@ const AuthModel = ({ open, onClose }: Props) => {
 											/>
 										))}
 									</div>
-									<button className="mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer">
-										Verify Email
+									{err && <div className={`${err=="Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}>*{err}</div>}
+									<button
+										className={`mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+										onClick={verifyEmail}
+										disabled={loading}
+									>
+										{loading ? "Verifying OTP..." : "Verify Email"}
 									</button>
 								</motion.div>
 							)}
