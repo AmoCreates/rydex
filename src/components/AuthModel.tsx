@@ -2,7 +2,7 @@
 import axios from "axios";
 import { Lock, Mail, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,8 +21,6 @@ const AuthModel = ({ open, onClose }: Props) => {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-	const { data } = useSession();
-	console.log(data);
 
 	async function handleSignup(formData: FormData) {
 		const name = formData.get("name");
@@ -44,22 +42,16 @@ const AuthModel = ({ open, onClose }: Props) => {
 				email,
 				password,
 			});
-			console.log(response?.data?.user);
 			if (response.status == 201) {
 				setStep("otp");
 			}
-		} catch (error: unknown) {
-			let message = "An unexpected error occurred";
-			if (error instanceof Error) {
-				message = error.message;
-			} else if (
-				typeof error === "object" &&
-				error !== null &&
-				"response" in error
-			) {
-				message = (error as any).response?.data?.message || message;
-			}
-			setErr(`Signup failed: ${message}`);
+		} catch (error: unknown | any) {
+			const message =
+				error?.response?.data?.message ||
+				error?.response?.data?.error ||
+				error?.message ||
+				"Signup failed";
+			setErr(message);
 		} finally {
 			setLoading(false);
 		}
@@ -81,24 +73,17 @@ const AuthModel = ({ open, onClose }: Props) => {
 				password,
 				redirect: false,
 			});
-			if (res.status === 200) {
+			if (res?.ok) {
 				router.push("/");
+			} else {
+				setErr(
+					res?.error === "CredentialsSignin"
+						? "Invalid email or password"
+						: res?.error || "Login failed",
+				);
 			}
-		} catch (error: unknown) {
-			let message = "An unexpected error occurred";
-			if (error instanceof Error) {
-				message = error.message;
-			} else if (
-				typeof error === "object" &&
-				error !== null &&
-				"response" in error
-			) {
-				message =
-					(error as any).response?.data?.error ||
-					(error as any).response?.data?.message ||
-					message;
-			}
-			setErr(`Signup failed: ${message}`);
+		} catch (error: unknown | any) {
+			console.log(error)
 		} finally {
 			setLoading(false);
 		}
@@ -123,7 +108,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 			console.log(data);
 			setTimeout(() => {
 				setStep("login");
-			}, 600)
+			}, 600);
 			setErr("Email Verified Successfully");
 			setTimeout(() => {
 				setErr("");
@@ -245,28 +230,32 @@ const AuthModel = ({ open, onClose }: Props) => {
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
-										{err && <div className={`${err=="Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}>*{err}</div>}
+										{err && (
+											<div
+												className={`${err == "Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}
+											>
+												*{err}
+											</div>
+										)}
 										<button
 											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center gap-3${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
 											{loading ? "Logging in..." : "Login"}
 										</button>
-										<div className="flex mt-5 items-center flex-col text-[15px]">
-											<p className="text-gray-500">
-												Don&#39;t have an account?
-											</p>
-											<button
-												onClick={() => {
-													setStep("signup");
-													setErr("");
-												}}
-												className="font-semibold hover:underline cursor-pointer"
-											>
-												Sign Up
-											</button>
-										</div>
 									</form>
+									<div className="flex mt-5 items-center flex-col text-[15px]">
+										<p className="text-gray-500">Don&#39;t have an account?</p>
+										<button
+											onClick={() => {
+												setStep("signup");
+												setErr("");
+											}}
+											className="font-semibold hover:underline cursor-pointer"
+										>
+											Sign Up
+										</button>
+									</div>
 								</motion.div>
 							)}
 
@@ -323,14 +312,19 @@ const AuthModel = ({ open, onClose }: Props) => {
 										>
 											{loading ? "Sending OTP..." : "Send OTP"}
 										</button>
-
-										<div className="flex mt-5 items-center flex-col text-[15px]">
-											<p className="text-gray-500">Already have an account?</p>
-											<button className="font-semibold hover:underline cursor-pointer">
-												Login
-											</button>
-										</div>
 									</form>
+									<div className="flex mt-5 items-center flex-col text-[15px]">
+										<p className="text-gray-500">Already have an account?</p>
+										<button
+											className="font-semibold hover:underline cursor-pointer"
+											onClick={() => {
+												setStep("login");
+												setErr("");
+											}}
+										>
+											Login
+										</button>
+									</div>
 								</motion.div>
 							)}
 
@@ -355,11 +349,17 @@ const AuthModel = ({ open, onClose }: Props) => {
 												name={`otp-${idx}`}
 												maxLength={1}
 												onChange={(e) => handleChangeOtp(idx, e.target.value)}
-												className="w-10 h-10 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outlilne-none"
+												className="w-10 h-10 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outline-none"
 											/>
 										))}
 									</div>
-									{err && <div className={`${err=="Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}>*{err}</div>}
+									{err && (
+										<div
+											className={`${err == "Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}
+										>
+											*{err}
+										</div>
+									)}
 									<button
 										className={`mt-6 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 										onClick={verifyEmail}
@@ -367,6 +367,17 @@ const AuthModel = ({ open, onClose }: Props) => {
 									>
 										{loading ? "Verifying OTP..." : "Verify Email"}
 									</button>
+									<div className="flex mt-2 items-center flex-col text-[15px]">
+										<button
+											onClick={() => {
+												setStep("signup");
+												setErr("");
+											}}
+											disabled={loading}
+											className="font-semibold hover:underline cursor-pointer text-gray-500 disabled:no-underline disabled:cursor-not-allowed"
+										>
+										</button>
+									</div>
 								</motion.div>
 							)}
 						</div>

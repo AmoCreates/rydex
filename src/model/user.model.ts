@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 // extends with mongoose doucment will resolve the upcoming id type and timestamps
-interface IUser extends mongoose.Document {
+export interface IUser extends mongoose.Document {
   name: string;
   image?: string;
   email: string;
