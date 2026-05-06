@@ -94,21 +94,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				token.name = user.name;
 				token.email = user.email;
 				token.image = user.image;
-			} else {
-				throw Error("jwt-callback: token is missing");
 			}
 			return token;
 		},
 
 		async session({ session, token }) {
-			if (token && session.user) {
+			if (session.user && token) {
 				session.user.id = token.id;
 				session.user.role = token.role;
 				session.user.name = token.name;
 				session.user.email = token.email;
 				session.user.image = token.image;
-			} else {
-				throw Error("session-callback: either token or session is missing");
 			}
 			return session;
 		},

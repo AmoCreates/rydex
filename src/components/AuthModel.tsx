@@ -2,7 +2,7 @@
 import axios from "axios";
 import { Lock, Mail, UserRound, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,6 +21,8 @@ const AuthModel = ({ open, onClose }: Props) => {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+	const { data, status } = useSession();
+	console.log("Session Status:", status, "User Data:", data?.user);
 
 	async function handleSignup(formData: FormData) {
 		const name = formData.get("name");
@@ -115,9 +117,11 @@ const AuthModel = ({ open, onClose }: Props) => {
 			}, 5000);
 		} catch (error) {
 			setLoading(false);
+			console.log(error)
 			setErr("Invalid OTP");
 		} finally {
 			setLoading(false);
+			setOtp(["", "", "", "", "", ""]);
 		}
 	}
 
