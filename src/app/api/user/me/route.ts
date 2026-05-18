@@ -20,12 +20,13 @@ export async function GET(req: Request) {
 			});
 		}
 
-		return new Response(JSON.stringify({ user }), {
-			status: 200,
-		});
+		return Response.json(user, {status: 200})
 	} catch (error) {
-		return new Response(JSON.stringify({ error: `Internal Server Error\nerror: ${error}` }), {
-			status: 500,
-		});
+		return new Response(
+			JSON.stringify({ error: `Internal Server Error\nerror: ${error}` }),
+			{
+				status: 500,
+			},
+		);
 	}
 }

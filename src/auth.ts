@@ -52,7 +52,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						id: user._id,
 						name: user.name,
 						email: user.email,
-						image: user.image,
 						role: user.role,
 					};
 				} catch (error) {
@@ -93,7 +92,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				token.role = user.role;
 				token.name = user.name;
 				token.email = user.email;
-				token.image = user.image;
 			}
 			return token;
 		},
@@ -104,7 +102,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				session.user.role = token.role;
 				session.user.name = token.name;
 				session.user.email = token.email;
-				session.user.image = token.image;
 			}
 			return session;
 		},

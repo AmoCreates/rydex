@@ -22,7 +22,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 	const [email, setEmail] = useState("");
 	const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 	const { data, status } = useSession();
-	// console.log("Session Status:", status, "User Data:", data?.user);
+	console.log("Session Status:", status, "User Data:", data?.user);
 
 	async function handleSignup(formData: FormData) {
 		const name = formData.get("name");
@@ -76,6 +76,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 				redirect: false,
 			});
 			if (res?.ok) {
+				onClose();
 				router.push("/");
 			} else {
 				setErr(

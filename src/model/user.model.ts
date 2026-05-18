@@ -3,13 +3,12 @@ import mongoose from "mongoose";
 // extends with mongoose doucment will resolve the upcoming id type and timestamps
 export interface IUser extends mongoose.Document {
   name: string;
-  image?: string;
   email: string;
   isEmailVerified?: boolean;
   otp?: string;
   otpExpiry?: Date;
   password?: string;
-  role: "user" | "partner" | "admin";
+  role: "customer" | "partner" | "admin";
   createdAt?: Date; // no need to add these becaues extends above, only for more secureness
   updatedAt?: Date;
 }
@@ -19,11 +18,6 @@ const userSchema = new mongoose.Schema<IUser>(
     name: {
       type: String,
       required: true,
-    },
-
-    image: {
-      type: String,
-      required: false,
     },
 
     email: {
@@ -54,8 +48,8 @@ const userSchema = new mongoose.Schema<IUser>(
 
     role: {
       type: String,
-      default: "user",
-      enum: ['user', 'partner', 'admin']
+      default: "customer",
+      enum: ['customer', 'partner', 'admin']
     }
   },
   { timestamps: true },
