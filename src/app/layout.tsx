@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Provider from "@/lib/Provider";
 import ReduxProvider from "@/Toolkit/ReduxProvider";
+import InitUser from "@/InitUser";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -33,6 +34,8 @@ export default function RootLayout({
 			<body className="min-h-full flex flex-col">
 				<Provider>
 					<ReduxProvider>
+						{/* Initialize user session on app load */}
+						<InitUser />
 						{children}
 					</ReduxProvider>
 				</Provider>
