@@ -3,14 +3,13 @@ import { RiBikeLine } from "@remixicon/react";
 import {
 	Bus,
 	Car,
-	CarTaxiFront,
 	ChevronLeft,
 	ChevronRight,
 	Sparkles,
 	Truck,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const VEHICLE_CATEGORIES = [
 	{
@@ -51,13 +50,28 @@ const VEHICLE_CATEGORIES = [
 	},
 ];
 
+const footerArray = [
+	{num: "6+", label: "Categories"},
+	{num: "50+", label: "Vehicle types"},
+	{num: "24/7", label: "Availability"}
+]
+
 const allIcon = [RiBikeLine, Car, Car, Bus, Truck];
 
 const Slider = () => {
 	const [hovered, setHovered] = useState<number | null>(null);
+	const sliderRef = useRef<HTMLDivElement>(null);
+	const scroll = (direction: "left" | "right") => {
+		if (!sliderRef.current) return;
+		sliderRef.current.scrollBy({
+			left: direction == "left" ? -300 : 300,
+			behavior: "smooth",
+		});
+	};
+
 	return (
-		<div className="w-full bg-white py-20 px-4 overflow-hidden ">
-			<div className="max-w-7xl mx-auto px-4  ">
+		<div className="w-full bg-white py-20 px-4 overflow-hidden h-auto">
+			<div className="max-w-7xl mx-auto px-4 md:px-8">
 				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					whileInView={{ opacity: 1, y: 0 }}
@@ -93,12 +107,14 @@ const Slider = () => {
 					</div>
 					<div className="hidden sm:flex items-center gap-2">
 						<motion.div
+							onClick={() => scroll("left")}
 							whileTap={{ scale: 0.88 }}
 							className="w-11 h-11 rounded-xl border border-zinc-200 bg-white flex items-center justify-center hover:bg-zinc-900 hover:border-zinc-900 hover:text-white disabled:opacity-25 disabled:hover:bg-white disabled:hover:text-zinc-900 disabled:hover:border-zinc-200 transition-all text-zinc-700 shadow-sm cursor-pointer"
 						>
 							<ChevronLeft size={18} strokeWidth={2.5} />
 						</motion.div>
 						<motion.div
+							onClick={() => scroll("right")}
 							whileTap={{ scale: 0.88 }}
 							className="w-11 h-11 rounded-xl border border-zinc-200 bg-white flex items-center justify-center hover:bg-zinc-900 hover:border-zinc-900 hover:text-white disabled:opacity-25 disabled:hover:bg-white disabled:hover:text-zinc-900 disabled:hover:border-zinc-200 transition-all text-zinc-700 shadow-sm cursor-pointer"
 						>
@@ -106,10 +122,12 @@ const Slider = () => {
 						</motion.div>
 					</div>
 				</motion.div>
+
 				<div className="relative">
 					<div
 						className="flex gap-5 pt-20 overflow-x-auto scroll-smooth pb-4 px-1"
 						style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+						ref={sliderRef}
 					>
 						{VEHICLE_CATEGORIES.map((category, idx) => {
 							const isHovered = hovered === idx;
@@ -211,12 +229,40 @@ const Slider = () => {
 										>
 											{category.title}
 										</motion.h3>
+										<motion.p
+											className="text-xs font-medium leading-relaxed"
+											animate={{
+												color: isHovered
+													? "rgba(255, 255, 255, 0.5)"
+													: "#a1a1aa",
+											}}
+											transition={{ duration: 0.25 }}
+										>
+											{category.desc}
+										</motion.p>
 									</motion.div>
 								</motion.div>
 							);
 						})}
 					</div>
 				</div>
+
+				<motion.div
+					className="flex pt-6 items-center gap-6 mt-8 border-t border-zinc-100"
+					initial={{ opacity: 0 }}
+					whileInView={{ opacity: 1 }}
+					transition={{ delay: 0.7 }}
+				>
+					{
+						footerArray.map((val, key) => (
+							<div key={key} className="flex items-center gap-3">
+								<p className="text-zinc-900 text-lg font-black tracking-tight">{val.num}</p>
+								<p className="text-xs text-zinc-400 font-medium">{val.label}</p>
+							</div>
+
+						))
+					}
+				</motion.div>
 			</div>
 		</div>
 	);

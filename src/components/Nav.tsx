@@ -200,7 +200,7 @@ const Nav = ({ onOpen }: Props) => {
 								<Link
 									key={index}
 									href={href}
-									className={`px-4 py-2 rounded-lg bg-black text-sm  cursor-pointer hover:bg-white/10 ${active ? "text-white bg-white/10" : "text-gray-400 hover:text-white"}`}
+									className={`px-4 py-2 rounded-lg  text-sm  cursor-pointer hover:bg-white/10 ${active ? "text-white bg-white/10" : "text-gray-400 hover:text-white"}`}
 								>
 									{icon && (
 										<div className="flex flex-col items-center justify-center">
