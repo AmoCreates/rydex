@@ -11,7 +11,6 @@ function Get(enabled: boolean) {
 		const getMe = async () => {
 			try {
 				const { data } = await axios.get("/api/user/me");
-				console.log(data)
 				dispatch(setUserData(data));
 			} catch (error) {
 				console.error("Error fetching user data:", error);

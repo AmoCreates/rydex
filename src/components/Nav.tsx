@@ -29,9 +29,8 @@ const Nav = ({ onOpen }: Props) => {
 	const pathName = usePathname();
 	const dispatch = useDispatch<AppDispatch>();
 	const [profileOpen, setProfileOpen] = useState(false);
-	const [menuOpen, setMenuOpen] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(true);
 	const { userData } = useSelector((state: RootState) => state.user);
-	console.log(userData);
 
 	const handleSignOut = async () => {
 		await signOut({ callbackUrl: "/", redirect: false });
@@ -103,7 +102,7 @@ const Nav = ({ onOpen }: Props) => {
 												initial={{ opacity: 0, scale: 0.95 }}
 												animate={{ opacity: 1, scale: 1 }}
 												exit={{ opacity: 0, scale: 0.95 }}
-												className="absolute right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200"
+												className="absolute hidden md:block right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200"
 											>
 												<div className="py-2 text-center border-b border-gray-200 mb-1">
 													<p className="text-lg font-semibold">
@@ -182,7 +181,7 @@ const Nav = ({ onOpen }: Props) => {
 						initial={{ y: -30, opacity: 0, zIndex: 1 }}
 						animate={{ y: 0, opacity: 1, zIndex: 50 }}
 						exit={{ y: -60, opacity: 0, zIndex: 1 }}
-						className="absolute left-1/2 -translate-x-1/2 top-20 z-50 bg-black text-white rounded-lg shadow-xl w-87.5 py-2 px-2 border border-gray-200 flex"
+						className="fixed md:hidden left-1/2 -translate-x-1/2 top-20 z-50 bg-transparent backdrop-blur-xl text-white rounded-lg shadow-xl w-87.5 py-2 px-2 border border-gray-200 flex"
 					>
 						{Nav_Items.map((item, index) => {
 							const href = item !== "Home" ? `/${item.toLowerCase()}` : "/";
@@ -212,6 +211,69 @@ const Nav = ({ onOpen }: Props) => {
 								</Link>
 							);
 						})}
+					</motion.div>
+				)}
+			</AnimatePresence>
+
+			<AnimatePresence>
+				{profileOpen && userData && (
+					<motion.div
+						initial={{ y: 400 }}
+						animate={{ y: 0 }}
+						exit={{ y: 400 }}
+						transition={{ type: "spring", damping: 25 }}
+						className="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl z-50 md:hidden"
+					>
+						<div className="py-2 text-center border-b border-gray-200 mb-1">
+							<p className="text-lg font-semibold">{userData.name}</p>
+							<p className="text-xs -mt-1 text-gray-500">{userData.role}</p>
+							{userData.role !== "partner" && (
+								<div
+									onClick={() => {
+										setProfileOpen(false);
+										onOpen();
+									}}
+									className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white text-black font-semibold cursor-pointer mt-2 gap-2 hover:bg-gray-200"
+								>
+									<div className="flex ">
+										<Bike
+											size={14}
+											className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center"
+										/>
+										<Car
+											size={14}
+											className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center -ml-1"
+										/>
+										<Truck
+											size={14}
+											className="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center -ml-1"
+										/>
+									</div>
+									Become a Partner
+									<ChevronRight size={16} className="ml-auto" />
+								</div>
+							)}
+						</div>
+						<Link
+							href="/profile"
+							className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+						>
+							Profile
+						</Link>
+						<Link
+							href="/bookings"
+							className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+						>
+							My Bookings
+						</Link>
+
+						<button
+							className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"
+							onClick={handleSignOut}
+						>
+							<LogOut size={16} className="text-black" />
+							Logout
+						</button>
 					</motion.div>
 				)}
 			</AnimatePresence>
