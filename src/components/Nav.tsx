@@ -1,11 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/Toolkit/store";
+import { signOut } from "next-auth/react";
+import { RiHome9Fill, RiPhoneFill, RiTaxiFill } from "@remixicon/react";
 import {
 	BadgeInfo,
 	Bike,
@@ -16,8 +18,6 @@ import {
 	Truck,
 	X,
 } from "lucide-react";
-import { signOut } from "next-auth/react";
-import { RiHome9Fill, RiPhoneFill, RiTaxiFill } from "@remixicon/react";
 
 const Nav_Items = ["Home", "Bookings", "About Us", "Contact Us"];
 
