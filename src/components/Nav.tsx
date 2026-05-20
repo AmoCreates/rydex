@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/Toolkit/store";
 import { signOut } from "next-auth/react";
@@ -31,6 +31,7 @@ const Nav = ({ onOpen }: Props) => {
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(true);
 	const { userData } = useSelector((state: RootState) => state.user);
+	const router = useRouter();
 
 	const handleSignOut = async () => {
 		await signOut({ callbackUrl: "/", redirect: false });
@@ -115,7 +116,7 @@ const Nav = ({ onOpen }: Props) => {
 														<div
 															onClick={() => {
 																setProfileOpen(false);
-																onOpen();
+																router.push('/partner/onboarding/vehicle')
 															}}
 															className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white text-black font-semibold cursor-pointer mt-2 gap-2 hover:bg-gray-200"
 														>
@@ -231,7 +232,7 @@ const Nav = ({ onOpen }: Props) => {
 								<div
 									onClick={() => {
 										setProfileOpen(false);
-										onOpen();
+									router.push('/partner/onboarding/vehicle')
 									}}
 									className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white text-black font-semibold cursor-pointer mt-2 gap-2 hover:bg-gray-200"
 								>
