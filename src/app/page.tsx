@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="w-full min-h-screen bg-white">
       <Nav onOpen={() =>setAuthOpen(true)} />
-      <PublicHome open={authOpen} onClose={() => setAuthOpen(false)}/>
+      <PublicHome onOpen={() =>setAuthOpen(true)} open={authOpen} onClose={() => setAuthOpen(false)}/>
       <Footer/>
     </div>
   );

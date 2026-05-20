@@ -241,7 +241,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 											</div>
 										)}
 										<button
-											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center gap-3${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center gap-3 ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
 											{loading ? "Logging in..." : "Login"}
@@ -310,7 +310,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 										</div>
 										{err && <div className="text-red-500">*{err}</div>}
 										<button
-											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900  flex justify-center items-center transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
 											{loading ? "Sending OTP..." : "Send OTP"}

@@ -6,13 +6,13 @@ import AuthModel from "./AuthModel";
 type Props = {
 	open: boolean;
 	onClose: () => void;
+	onOpen: () => void;
 };
 
-const PublicHome = ({ open, onClose }: Props) => {
-	
+const PublicHome = ({ open, onOpen, onClose }: Props) => {
 	return (
 		<>
-			<Hero/>
+			<Hero onOpen={onOpen} />
 			<Slider />
 			<AuthModel open={open} onClose={onClose} />
 		</>
