@@ -84,7 +84,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 				);
 			}
 		} catch (error: unknown | any) {
-			console.log(error)
+			console.log(error);
 		} finally {
 			setLoading(false);
 		}
@@ -116,7 +116,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 			}, 5000);
 		} catch (error) {
 			setLoading(false);
-			console.log(error)
+			console.log(error);
 			setErr("Invalid OTP");
 		} finally {
 			setLoading(false);
@@ -378,8 +378,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 											}}
 											disabled={loading}
 											className="font-semibold hover:underline cursor-pointer text-gray-500 disabled:no-underline disabled:cursor-not-allowed"
-										>
-										</button>
+										>Re-Enter Email</button>
 									</div>
 								</motion.div>
 							)}
