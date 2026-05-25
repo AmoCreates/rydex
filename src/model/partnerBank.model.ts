@@ -5,6 +5,7 @@ export interface IPartnerBank extends mongoose.Document {
 	accountHolder: string;
 	accountNumber: string;
 	ifscCode: string;
+	mobile: number;
 	upi?: string;
 	rejectionMsg?: string;
 	status: "not added" | "added" | "verified" | "rejected";
@@ -33,6 +34,11 @@ const partnerBankSchema = new mongoose.Schema<IPartnerBank>(
 
 		ifscCode: {
 			type: String,
+			required: true,
+		},
+
+		mobile: {
+			type: Number,
 			required: true,
 		},
 

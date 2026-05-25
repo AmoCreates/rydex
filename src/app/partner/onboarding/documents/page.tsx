@@ -3,7 +3,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
-import { UploadCloud } from "lucide-react";
+import { FileCheck, UploadCloud } from "lucide-react";
 
 const Page = () => {
 	const router = useRouter();
@@ -59,8 +59,12 @@ const Page = () => {
 
 					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
 						<div>
-							<p className="text-sm font-semibold">RC</p>
-							<p className="text-xs text-gray-500">MoRTH/RTO issued certificate</p>
+							<p className="text-sm font-semibold">
+								Vehicle Registration Certificate(RC)
+							</p>
+							<p className="text-xs text-gray-500">
+								MoRTH/RTO issued certificate
+							</p>
 						</div>
 						<div>
 							<span className="text-xs text-gray-400">Upload</span>
@@ -72,7 +76,9 @@ const Page = () => {
 
 					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
 						<div>
-							<p className="text-sm font-semibold">Pollution Under Control(PUC)</p>
+							<p className="text-sm font-semibold">
+								Pollution Under Control(PUC)
+							</p>
 							<p className="text-xs text-gray-500">MoRTH issued Certificate</p>
 						</div>
 						<div>
@@ -85,8 +91,12 @@ const Page = () => {
 
 					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
 						<div>
-							<p className="text-sm font-semibold">Motor Insurance Certificate(MIC)</p>
-							<p className="text-xs text-gray-500">Authorized issued certificate</p>
+							<p className="text-sm font-semibold">
+								Motor Insurance Certificate(MIC)
+							</p>
+							<p className="text-xs text-gray-500">
+								Authorized issued certificate
+							</p>
 						</div>
 						<div>
 							<span className="text-xs text-gray-400">Upload</span>
@@ -97,7 +107,18 @@ const Page = () => {
 					</div>
 				</div>
 
-				<div className="flex items-center justify-center mt-2 text-gray-400 text-sm">All related documents will be checked by our team manually.</div>
+				<div className="mt-6 flex items-start gap-3 text-xs text-gray-500">
+					<FileCheck size={16} className="text-green-500 mt-0.6" />
+					<p>All related documents are securely stored and manually verified by our team.</p>
+				</div>
+
+				<button
+					type="submit"
+					className="mt-5 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+					onClick={() => router.push("/partner/onboarding/bank")}
+				>
+					Continue
+				</button>
 			</motion.div>
 		</div>
 	);
