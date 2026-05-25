@@ -1,42 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth";
-import path from "path";
 
 const PUBLIC_ROUTES = ["/"];
+
+function isPublicRoute(pathname: string) {
+	return PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/auth");
+}
+
 export async function proxy(req: NextRequest) {
 	const { pathname } = req.nextUrl;
-	console.log(pathname);
 
 	if (
 		pathname.startsWith("/_next") ||
 		pathname.startsWith("/favicon.ico") ||
-		pathname.startsWith(".") ||
-		PUBLIC_ROUTES.includes(pathname)
-	)
+		pathname.startsWith("/.") ||
+		isPublicRoute(pathname)
+	) {
 		return NextResponse.next();
+	}
 
 	const session = await auth();
 	if (!session) {
-		return NextResponse.redirect(new URL("/auth/signin", req.url)); // new URL to add after the main url, mainURL
+		return NextResponse.redirect(new URL("/", req.url));
 	}
 
 	const role = session.user.role;
 
-	if (pathname.startsWith("/admin")) {
-		if (role !== "admin") return NextResponse.redirect(new URL("/", req.url));
+	if (pathname.startsWith("/admin") && role !== "admin") {
+		return NextResponse.redirect(new URL("/", req.url));
 	}
 
-	if (pathname.startsWith("/partner")) {
-		if (pathname.startsWith("/partner/onboarding")) {
-			return NextResponse.next();
-		}
-		if (role !== "partner") return NextResponse.redirect(new URL("/", req.url));
-	}
-
-	if (pathname.startsWith("/api")) {
-		if (!session) {
-			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-		}
+	if (
+		pathname.startsWith("/partner") &&
+		!pathname.startsWith("/partner/onboarding") &&
+		role == "partner"
+	) {
+		return NextResponse.redirect(new URL("/", req.url));
 	}
 
 	return NextResponse.next();

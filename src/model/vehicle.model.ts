@@ -7,20 +7,19 @@ type vehcileType =
 	| "Cargo"
 	| "Loaders"
 	| "Passenger"
-	| "Other";
 
 export interface IVehicle extends mongoose.Document {
 	owner: mongoose.Types.ObjectId;
 	type: vehcileType;
 	vehicleModel: string;
 	vehicleNumber: string;
-	vehicleCondition: "Good" | "Fair" | "Poor";
-	AC: boolean;
+	vehicleCondition?: "Good" | "Fair" | "Poor";
+	AC?: boolean;
 	imageUrl?: string;
 	baseFare?: number;
 	pricePerKM?: number;
 	waitingChargerPerMin?: number;
-	ownerStatus: "Approved" | "Rejected" | "Pending";
+	ownerStatus?: "Approved" | "Rejected" | "Pending";
 	isActive?: boolean;
 	rejectionMsg?: string;
   rating?: number;
@@ -37,7 +36,7 @@ const vehicleSchema = new mongoose.Schema<IVehicle>({
 
 	type: {
 		type: String,
-		enum: ["Bike", "Car", "Auto", "Cargo", "Loaders", "Passenger", "Other"],
+		enum: ["Bike", "Car", "Auto", "Cargo", "Loaders", "Passenger"],
 	},
 
 	AC: {
