@@ -81,7 +81,8 @@ const Page = () => {
 						</label>
 						<input
 							type="text"
-							placeholder="eg. UP251111"
+							placeholder="eg. UP25AB1111"
+							style={{ textTransform: "uppercase" }}
 							id="vn"
 							minLength={9}
 							maxLength={11}

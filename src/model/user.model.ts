@@ -8,6 +8,8 @@ export interface IUser extends mongoose.Document {
 	otp?: string;
 	otpExpiry?: Date;
 	password?: string;
+	mobile?: number;
+	partnerOnBoardingStep?: number;
 	role: "customer" | "partner" | "admin";
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
@@ -44,6 +46,18 @@ const userSchema = new mongoose.Schema<IUser>(
 		password: {
 			type: String,
 			required: false,
+		},
+
+		mobile: {
+			type: Number,
+			required: false,
+		},
+
+		partnerOnBoardingStep: {
+			type: Number,
+			min: 0,
+			max: 8,
+			default: 0,
 		},
 
 		role: {

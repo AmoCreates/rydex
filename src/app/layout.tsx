@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "RYDEX - Smart Vehcile Booking Platform",
+	title: "RYDEX - Smart Vehicle Booking Platform",
 	description:
-		"RYDEX a modern multi-vendor vehcile booking platform where user can easily book cars, bikes, and commercial vehicles. RYDEX make mobility simple and reliable with its secure login, verified owners and transparent pricing",
+		"RYDEX a modern multi-vendor vehicle booking platform where user can easily book cars, bikes, and commercial vehicles. RYDEX make mobility simple and reliable with its secure login, verified owners and transparent pricing",
 };
 
 export default function RootLayout({

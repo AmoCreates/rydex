@@ -4,10 +4,10 @@ export interface IPartnerDocs extends mongoose.Document {
 	owner: mongoose.Types.ObjectId;
 	aadharUrl: string;
 	rcUrl: string;
-	dlUrl: string;
+	licenseUrl: string;
 	motorInsuranceUrl: string;
 	pucUrl: string;
-	status: "Approved" | "Rejected" | "Pending";
+	status?: "approved" | "rejected" | "pending";
 	rejectionMsg?: string;
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
@@ -31,7 +31,7 @@ const partnerDocsSchema = new mongoose.Schema<IPartnerDocs>(
 			required: true,
 		},
 
-		dlUrl: {
+		licenseUrl: {
 			type: String,
 			required: true,
 		},
@@ -48,8 +48,8 @@ const partnerDocsSchema = new mongoose.Schema<IPartnerDocs>(
 
 		status: {
 			type: String,
-			enum: ["Approved", "Rejected", "Pending"],
-			default: "Pending",
+			enum: ["approved", "rejected", "pending"],
+			default: "pending",
 		},
 
 		rejectionMsg: String,

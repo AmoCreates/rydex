@@ -1,25 +1,25 @@
 import mongoose from "mongoose";
 
-type vehcileType =
-	| "Bike"
-	| "Car"
-	| "Auto"
-	| "Cargo"
-	| "Loaders"
-	| "Passenger"
+type vehicleType =
+	| "bike"
+	| "car"
+	| "auto"
+	| "cargo"
+	| "loaders"
+	| "passenger"
 
 export interface IVehicle extends mongoose.Document {
 	owner: mongoose.Types.ObjectId;
-	type: vehcileType;
+	type: vehicleType;
 	vehicleModel: string;
 	vehicleNumber: string;
-	vehicleCondition?: "Good" | "Fair" | "Poor";
+	vehicleCondition?: "good" | "fair" | "poor";
 	AC?: boolean;
 	imageUrl?: string;
 	baseFare?: number;
 	pricePerKM?: number;
 	waitingChargerPerMin?: number;
-	ownerStatus?: "Approved" | "Rejected" | "Pending";
+	status?: "approved" | "rejected" | "pending";
 	isActive?: boolean;
 	rejectionMsg?: string;
   rating?: number;
@@ -36,7 +36,7 @@ const vehicleSchema = new mongoose.Schema<IVehicle>({
 
 	type: {
 		type: String,
-		enum: ["Bike", "Car", "Auto", "Cargo", "Loaders", "Passenger"],
+		enum: ["bike", "car", "auto", "cargo", "loaders", "passenger"],
 	},
 
 	AC: {
@@ -57,7 +57,7 @@ const vehicleSchema = new mongoose.Schema<IVehicle>({
 
 	vehicleCondition: {
 		type: String,
-		enum: ["Good", "Fair", "Poor"],
+		enum: ["good", "fair", "poor"],
 	},
 
   rating: {
@@ -70,10 +70,10 @@ const vehicleSchema = new mongoose.Schema<IVehicle>({
     default: true,
   },
 
-  ownerStatus: {
+  status: {
     type: String,
-    enum: ["Approved", "Rejected", "Pending"],
-    default: "Pending",
+    enum: ["approved", "rejected", "pending"],
+    default: "pending",
   },
 
   imageUrl: String,

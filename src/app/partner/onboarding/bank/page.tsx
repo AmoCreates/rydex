@@ -84,6 +84,7 @@ const Page = () => {
 							<input
 								type="text"
 								placeholder="HDFC0000123"
+								style={{ textTransform: "uppercase" }}
 								id="ic"
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
