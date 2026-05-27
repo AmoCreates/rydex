@@ -22,7 +22,7 @@ const Page = () => {
 	const [vehicleModel, setVehicleModel] = useState("");
 	const [err, setErr] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isSubmitting, setIsSubmitting] = useState(true);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	useEffect(() => {
 		async function getDetails() {
