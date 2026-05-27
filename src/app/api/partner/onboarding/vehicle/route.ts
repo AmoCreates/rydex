@@ -47,18 +47,18 @@ export async function POST(req: Request) {
 			);
 		}
 
-		let vehicle = await Vehicle.findOne({ owner: session.user.id });
-		if (vehicle) {
-			vehicle.type = vehicleType;
-			vehicle.vehicleModel = vehicleModel;
-			vehicle.vehicleNumber = vehicleNumberCapitalize;
-			vehicle.status = "pending";
-			await vehicle.save();
+		// let vehicle = await Vehicle.findOne({ owner: user._id });
+		// if (vehicle) {
+		// 	vehicle.type = vehicleType;
+		// 	vehicle.vehicleModel = vehicleModel;
+		// 	vehicle.vehicleNumber = vehicleNumberCapitalize;
+		// 	vehicle.status = "pending";
+		// 	await vehicle.save();
 
-			return Response.json(vehicle, { status: 200 });
-		}
+		// 	return Response.json(vehicle, { status: 200 });
+		// }
 
-		vehicle = await Vehicle.create({
+		const vehicle = await Vehicle.create({
 			owner: user._id,
 			type: vehicleType,
 			vehicleNumber: vehicleNumberCapitalize,

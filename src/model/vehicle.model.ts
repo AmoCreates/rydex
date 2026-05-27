@@ -67,7 +67,7 @@ const vehicleSchema = new mongoose.Schema<IVehicle>({
 
   isActive: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 
   status: {

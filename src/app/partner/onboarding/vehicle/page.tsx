@@ -1,9 +1,10 @@
 "use client";
 import { RiArrowLeftLine } from "@remixicon/react";
-import { Bike, Bus, Car, Package, Truck } from "lucide-react";
+import axios from "axios";
+import { Bike, Bus, Car, Loader2, Package, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const VEHICLES = [
 	{ id: "bike", label: "Bike", icon: Bike, desc: "2 Wheeler" },
@@ -16,7 +17,86 @@ const VEHICLES = [
 
 const Page = () => {
 	const router = useRouter();
-	const [vehicleType, setVehicleType] = useState<string | null>(null);
+	const [vehicleType, setVehicleType] = useState("");
+	const [vehicleNumber, setVehicleNumber] = useState("");
+	const [vehicleModel, setVehicleModel] = useState("");
+	const [err, setErr] = useState<string | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isSubmitting, setIsSubmitting] = useState(true);
+
+	useEffect(() => {
+		async function getDetails() {
+			try {
+				const res = await axios.get("/api/partner/onboarding/vehicle");
+				if (res.status === 200) {
+					const { type, vehicleNumber, vehicleModel } = res.data;
+					setVehicleType(type);
+					setVehicleNumber(vehicleNumber);
+					setVehicleModel(vehicleModel);
+				}
+			} catch (error: any) {
+				const axiosError = error;
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					"vehicle submit error",
+					axiosError?.response?.data || axiosError?.message || axiosError,
+				);
+				setErr(serverMessage || "Something went wrong");
+			}
+			setIsLoading(false);
+		}
+
+		getDetails();
+	}, []);
+
+	async function handleSubmit() {
+		try {
+			if (vehicleType.length === 0) {
+				setErr("Please select vehicle type");
+				return;
+			} else if (vehicleNumber.length === 0) {
+				setErr("Please enter vehicle number");
+				return;
+			} else if (vehicleModel.length === 0) {
+				setErr("Please enter vehicle model");
+				return;
+			} else {
+				setErr(null);
+			}
+
+			setIsSubmitting(true);
+			const res = await axios.post("/api/partner/onboarding/vehicle", {
+				vehicleType,
+				vehicleNumber,
+				vehicleModel,
+			});
+
+			if (res.status === 201) {
+				router.push("/partner/onboarding/documents");
+			} else {
+				setErr("Something went wrong");
+			}
+		} catch (error: any) {
+			const axiosError = error;
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				"vehicle submit error",
+				axiosError?.response?.data || axiosError?.message || axiosError,
+			);
+			setErr(serverMessage || "Something went wrong");
+			} finally {
+				setIsSubmitting(false);
+			}
+	}
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen bg-white flex items-center justify-center">
+				<Loader2 className="w-8 h-8 animate-spin text-black" />
+			</div>
+		);
+	}
+
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center px-4">
 			<motion.div
@@ -81,11 +161,13 @@ const Page = () => {
 						</label>
 						<input
 							type="text"
-							placeholder="eg. UP25AB1111"
-							style={{ textTransform: "uppercase" }}
+							placeholder="AB01AB1111"
 							id="vn"
+							required
 							minLength={9}
-							maxLength={11}
+							maxLength={10}
+							onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+							value={vehicleNumber}
 							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
 						/>
 					</div>
@@ -96,18 +178,35 @@ const Page = () => {
 						</label>
 						<input
 							type="text"
-							placeholder="eg. Tata Nexon"
+							placeholder="Tata Nexon"
+							style={{ textTransform: "capitalize" }}
 							id="vm"
+							required
+							onChange={(e) => {
+								setVehicleModel(e.target.value);
+							}}
+							value={vehicleModel}
 							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
 						/>
 					</div>
 
+					{err && (
+						<div className="text-red-500 text-xs font-medium bg-red-50 p-3 rounded-lg border border-red-100">
+							{err}
+						</div>
+					)}
+
 					<button
 						type="submit"
-						className="mt-8 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
-						onClick={() => router.push("/partner/onboarding/documents")}
+						className="mt-8 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+						onClick={handleSubmit}
+						disabled={isSubmitting}
 					>
-						Continue
+						{isSubmitting ? (
+							"Saving your details..."
+						) : (
+							"Continue"
+						)}
 					</button>
 				</div>
 			</motion.div>
