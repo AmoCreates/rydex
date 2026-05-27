@@ -1,12 +1,36 @@
 "use client";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
-import { FileCheck, UploadCloud } from "lucide-react";
+import { FileCheck, UploadCloud, Loader, File, Check } from "lucide-react";
 
 const Page = () => {
 	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState("");
+	const [success, setSuccess] = useState(false);
+
+
+	type docsType = "aadhaar" | "license" | "rc" | "puc" | "motorInsurance";
+	const [docs, setDocs] = useState<Record<docsType, File | null>>({
+		aadhaar: null,
+		license: null,
+		rc: null,
+		puc: null,
+		motorInsurance: null,
+	});
+
+	const handleImg = (docs: docsType, file: File | null) => {
+		if (!file) {
+			return;
+		}
+		setDocs((prev) => ({
+			...prev,
+			[docs]: file,
+		}));
+	};
+
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center px-4">
 			<motion.div
@@ -31,85 +55,139 @@ const Page = () => {
 				</div>
 
 				<div className="mt-8 space-y-6">
-					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
+					<label
+						htmlFor="aadhaar"
+						className={`flex relative items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.aadhaar ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+					>
 						<div>
 							<p className="text-sm font-semibold">Aadhaar / ID Proof</p>
-							<p className="text-xs text-gray-500">Government issued ID</p>
+							<p className={`truncate text-xs ${docs.aadhaar ? "text-green-600 font-medium" : "text-gray-500"}`}>
+								{docs.aadhaar ? docs.aadhaar.name : "Government issued ID"}
+							</p>
 						</div>
-						<div>
-							<span className="text-xs text-gray-400">Upload</span>
-							<div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-								<UploadCloud />
+						<div className="flex flex-col items-center gap-1">
+							<span className=" text-xs text-gray-400">{docs.aadhaar ? <span className="flex items-center gap-1"><Check size={15}/> Done</span> : "Upload"}</span>
+							<div className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.aadhaar ? "bg-green-500" : "bg-black"} text-white`}>
+								{docs.aadhaar ? <File/> : <UploadCloud />}
 							</div>
 						</div>
-					</div>
+						<input
+							type="file"
+							id="aadhaar"
+							accept="/image*,.pdf"
+							onChange={(e) =>
+								handleImg("aadhaar", e.target?.files?.[0] || null)
+							}
+							className="hidden"
+						/>
+					</label>
 
-					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
+					<label htmlFor="license" className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.license ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}>
 						<div>
 							<p className="text-sm font-semibold">Driving License</p>
-							<p className="text-xs text-gray-500">RTO/RTA issued ID</p>
+							<p className={`truncate text-xs ${docs.license ? "text-green-600 font-medium" : "text-gray-500"}`}>
+								{docs.license ? docs.license.name : "RTO/RTA issued ID"}
+							</p>
 						</div>
-						<div>
-							<span className="text-xs text-gray-400">Upload</span>
-							<div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-								<UploadCloud />
+						<div className="flex flex-col items-center gap-1">
+							<span className="text-xs text-gray-400">{docs.license ? <span className="flex items-center gap-1"><Check size={15}/> Done</span> : "Upload"}</span>
+							<div className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.license ? "bg-green-500" : "bg-black"} text-white`}>
+								{docs.license ? <File/> : <UploadCloud />}
 							</div>
 						</div>
-					</div>
 
-					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
+						<input
+							type="file"
+							id="license"
+							accept="/image*,.pdf"
+							onChange={(e) => {
+								handleImg("license", e.target?.files?.[0] || null);
+							}}
+							className="hidden"
+						/>
+					</label>
+
+					<label htmlFor="rc" className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.rc ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}>
 						<div>
 							<p className="text-sm font-semibold">
 								Vehicle Registration Certificate(RC)
 							</p>
-							<p className="text-xs text-gray-500">
-								MoRTH/RTO issued certificate
+							<p className={`truncate text-xs ${docs.rc ? "text-green-600 font-medium" : "text-gray-500"}`}>
+								{docs.rc ? docs.rc.name : "MoRTH/RTO issued certificate"}
 							</p>
 						</div>
-						<div>
-							<span className="text-xs text-gray-400">Upload</span>
-							<div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-								<UploadCloud />
+						<div className="flex flex-col items-center gap-1">
+							<span className="text-xs text-gray-400">{docs.rc ? <span className="flex items-center gap-1"><Check size={15}/> Done</span> : "Upload"}</span>
+							<div className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.rc ? "bg-green-500" : "bg-black"} text-white`}>
+								{docs.rc ? <File/> : <UploadCloud />}
 							</div>
 						</div>
-					</div>
+						<input
+							type="file"
+							id="rc"
+							accept="/image*,.pdf"
+							onChange={(e) => handleImg("rc", e.target?.files?.[0] || null)}
+							className="hidden"
+						/>
+					</label>
 
-					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
+					<label htmlFor="puc" className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.puc ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}>
 						<div>
 							<p className="text-sm font-semibold">
 								Pollution Under Control(PUC)
 							</p>
-							<p className="text-xs text-gray-500">MoRTH issued Certificate</p>
+							<p className={`truncate text-xs ${docs.puc ? "text-green-600 font-medium" : "text-gray-500"}`}>
+								{docs.puc ? docs.puc.name : "MoRTH issued Certificate"}
+							</p>
 						</div>
-						<div>
-							<span className="text-xs text-gray-400">Upload</span>
-							<div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-								<UploadCloud />
+						<div className="flex flex-col items-center gap-1">
+							<span className="text-xs text-gray-400">{docs.puc ? <span className="flex items-center gap-1"><Check size={15}/> Done</span> : "Upload"}</span>
+							<div className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.puc ? "bg-green-500" : "bg-black"} text-white`}>
+								{docs.puc ? <File/> : <UploadCloud />}
 							</div>
 						</div>
-					</div>
+						<input
+							type="file"
+							id="puc"
+							accept="/image*,.pdf"
+							onChange={(e) => handleImg("puc", e.target?.files?.[0] || null)}
+							className="hidden"
+						/>
+					</label>
 
-					<div className="flex items-center justify-between p-4 rounded-2xl border border-gray-200 cursor-pointer hover:border-black hover:scale-102 transition">
+					<label htmlFor="mic" className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.motorInsurance ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}>
 						<div>
 							<p className="text-sm font-semibold">
 								Motor Insurance Certificate(MIC)
 							</p>
-							<p className="text-xs text-gray-500">
-								Authorized issued certificate
+							<p className={`truncate text-xs ${docs.motorInsurance ? "text-green-600 font-medium" : "text-gray-500"}`}>
+								{docs.motorInsurance ? docs.motorInsurance.name : "Authorized issued certificate"}
 							</p>
 						</div>
-						<div>
-							<span className="text-xs text-gray-400">Upload</span>
-							<div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center">
-								<UploadCloud />
+						<div className="flex flex-col items-center gap-1">
+							<span className="text-xs text-gray-400">{docs.motorInsurance ? <span className="flex items-center gap-1"><Check size={15}/> Done</span>: "Upload"}</span>
+							<div className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.motorInsurance ? "bg-green-500" : "bg-black"} text-white`}>
+								{docs.motorInsurance ? <File/> : <UploadCloud />}
 							</div>
 						</div>
-					</div>
+						<input
+							type="file"
+							id="mic"
+							accept="/image*,.pdf"
+							onChange={(e) =>
+								handleImg("motorInsurance", e.target?.files?.[0] || null)
+							}
+							className="hidden"
+						/>
+					</label>
 				</div>
 
 				<div className="mt-6 flex items-start gap-3 text-xs text-gray-500">
 					<FileCheck size={16} className="text-green-500 mt-0.6" />
-					<p>All related documents are securely stored and manually verified by our team.</p>
+					<p>
+						All related documents are securely stored and manually verified by
+						our team.
+					</p>
 				</div>
 
 				<button
