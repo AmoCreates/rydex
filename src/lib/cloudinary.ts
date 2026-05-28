@@ -6,7 +6,7 @@ cloudinary.config({
 	api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const cloudinaryUpload = async (file: Blob): Promise<string | null> => {
+const cloudinaryUpload = async (file: Blob): Promise<string | null> => {
 	if (!file) {
 		return null;
 	}
@@ -32,7 +32,9 @@ export const cloudinaryUpload = async (file: Blob): Promise<string | null> => {
 			uploadStream.end(buffer);
 		});
 	} catch (error) {
-    console.log(error);
+		console.log("cloudinary error",error);
 		return null;
 	}
 };
+
+export default cloudinaryUpload;

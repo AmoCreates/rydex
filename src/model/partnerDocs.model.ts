@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface IPartnerDocs extends mongoose.Document {
 	owner: mongoose.Types.ObjectId;
-	aadharUrl: string;
+	aadhaarUrl: string;
 	rcUrl: string;
 	licenseUrl: string;
 	motorInsuranceUrl: string;
@@ -21,7 +21,7 @@ const partnerDocsSchema = new mongoose.Schema<IPartnerDocs>(
 			required: true,
 		},
 
-		aadharUrl: {
+		aadhaarUrl: {
 			type: String,
 			required: true,
 		},

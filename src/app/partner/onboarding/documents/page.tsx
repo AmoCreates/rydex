@@ -12,9 +12,9 @@ const Page = () => {
 	const [err, setErr] = useState("");
 	const [success, setSuccess] = useState(false);
 
-	type docsType = "aadhar" | "license" | "rc" | "puc" | "motorInsurance";
+	type docsType = "aadhaar" | "license" | "rc" | "puc" | "motorInsurance";
 	const [docs, setDocs] = useState<Record<docsType, File | null>>({
-		aadhar: null,
+		aadhaar: null,
 		license: null,
 		rc: null,
 		puc: null,
@@ -35,8 +35,9 @@ const Page = () => {
 		setIsLoading(true);
 		setErr("");
 		setSuccess(false);
+
 		if (
-			!docs.aadhar ||
+			!docs.aadhaar ||
 			!docs.license ||
 			!docs.rc ||
 			!docs.puc ||
@@ -49,7 +50,7 @@ const Page = () => {
 
 		try {
 			const formData = new FormData();
-			formData.append("aadhar", docs.aadhar);
+			formData.append("aadhaar", docs.aadhaar);
 			formData.append("license", docs.license);
 			formData.append("rc", docs.rc);
 			formData.append("puc", docs.puc);
@@ -96,20 +97,20 @@ const Page = () => {
 
 				<div className="mt-8 space-y-6">
 					<label
-						htmlFor="aadhar"
-						className={`flex relative items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.aadhar ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+						htmlFor="aadhaar"
+						className={`flex relative items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.aadhaar ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
 					>
 						<div>
 							<p className="text-sm font-semibold">Aadhaar / ID Proof</p>
 							<p
-								className={`truncate w-62.5 text-xs ${docs.aadhar ? "text-green-600 font-medium" : "text-gray-500"}`}
+								className={`truncate w-62.5 text-xs ${docs.aadhaar ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
-								{docs.aadhar ? docs.aadhar.name : "Government issued ID"}
+								{docs.aadhaar ? docs.aadhaar.name : "Government issued ID"}
 							</p>
 						</div>
 						<div className="flex flex-col items-center gap-1">
 							<span className=" text-xs text-gray-400">
-								{docs.aadhar ? (
+								{docs.aadhaar ? (
 									<span className="flex items-center gap-1">
 										<Check size={15} /> Done
 									</span>
@@ -118,17 +119,17 @@ const Page = () => {
 								)}
 							</span>
 							<div
-								className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.aadhar ? "bg-green-500" : "bg-black"} text-white`}
+								className={`w-10 h-10 rounded-full flex items-center justify-center ${docs.aadhaar ? "bg-green-500" : "bg-black"} text-white`}
 							>
-								{docs.aadhar ? <File /> : <UploadCloud />}
+								{docs.aadhaar ? <File /> : <UploadCloud />}
 							</div>
 						</div>
 						<input
 							type="file"
-							id="aadhar"
+							id="aadhaar"
 							accept="image/*, .pdf"
 							onChange={(e) =>
-								handleImg("aadhar", e.target?.files?.[0] || null)
+								handleImg("aadhaar", e.target?.files?.[0] || null)
 							}
 							className="hidden"
 						/>
