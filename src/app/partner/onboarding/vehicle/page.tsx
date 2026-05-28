@@ -84,9 +84,9 @@ const Page = () => {
 				axiosError?.response?.data || axiosError?.message || axiosError,
 			);
 			setErr(serverMessage || "Something went wrong");
-			} finally {
-				setIsSubmitting(false);
-			}
+		} finally {
+			setIsSubmitting(false);
+		}
 	}
 
 	if (isLoading) {
@@ -203,7 +203,10 @@ const Page = () => {
 						disabled={isSubmitting}
 					>
 						{isSubmitting ? (
-							"Saving your details..."
+							<>
+								<Loader2 className="w-5 h-5 animate-spin" />
+								<span>Saving Vehicle Details...</span>
+							</>
 						) : (
 							"Continue"
 						)}

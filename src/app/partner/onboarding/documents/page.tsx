@@ -3,14 +3,14 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
-import { FileCheck, UploadCloud, File, Check } from "lucide-react";
+import { FileCheck, UploadCloud, File, Check, Loader2 } from "lucide-react";
 import axios from "axios";
 
 const Page = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
+	const [upload, setUpload] = useState(false);
 	const [err, setErr] = useState("");
-	const [success, setSuccess] = useState(false);
 
 	type docsType = "aadhaar" | "license" | "rc" | "puc" | "motorInsurance";
 	const [docs, setDocs] = useState<Record<docsType, File | null>>({
@@ -34,7 +34,7 @@ const Page = () => {
 	const handleDocs = async () => {
 		setIsLoading(true);
 		setErr("");
-		setSuccess(false);
+		setUpload(false);
 
 		if (
 			!docs.aadhaar ||
@@ -55,11 +55,15 @@ const Page = () => {
 			formData.append("rc", docs.rc);
 			formData.append("puc", docs.puc);
 			formData.append("motorInsurance", docs.motorInsurance);
-			const { data } = await axios.post(
+			const res = await axios.post(
 				"/api/partner/onboarding/documents",
 				formData,
 			);
-			console.log(data);
+			if (res.status === 200) {
+				router.push("/partner/onboarding/bank");
+			} else {
+				setErr("Something went wrong");
+			}
 		} catch (error: any) {
 			const axiosError = error;
 			const serverMessage = axiosError?.response?.data?.message;
@@ -320,8 +324,16 @@ const Page = () => {
 					type="submit"
 					className="mt-5 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
 					onClick={handleDocs}
+					disabled={isLoading}
 				>
-					Continue
+					{isLoading ? (
+						<>
+							<Loader2 className="w-5 h-5 animate-spin" />
+							<span>Uploading Documents...</span>
+						</>
+					) : (
+						"Continue"
+					)}
 				</button>
 			</motion.div>
 		</div>
