@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const VEHICLES = [
-	{ id: "bike", label: "Bike", icon: Bike, desc: "2 Wheeler" },
+	{ id: "bike", label: "Bike/Scooter", icon: Bike, desc: "2 Wheeler" },
 	{ id: "auto", label: "Auto", icon: Car, desc: "3 Wheeler ride" },
 	{ id: "car", label: "Car", icon: Car, desc: "4 Wheeler ride" },
 	{ id: "loading", label: "Loading", icon: Package, desc: "Small goods" },

@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
 		if (!VEHICLE_REGEX.test(vehicleNumber)) {
 			return Response.json(
-				{ message: "invalide vehicle number format" },
+				{ message: "invalid vehicle number format" },
 				{ status: 400 },
 			);
 		}
@@ -65,8 +65,9 @@ export async function POST(req: Request) {
 			vehicleModel,
 		});
 
-		if (user.partnerOnBoardingStep < 1) {
+		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 1) {
 			user.partnerOnBoardingStep = 1;
+			await user.save();
 		}
 
 		// user.role = "partner"
@@ -74,9 +75,10 @@ export async function POST(req: Request) {
 
 		return Response.json(vehicle, { status: 201 });
 	} catch (error) {
-		console.log("vehicle add/update error, err: ", error)
+		const errorMessage = error instanceof Error ? error.message : "Unknown error";
+		console.error("Vehicle add/update error:", error);
 		return Response.json(
-			{ message: "Vehicle add/update error, err: ", error },
+			{ message: "Vehicle add/update error", error: errorMessage },
 			{ status: 500 },
 		);
 	}
@@ -89,7 +91,7 @@ export async function GET(req: Request) {
 		const session = await auth();
 
 		if (!session || !session.user?.email) {
-			return Response.json({ message: "unauthorize" }, { status: 401 });
+			return Response.json({ message: "unauthorized" }, { status: 401 });
 		}
 
 		const user = await User.findOne({ email: session.user.email });

@@ -18,11 +18,11 @@ export async function POST(req: Request) {
 			return Response.json({ message: "user not found" }, { status: 401 });
 		}
 
-		if (user.partnerOnBoardingStep < 1) {
+		// Handle 'undefined' or '0' values robustly
+		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 1) {
 			return Response.json({
 				message: "please complete previous steps",
-				status: 400,
-			});
+			}, { status: 400 });
 		}
 
 		const formData = await req.formData();
@@ -34,9 +34,8 @@ export async function POST(req: Request) {
 
 		if (!aadhar || !rc || !license || !motorInsurance || !puc) {
 			return Response.json({
-				message: "missing required documents",
-				status: 400,
-			});
+				message: "missing required documents"
+			}, { status: 400 });
 		}
 
 		const updatePayload: any = {
@@ -47,9 +46,8 @@ export async function POST(req: Request) {
 			const url = await cloudinaryUpload(aadhar);
 			if (!url) {
 				return Response.json({
-					message: "aadhar upload failed",
-					status: 500,
-				});
+					message: "aadhar upload failed"
+				}, { status: 500 });
 			}
 			updatePayload.aadharUrl = url;
 		}
@@ -58,9 +56,8 @@ export async function POST(req: Request) {
 			const url = await cloudinaryUpload(license);
 			if (!url) {
 				return Response.json({
-					message: "license upload failed",
-					status: 500,
-				});
+					message: "license upload failed"
+				}, { status: 500 });
 			}
 			updatePayload.licenseUrl = url;
 		}
@@ -69,9 +66,8 @@ export async function POST(req: Request) {
 			const url = await cloudinaryUpload(rc);
 			if (!url) {
 				return Response.json({
-					message: "registration certificate upload failed",
-					status: 500,
-				});
+					message: "registration certificate upload failed"
+				}, { status: 500 });
 			}
 			updatePayload.rcUrl = url;
 		}
@@ -80,9 +76,8 @@ export async function POST(req: Request) {
 			const url = await cloudinaryUpload(puc);
 			if (!url) {
 				return Response.json({
-					message: "pollution certificate upload failed",
-					status: 500,
-				});
+					message: "pollution certificate upload failed"
+				}, { status: 500 });
 			}
 			updatePayload.pucUrl = url;
 		}
@@ -91,9 +86,8 @@ export async function POST(req: Request) {
 			const url = await cloudinaryUpload(motorInsurance);
 			if (!url) {
 				return Response.json({
-					message: "motor insurance certificate upload failed",
-					status: 500,
-				});
+					message: "motor insurance certificate upload failed"
+				}, { status: 500 });
 			}
 			updatePayload.motorInsuranceUrl = url;
 		}
@@ -101,21 +95,23 @@ export async function POST(req: Request) {
 		const partnerDocs = await PartnerDocs.findOneAndUpdate(
 			{ owner: user._id },
 			{ $set: updatePayload },
-			{ upsert: true, new: true }, // update if present, else create
+			{ upsert: true, new: true, runValidators: true }, // Add runValidators to catch schema issues
 		);
 
-		if (user.partnerOnBoardingStep == 1) {
+		// Update the step robustly if it hasn't reached step 2 yet
+		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 2) {
 			user.partnerOnBoardingStep = 2;
+			// Save the user document change explicitly
+			await user.save();
 		}
-
-		await user.save();
 
 		return Response.json(partnerDocs, { status: 200 });
 	} catch (error) {
-		console.log("partner docs error, err: ", error);
+		const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+		console.error("Partner documents upload error details:", error);
 		return Response.json(
-			{ message: "Upload documents error, err: ", error },
-			{ status: 500 },
+			{ message: "Upload documents error", error: errorMessage },
+			{ status: 500 }
 		);
 	}
 }
