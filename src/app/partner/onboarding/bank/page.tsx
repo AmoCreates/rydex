@@ -1,17 +1,77 @@
 "use client";
+import React, { useState } from "react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { RiArrowLeftLine, RiSecurePaymentFill } from "@remixicon/react";
 import {
 	BadgeCheck,
 	CheckCircle,
+	CircleDashed,
 	CreditCard,
 	Landmark,
 	Phone,
 } from "lucide-react";
+import axios from "axios";
 
 const Page = () => {
 	const router = useRouter();
+	const [isLoading, setIsLoading] = useState(false);
+	const [err, setErr] = useState("");
+
+	const [formData, setFormData] = useState({
+		accountHolder: "",
+		accountNumber: "",
+		ifscCode: "",
+		mobile: "",
+		upi: "",
+	});
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { name, value } = e.target;
+		if (name === "mobile" && value.length > 10) {
+			setErr("Mobile number cannot exceed 10 digits");
+			return;
+		}
+		setFormData((prev) => ({
+			...prev,
+			[name]: value,
+		}));
+	};
+
+	const handleSubmit = async () => {
+		setIsLoading(true);
+		setErr("");
+
+		if (!formData.accountHolder || !formData.accountNumber || !formData.ifscCode || !formData.mobile) {
+			setErr("Please fill in all required (*) fields");
+			setIsLoading(false);
+			return;
+		}
+
+		if (formData.mobile.length !== 10) {
+			setErr("Please enter a valid 10-digit mobile number");
+			setIsLoading(false);
+			return;
+		}
+
+		try {
+			const res = await axios.post("/api/partner/onboarding/bank", formData);
+			if (res.status === 200) {
+				console.log("done")
+			} else {
+				setErr("Something went wrong");
+			}
+		} catch (error: any) {
+			const serverMessage = error?.response?.data?.message;
+			console.log(
+				"bank setup error",
+				error?.response?.data || error?.message || error,
+			);
+			setErr(serverMessage || "Something went wrong");
+		}
+		setIsLoading(false);
+	};
+
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center px-4">
 			<motion.div
@@ -41,7 +101,7 @@ const Page = () => {
 							htmlFor="ahn"
 							className="text-sm font-semibold text-gray-500"
 						>
-							Account Holder Name
+							Account Holder Name <span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -51,6 +111,10 @@ const Page = () => {
 								type="text"
 								placeholder="As per bank records"
 								id="ahn"
+								name="accountHolder"
+								value={formData.accountHolder}
+								onChange={handleChange}
+								disabled={isLoading}
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
 						</div>
@@ -58,7 +122,7 @@ const Page = () => {
 
 					<div>
 						<label htmlFor="an" className="text-sm font-semibold text-gray-500">
-							Bank Account Number
+							Bank Account Number <span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -68,6 +132,10 @@ const Page = () => {
 								type="text"
 								placeholder="Enter account number"
 								id="an"
+								name="accountNumber"
+								value={formData.accountNumber}
+								onChange={handleChange}
+								disabled={isLoading}
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
 						</div>
@@ -75,7 +143,7 @@ const Page = () => {
 
 					<div>
 						<label htmlFor="ic" className="text-sm font-semibold text-gray-500">
-							IFSC Code
+							IFSC Code <span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -86,6 +154,10 @@ const Page = () => {
 								placeholder="HDFC0000123"
 								style={{ textTransform: "uppercase" }}
 								id="ic"
+								name="ifscCode"
+								value={formData.ifscCode}
+								onChange={handleChange}
+								disabled={isLoading}
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
 						</div>
@@ -93,7 +165,7 @@ const Page = () => {
 
 					<div>
 						<label htmlFor="mn" className="text-sm font-semibold text-gray-500">
-							Mobile Number
+							Mobile Number <span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -101,8 +173,12 @@ const Page = () => {
 							</div>
 							<input
 								type="number"
-								placeholder="0123456789"
+								placeholder="Enter 10 digit mobile number"
 								id="mn"
+								name="mobile"
+								value={formData.mobile}
+								onChange={handleChange}
+								disabled={isLoading}
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
 						</div>
@@ -123,6 +199,10 @@ const Page = () => {
 								type="text"
 								placeholder="yourname@upi"
 								id="upi"
+								name="upi"
+								value={formData.upi}
+								onChange={handleChange}
+								disabled={isLoading}
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
 						</div>
@@ -137,11 +217,31 @@ const Page = () => {
 					</p>
 				</div>
 
+				{err && (
+					<motion.div
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: "auto" }}
+						className="mt-4 p-3 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-sm"
+					>
+						<div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+						{err}
+					</motion.div>
+				)}
+
 				<button
 					type="submit"
 					className="mt-5 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+					onClick={handleSubmit}
+					disabled={isLoading}
 				>
-					Final Submit
+					{isLoading ? (
+						<>
+							<CircleDashed className="w-5 h-5 text-white animate-spin" />
+							<span>Submitting Details...</span>
+						</>
+					) : (
+						"Final Submit"
+					)}
 				</button>
 			</motion.div>
 		</div>

@@ -3,13 +3,12 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
-import { FileCheck, UploadCloud, File, Check, Loader2 } from "lucide-react";
+import { FileCheck, UploadCloud, File, Check, CircleDashed } from "lucide-react";
 import axios from "axios";
 
 const Page = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
-	const [upload, setUpload] = useState(false);
 	const [err, setErr] = useState("");
 
 	type docsType = "aadhaar" | "license" | "rc" | "puc" | "motorInsurance";
@@ -34,7 +33,6 @@ const Page = () => {
 	const handleDocs = async () => {
 		setIsLoading(true);
 		setErr("");
-		setUpload(false);
 
 		if (
 			!docs.aadhaar ||
@@ -102,10 +100,12 @@ const Page = () => {
 				<div className="mt-8 space-y-6">
 					<label
 						htmlFor="aadhaar"
-						className={`flex relative items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.aadhaar ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+						className={`flex relative items-center justify-between p-4 rounded-2xl border transition hover:scale-102 ${docs.aadhaar ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"} ${isLoading ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 					>
 						<div>
-							<p className="text-sm font-semibold">Aadhaar / ID Proof</p>
+							<p className="text-sm font-semibold">
+								Aadhaar / ID Proof <span className="text-red-500">*</span>
+							</p>
 							<p
 								className={`truncate w-62.5 text-xs ${docs.aadhaar ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
@@ -136,15 +136,18 @@ const Page = () => {
 								handleImg("aadhaar", e.target?.files?.[0] || null)
 							}
 							className="hidden"
+							disabled={isLoading}
 						/>
 					</label>
 
 					<label
 						htmlFor="license"
-						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.license ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.license ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"} ${isLoading ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 					>
 						<div>
-							<p className="text-sm font-semibold">Driving License</p>
+							<p className="text-sm font-semibold">
+								Driving License <span className="text-red-500">*</span>
+							</p>
 							<p
 								className={`truncate text-xs ${docs.license ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
@@ -181,11 +184,11 @@ const Page = () => {
 
 					<label
 						htmlFor="rc"
-						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.rc ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.rc ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"} ${isLoading ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 					>
 						<div>
 							<p className="text-sm font-semibold">
-								Vehicle Registration Certificate(RC)
+								Vehicle Registration Certificate(RC) <span className="text-red-500">*</span>
 							</p>
 							<p
 								className={`truncate text-xs ${docs.rc ? "text-green-600 font-medium" : "text-gray-500"}`}
@@ -220,11 +223,11 @@ const Page = () => {
 
 					<label
 						htmlFor="puc"
-						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.puc ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.puc ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"} ${isLoading ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 					>
 						<div>
 							<p className="text-sm font-semibold">
-								Pollution Under Control(PUC)
+								Pollution Under Control(PUC) <span className="text-red-500">*</span>
 							</p>
 							<p
 								className={`truncate text-xs ${docs.puc ? "text-green-600 font-medium" : "text-gray-500"}`}
@@ -259,11 +262,11 @@ const Page = () => {
 
 					<label
 						htmlFor="mic"
-						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.motorInsurance ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"}`}
+						className={`flex items-center justify-between p-4 rounded-2xl border transition cursor-pointer hover:scale-102 ${docs.motorInsurance ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-black"} ${isLoading ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
 					>
 						<div>
 							<p className="text-sm font-semibold">
-								Motor Insurance Certificate(MIC)
+								Motor Insurance Certificate(MIC) <span className="text-red-500">*</span>
 							</p>
 							<p
 								className={`truncate text-xs ${docs.motorInsurance ? "text-green-600 font-medium" : "text-gray-500"}`}
@@ -328,7 +331,7 @@ const Page = () => {
 				>
 					{isLoading ? (
 						<>
-							<Loader2 className="w-5 h-5 animate-spin" />
+							<CircleDashed className="w-5 h-5 text-white animate-spin" />
 							<span>Uploading Documents...</span>
 						</>
 					) : (

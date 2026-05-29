@@ -1,7 +1,15 @@
 "use client";
 import { RiArrowLeftLine } from "@remixicon/react";
 import axios from "axios";
-import { Bike, Bus, Car, Loader2, Package, Truck } from "lucide-react";
+import {
+	Bike,
+	Bus,
+	Car,
+	CircleDashed,
+	Loader2,
+	Package,
+	Truck,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -122,8 +130,8 @@ const Page = () => {
 
 				<div className="mt-8 space-y-6">
 					<div>
-						<p className="text-xs font-semibold text-gray-500 mb-3">
-							Vehicle Type
+						<p className="text-sm font-semibold text-gray-500 mb-3">
+							Vehicle Type <span className="text-red-500">*</span>
 						</p>
 						<div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 							{VEHICLES.map((v, i) => {
@@ -157,7 +165,7 @@ const Page = () => {
 
 					<div>
 						<label htmlFor="vn" className="text-sm font-semibold text-gray-500">
-							Vehicle Number
+							Vehicle Number <span className="text-red-500">*</span>
 						</label>
 						<input
 							type="text"
@@ -174,7 +182,7 @@ const Page = () => {
 
 					<div>
 						<label htmlFor="vm" className="text-sm font-semibold text-gray-500">
-							Vehicle Model
+							Vehicle Model <span className="text-red-500">*</span>
 						</label>
 						<input
 							type="text"
@@ -191,9 +199,14 @@ const Page = () => {
 					</div>
 
 					{err && (
-						<div className="text-red-500 text-xs font-medium bg-red-50 p-3 rounded-lg border border-red-100">
+						<motion.div
+							initial={{ opacity: 0, height: 0 }}
+							animate={{ opacity: 1, height: "auto" }}
+							className="mt-4 p-3 rounded-xl bg-red-50 border border-red-100 flex items-center gap-3 text-red-600 text-sm"
+						>
+							<div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
 							{err}
-						</div>
+						</motion.div>
 					)}
 
 					<button
@@ -204,7 +217,7 @@ const Page = () => {
 					>
 						{isSubmitting ? (
 							<>
-								<Loader2 className="w-5 h-5 animate-spin" />
+								<CircleDashed className="w-5 h-5 text-white animate-spin" />
 								<span>Saving Vehicle Details...</span>
 							</>
 						) : (

@@ -52,11 +52,12 @@ export async function POST(req: Request) {
     user.mobile = mobile;
     await user.save();
 
-		if (user.partnerOnBoardingStep == 2) {
+		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 3) {
 			user.partnerOnBoardingStep = 3;
+			await user.save();
 		}
 
-		return Response.json(partnerBank, { status: 201 });
+		return Response.json(partnerBank, { status: 200 });
 	} catch (error) {
 		console.log("partner bank details error, err: ", error);
 		return Response.json(
