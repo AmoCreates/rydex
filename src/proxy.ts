@@ -30,12 +30,16 @@ export async function proxy(req: NextRequest) {
 		return NextResponse.redirect(new URL("/", req.url));
 	}
 
+	if (pathname.startsWith("/partner/onboarding") && role !== "customer") {
+		return NextResponse.redirect(new URL("/partner", req.url));
+	}
+
 	if (
 		pathname.startsWith("/partner") &&
-		!pathname.startsWith("/partner/onboarding") &&
-		role == "partner"
+		pathname.startsWith("/partner/onboarding") &&
+		role === "partner"
 	) {
-		return NextResponse.redirect(new URL("/", req.url));
+		return NextResponse.redirect(new URL("/partner", req.url));
 	}
 
 	return NextResponse.next();

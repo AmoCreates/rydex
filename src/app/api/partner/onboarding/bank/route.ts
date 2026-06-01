@@ -3,6 +3,8 @@ import dbConnect from "@/lib/db";
 import PartnerBank from "@/model/partnerBank.model";
 import User from "@/model/user.model";
 
+const IFSC_RAGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+
 export async function POST(req: Request) {
 	try {
 		await dbConnect();
@@ -30,6 +32,13 @@ export async function POST(req: Request) {
 		if (!accountHolder || !accountNumber || !ifscCode || !mobile) {
 			return Response.json({
 				message: "missing required documents",
+				status: 400,
+			});
+		}
+
+		if (ifscCode.length !== 11 || !IFSC_RAGEX.test(ifscCode)) {
+			return Response.json({
+				message: "invalid ifsc code",
 				status: 400,
 			});
 		}
@@ -68,7 +77,7 @@ export async function POST(req: Request) {
 }
 
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     await dbConnect();
 

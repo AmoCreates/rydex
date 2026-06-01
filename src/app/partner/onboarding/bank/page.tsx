@@ -17,7 +17,9 @@ const Page = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [err, setErr] = useState("");
+	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+	const IFSC_RAGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 	const [formData, setFormData] = useState({
 		accountHolder: "",
 		accountNumber: "",
@@ -28,28 +30,48 @@ const Page = () => {
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
-		if (name === "mobile" && value.length > 10) {
-			setErr("Mobile number cannot exceed 10 digits");
-			return;
-		}
 		setFormData((prev) => ({
 			...prev,
 			[name]: value,
 		}));
+		if (fieldErrors[name]) {
+			setFieldErrors((prev) => {
+				const updated = { ...prev };
+				delete updated[name];
+				return updated;
+			});
+		}
 	};
-
+	
 	const handleSubmit = async () => {
 		setIsLoading(true);
 		setErr("");
+		setFieldErrors({});
 
-		if (!formData.accountHolder || !formData.accountNumber || !formData.ifscCode || !formData.mobile) {
-			setErr("Please fill in all required (*) fields");
-			setIsLoading(false);
-			return;
+		const errors: Record<string, string> = {};
+
+		if (!formData.accountHolder) errors.accountHolder = "Required";
+		else if (formData.accountHolder.length < 3 || formData.accountHolder.length > 35) {
+			errors.accountHolder = "Must be 3-35 characters";
 		}
 
-		if (formData.mobile.length !== 10) {
-			setErr("Please enter a valid 10-digit mobile number");
+		if (!formData.accountNumber) errors.accountNumber = "Required";
+		else if (formData.accountNumber.length < 9 || formData.accountNumber.length > 18) {
+			errors.accountNumber = "Must be 9-18 digits";
+		}
+
+		if (!formData.ifscCode) errors.ifscCode = "Required";
+		else if (formData.ifscCode.length !== 11 || !IFSC_RAGEX.test(formData.ifscCode)) {
+			errors.ifscCode = "Invalid IFSC format";
+		}
+
+		if (!formData.mobile) errors.mobile = "Required";
+		else if (formData.mobile.length !== 10) {
+			errors.mobile = "Invalid 10-digit number";
+		}
+
+		if (Object.keys(errors).length > 0) {
+			setFieldErrors(errors);
 			setIsLoading(false);
 			return;
 		}
@@ -115,9 +137,12 @@ const Page = () => {
 								value={formData.accountHolder}
 								onChange={handleChange}
 								disabled={isLoading}
-								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.accountHolder && "border-red-500 focus:border-red-500"} `}
 							/>
 						</div>
+						{fieldErrors.accountHolder && (
+							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.accountHolder}</p>
+						)}
 					</div>
 
 					<div>
@@ -136,9 +161,12 @@ const Page = () => {
 								value={formData.accountNumber}
 								onChange={handleChange}
 								disabled={isLoading}
-								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.accountNumber && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
+						{fieldErrors.accountNumber && (
+							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.accountNumber}</p>
+						)}
 					</div>
 
 					<div>
@@ -152,15 +180,17 @@ const Page = () => {
 							<input
 								type="text"
 								placeholder="HDFC0000123"
-								style={{ textTransform: "uppercase" }}
 								id="ic"
 								name="ifscCode"
-								value={formData.ifscCode}
+								value={formData.ifscCode.toUpperCase()}
 								onChange={handleChange}
 								disabled={isLoading}
-								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.ifscCode && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
+						{fieldErrors.ifscCode && (
+							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.ifscCode}</p>
+						)}
 					</div>
 
 					<div>
@@ -179,9 +209,12 @@ const Page = () => {
 								value={formData.mobile}
 								onChange={handleChange}
 								disabled={isLoading}
-								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
+								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.mobile && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
+						{fieldErrors.mobile && (
+							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.mobile}</p>
+						)}
 					</div>
 
 					<div>
