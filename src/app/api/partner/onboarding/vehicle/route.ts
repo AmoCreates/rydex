@@ -49,16 +49,16 @@ export async function POST(req: Request) {
 			return Response.json(vehicle, { status: 200 });
 		}
 
-		// const duplicate = await Vehicle.findOne({
-		// 	vehicleNumber: vehicleNumberCapitalize,
-		// });
-		// if (duplicate) {
-		// 	return Response.json(
-		// 		{ message: "Vehicle already registered" },
-		// 		{ status: 400 },
-		// 	);
-		// }
-
+		const duplicate = await Vehicle.findOne({
+			vehicleNumber: vehicleNumberCapitalize,
+		});
+		if (duplicate) {
+			return Response.json(
+				{ message: "Vehicle already registered" },
+				{ status: 400 },
+			);
+		}
+		
 		vehicle = await Vehicle.create({
 			owner: user._id,
 			type: vehicleType,
