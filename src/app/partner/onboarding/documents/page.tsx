@@ -5,11 +5,15 @@ import { RiArrowLeftLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
 import { FileCheck, UploadCloud, File, Check, CircleDashed } from "lucide-react";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Toolkit/store";
+
 
 const Page = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [err, setErr] = useState("");
+	const {userData} = useSelector((state: RootState) => state.user);
 
 	type docsType = "aadhaar" | "license" | "rc" | "puc" | "motorInsurance";
 	const [docs, setDocs] = useState<Record<docsType, File | null>>({
@@ -332,10 +336,10 @@ const Page = () => {
 					{isLoading ? (
 						<>
 							<CircleDashed className="w-5 h-5 text-white animate-spin" />
-							<span>Uploading Documents...</span>
+							<span>{userData?.partnerOnBoardingStep >= 2 ? "Updating Documents..." :  "Uploading Documents..."}</span>
 						</>
 					) : (
-						"Continue"
+						userData?.partnerOnBoardingStep >= 2 ? "Update Documents" : "Submit Documents"
 					)}
 				</button>
 			</motion.div>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { RiArrowLeftLine, RiSecurePaymentFill } from "@remixicon/react";
@@ -12,14 +12,19 @@ import {
 	Phone,
 } from "lucide-react";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Toolkit/store";
 
 const Page = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
+	const [isInitialLoading, setIsInitialLoading] = useState(true);
+	const isBusy = isLoading || isInitialLoading;
 	const [err, setErr] = useState("");
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-
+	const {userData} = useSelector((state: RootState) => state.user);
 	const IFSC_RAGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+
 	const [formData, setFormData] = useState({
 		accountHolder: "",
 		accountNumber: "",
@@ -27,6 +32,37 @@ const Page = () => {
 		mobile: "",
 		upi: "",
 	});
+
+	useEffect(() => {
+		async function getDetails() {
+			setIsInitialLoading(true);
+			try {
+				const res = await axios.get("/api/partner/onboarding/bank");
+				if (res.status === 200 && res.data) {
+					const { accountHolder, accountNumber, ifscCode, mobile, upi } = res.data;
+					setFormData({
+						accountHolder: accountHolder || "",
+						accountNumber: accountNumber || "",
+						ifscCode: ifscCode || "",
+						mobile: mobile || "",
+						upi: upi || "",
+					});
+				}
+			} catch (error: any) {
+				const axiosError = error;
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					"vehicle submit error",
+					axiosError?.response?.data || axiosError?.message || axiosError,
+				);
+				setErr(serverMessage || "Something went wrong");
+			} finally {
+				setIsInitialLoading(false);
+			}
+		}
+
+		getDetails();
+	},[]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -80,6 +116,7 @@ const Page = () => {
 			const res = await axios.post("/api/partner/onboarding/bank", formData);
 			if (res.status === 200) {
 				console.log("done")
+				router.push("/");
 			} else {
 				setErr("Something went wrong");
 			}
@@ -100,7 +137,7 @@ const Page = () => {
 				initial={{ opacity: 0, y: 30 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.4 }}
-				className="w-full max-w-xl bg-white rounded-3xl border border-gray-200 shadow-[0_25px_70px_rgba(0,0,0,0.15)] p-6 sm:p-8"
+				className="relative w-full max-w-xl bg-white rounded-3xl border border-gray-200 shadow-[0_25px_70px_rgba(0,0,0,0.15)] p-6 sm:p-8"
 			>
 				<div className="relative text-center">
 					<button
@@ -136,7 +173,7 @@ const Page = () => {
 								name="accountHolder"
 								value={formData.accountHolder}
 								onChange={handleChange}
-								disabled={isLoading}
+							disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.accountHolder && "border-red-500 focus:border-red-500"} `}
 							/>
 						</div>
@@ -160,7 +197,7 @@ const Page = () => {
 								name="accountNumber"
 								value={formData.accountNumber}
 								onChange={handleChange}
-								disabled={isLoading}
+							disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.accountNumber && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
@@ -184,7 +221,7 @@ const Page = () => {
 								name="ifscCode"
 								value={formData.ifscCode.toUpperCase()}
 								onChange={handleChange}
-								disabled={isLoading}
+							disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.ifscCode && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
@@ -208,7 +245,7 @@ const Page = () => {
 								name="mobile"
 								value={formData.mobile}
 								onChange={handleChange}
-								disabled={isLoading}
+							disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.mobile && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
@@ -230,12 +267,12 @@ const Page = () => {
 							</div>
 							<input
 								type="text"
-								placeholder="yourname@upi"
 								id="upi"
 								name="upi"
+								placeholder="yourname@upi"
 								value={formData.upi}
 								onChange={handleChange}
-								disabled={isLoading}
+								disabled={isBusy}
 								className="flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black"
 							/>
 						</div>
@@ -261,19 +298,32 @@ const Page = () => {
 					</motion.div>
 				)}
 
+				{isBusy && (
+					<div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl">
+						<div className="flex flex-col items-center gap-3 p-6">
+							<CircleDashed className="w-8 h-8 text-gray-700 animate-spin" />
+							<p className="text-sm font-medium text-gray-600 text-center">
+								{isInitialLoading ? "Loading your bank details..." : "Saving bank details..."}
+							</p>
+						</div>
+					</div>
+				)}
+
 				<button
 					type="submit"
 					className="mt-5 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
 					onClick={handleSubmit}
-					disabled={isLoading}
+					disabled={isBusy}
 				>
 					{isLoading ? (
 						<>
 							<CircleDashed className="w-5 h-5 text-white animate-spin" />
-							<span>Submitting Details...</span>
+							<span>{userData?.partnerOnBoardingStep >= 3 ? "Updating Details..." :  "Submitting Bank Details..."}</span>
 						</>
 					) : (
-						"Final Submit"
+						
+							userData?.partnerOnBoardingStep >= 3 ? "Update Bank Details" : "Submit Bank Details"
+						
 					)}
 				</button>
 			</motion.div>

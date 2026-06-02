@@ -14,16 +14,18 @@ export default function Home() {
 	return (
 		<div className="w-full min-h-screen bg-white">
 			<Nav onOpen={() => setAuthOpen(true)} />
-			{userData?.role === "partner" && <PartnerDashboard />}
-			{userData?.role === "admin" && <AdminDashboard />}
-			{userData?.role === "customer" && (
+			{userData?.role === "partner" ? (
+				<PartnerDashboard />
+			) : userData?.role === "admin" ? (
+				<AdminDashboard />
+			) : (
 				<PublicHome
 					onOpen={() => setAuthOpen(true)}
 					open={authOpen}
 					onClose={() => setAuthOpen(false)}
 				/>
 			)}
-
+			{userData?.role === "admin" && <AdminDashboard />}
 			<Footer />
 		</div>
 	);

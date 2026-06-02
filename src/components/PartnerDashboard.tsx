@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { motion } from "motion/react";
 import { Check, Clock, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Step = {
 	id: number;
@@ -26,6 +27,7 @@ const TOTAL_STEPS = 8;
 const PartnerDashboard = () => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const { userData } = useSelector((state: RootState) => state.user);
+	const router = useRouter();
 	useEffect(() => {
 		if (userData) {
 			setCurrentStep(userData.partnerOnBoardingStep! + 1 || 0);
@@ -60,6 +62,7 @@ const PartnerDashboard = () => {
 						{STEPS.map((step) => {
 							const isCompleted = step.id < currentStep;
 							const isActive = step.id === currentStep;
+							const route = isActive || isCompleted ? step.route : undefined;
 							return (
 								<div key={step.id} className="flex flex-col items-center z-10">
 									<div
@@ -70,6 +73,13 @@ const PartnerDashboard = () => {
 													? "bg-gray-100 border border-black text-white hover:scale-110 transition cursor-pointer"
 													: "bg-gray-300 text-white cursor-not-allowed"
 										} transition-colors duration-300 `}
+										onClick={() => {
+											if (route) {
+												router.push(route);
+											} else {
+												return;
+											}
+										}}
 									>
 										<div className="relative flex justify-center items-center">
 											{step.id > currentStep && (

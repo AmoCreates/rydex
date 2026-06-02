@@ -37,28 +37,29 @@ export async function POST(req: Request) {
 
 		const vehicleNumberCapitalize = vehicleNumber.toUpperCase();
 
-		const duplicate = await Vehicle.findOne({
-			vehicleNumber: vehicleNumberCapitalize,
-		});
-		if (duplicate) {
-			return Response.json(
-				{ message: "Vehicle already registered" },
-				{ status: 400 },
-			);
+		
+		let vehicle = await Vehicle.findOne({ owner: user._id, vehicleNumber: vehicleNumberCapitalize});
+		if (vehicle) {
+			vehicle.type = vehicleType;
+			vehicle.vehicleModel = vehicleModel;
+			vehicle.vehicleNumber = vehicleNumberCapitalize;
+			vehicle.status = "pending";
+			await vehicle.save();
+			
+			return Response.json(vehicle, { status: 200 });
 		}
 
-		// let vehicle = await Vehicle.findOne({ owner: user._id });
-		// if (vehicle) {
-		// 	vehicle.type = vehicleType;
-		// 	vehicle.vehicleModel = vehicleModel;
-		// 	vehicle.vehicleNumber = vehicleNumberCapitalize;
-		// 	vehicle.status = "pending";
-		// 	await vehicle.save();
-
-		// 	return Response.json(vehicle, { status: 200 });
+		// const duplicate = await Vehicle.findOne({
+		// 	vehicleNumber: vehicleNumberCapitalize,
+		// });
+		// if (duplicate) {
+		// 	return Response.json(
+		// 		{ message: "Vehicle already registered" },
+		// 		{ status: 400 },
+		// 	);
 		// }
 
-		const vehicle = await Vehicle.create({
+		vehicle = await Vehicle.create({
 			owner: user._id,
 			type: vehicleType,
 			vehicleNumber: vehicleNumberCapitalize,
@@ -67,11 +68,10 @@ export async function POST(req: Request) {
 
 		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 1) {
 			user.partnerOnBoardingStep = 1;
-			await user.save();
 		}
 
-		// user.role = "partner"
-		// await user.save();
+		user.role = "partner"
+		await user.save();
 
 		return Response.json(vehicle, { status: 201 });
 	} catch (error) {
@@ -103,7 +103,7 @@ export async function GET() {
 		if (vehicle) {
 			return Response.json(vehicle, { status: 200 });
 		} else {
-			return null;
+			return Response.json({ message: "vehicle not found" }, {status: 404});
 		}
 	} catch (error) {
 		console.log("Get vehicle details error, err: ",error)

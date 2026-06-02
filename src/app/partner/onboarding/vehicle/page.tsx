@@ -1,4 +1,5 @@
 "use client";
+import { RootState } from "@/Toolkit/store";
 import { RiArrowLeftLine } from "@remixicon/react";
 import axios from "axios";
 import {
@@ -13,6 +14,7 @@ import {
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 const VEHICLES = [
 	{ id: "bike", label: "Bike/Scooter", icon: Bike, desc: "2 Wheeler" },
@@ -31,6 +33,8 @@ const Page = () => {
 	const [err, setErr] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const {userData} = useSelector((state: RootState) => state.user);
+	const isBusy = isLoading || isSubmitting;
 
 	useEffect(() => {
 		async function getDetails() {
@@ -42,6 +46,7 @@ const Page = () => {
 					setVehicleNumber(vehicleNumber);
 					setVehicleModel(vehicleModel);
 				}
+				
 			} catch (error: any) {
 				const axiosError = error;
 				const serverMessage = axiosError?.response?.data?.message;
@@ -49,9 +54,14 @@ const Page = () => {
 					"vehicle submit error",
 					axiosError?.response?.data || axiosError?.message || axiosError,
 				);
+				if(serverMessage === "vehicle not found") {
+					setErr("");
+					return;
+				}
 				setErr(serverMessage || "Something went wrong");
+			} finally {
+				setIsLoading(false);
 			}
-			setIsLoading(false);
 		}
 
 		getDetails();
@@ -79,7 +89,7 @@ const Page = () => {
 				vehicleModel,
 			});
 
-			if (res.status === 201) {
+			if (res.status === 201 || res.status === 200) {
 				router.push("/partner/onboarding/documents");
 			} else {
 				setErr("Something went wrong");
@@ -97,21 +107,13 @@ const Page = () => {
 		}
 	}
 
-	if (isLoading) {
-		return (
-			<div className="min-h-screen bg-white flex items-center justify-center">
-				<Loader2 className="w-8 h-8 animate-spin text-black" />
-			</div>
-		);
-	}
-
 	return (
 		<div className="min-h-screen bg-white flex items-center justify-center px-4">
 			<motion.div
 				initial={{ opacity: 0, y: 30 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.4 }}
-				className="w-full max-w-xl bg-white rounded-3xl border border-gray-200 shadow-[0_25px_70px_rgba(0,0,0,0.15)] p-6 sm:p-8"
+				className="relative w-full max-w-xl bg-white rounded-3xl border border-gray-200 shadow-[0_25px_70px_rgba(0,0,0,0.15)] p-6 sm:p-8"
 			>
 				<div className="relative text-center">
 					<button
@@ -140,10 +142,10 @@ const Page = () => {
 								return (
 									<motion.div
 										key={i}
-										whileHover={{ scale: 1.05 }}
-										whileTap={{ scale: 0.96 }}
-										onClick={() => setVehicleType(v.id)}
-										className={` rounded-2xl border p-4 flex flex-col items-center gap-2 transition cursor-pointer ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}
+										whileHover={{ scale: isBusy ? 1 : 1.05 }}
+										whileTap={{ scale: isBusy ? 1 : 0.96 }}
+										onClick={() => !isBusy && setVehicleType(v.id)}
+										className={`rounded-2xl border p-4 flex flex-col items-center gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}
 									>
 										<div
 											className={`w-11 h-11 rounded-full flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
@@ -176,7 +178,8 @@ const Page = () => {
 							maxLength={10}
 							onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
 							value={vehicleNumber}
-							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
+							disabled={isBusy}
+							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
 						/>
 					</div>
 
@@ -194,7 +197,8 @@ const Page = () => {
 								setVehicleModel(e.target.value);
 							}}
 							value={vehicleModel}
-							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition"
+							disabled={isBusy}
+							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
 						/>
 					</div>
 
@@ -213,17 +217,30 @@ const Page = () => {
 						type="submit"
 						className="mt-8 w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
 						onClick={handleSubmit}
-						disabled={isSubmitting}
+						disabled={isBusy}
 					>
 						{isSubmitting ? (
 							<>
 								<CircleDashed className="w-5 h-5 text-white animate-spin" />
-								<span>Saving Vehicle Details...</span>
+								<span>{userData?.partnerOnBoardingStep >= 1 ? "Updating Details..." :  "Submitting Vehicle Details..."}</span>
 							</>
 						) : (
-							"Continue"
+							userData?.partnerOnBoardingStep >= 1 ? "Update Vehicle Details" : "Submit Vehicle Details"
 						)}
 					</button>
+
+					{isBusy && (
+						<div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-3xl">
+							<div className="flex flex-col items-center gap-3 p-6">
+								<CircleDashed className="w-8 h-8 text-gray-700 animate-spin" />
+								<p className="text-sm font-medium text-gray-600 text-center">
+									{isLoading
+										? "Loading vehicle details..."
+										: "Saving vehicle details..."}
+								</p>
+							</div>
+						</div>
+					)}
 				</div>
 			</motion.div>
 		</div>
