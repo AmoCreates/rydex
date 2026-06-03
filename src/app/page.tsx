@@ -14,7 +14,8 @@ export default function Home() {
 
 	return (
 		<div className="w-full min-h-screen bg-white">
-			<Nav onOpen={() => setAuthOpen(true)} />
+			{role !== "admin" && <Nav onOpen={() => setAuthOpen(true)} />}
+
 			{role === "partner" ? (
 				<PartnerDashboard />
 			) : role === "admin" ? (
@@ -26,6 +27,7 @@ export default function Home() {
 					onClose={() => setAuthOpen(false)}
 				/>
 			)}
+			
 			<Footer />
 		</div>
 	);
