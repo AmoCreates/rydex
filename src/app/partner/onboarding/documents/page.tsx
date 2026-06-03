@@ -336,10 +336,10 @@ const Page = () => {
 					{isLoading ? (
 						<>
 							<CircleDashed className="w-5 h-5 text-white animate-spin" />
-							<span>{userData?.partnerOnBoardingStep >= 2 ? "Updating Documents..." :  "Uploading Documents..."}</span>
+							<span>{(userData?.partnerOnBoardingStep ?? 0) >= 2 ? "Updating Documents..." :  "Uploading Documents..."}</span>
 						</>
 					) : (
-						userData?.partnerOnBoardingStep >= 2 ? "Update Documents" : "Submit Documents"
+						(userData?.partnerOnBoardingStep ?? 0) >= 2 ? "Update Documents" : "Submit Documents"
 					)}
 				</button>
 			</motion.div>

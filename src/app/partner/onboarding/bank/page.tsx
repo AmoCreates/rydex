@@ -102,7 +102,7 @@ const Page = () => {
 		}
 
 		if (!formData.mobile) errors.mobile = "Required";
-		else if (formData.mobile.length !== 10) {
+		else if (formData.mobile.length < 10 || formData.mobile.length > 10) {
 			errors.mobile = "Invalid 10-digit number";
 		}
 
@@ -318,11 +318,11 @@ const Page = () => {
 					{isLoading ? (
 						<>
 							<CircleDashed className="w-5 h-5 text-white animate-spin" />
-							<span>{userData?.partnerOnBoardingStep >= 3 ? "Updating Details..." :  "Submitting Bank Details..."}</span>
+							<span>{(userData?.partnerOnBoardingStep ?? 0) >= 3 ? "Updating Details..." :  "Submitting Bank Details..."}</span>
 						</>
 					) : (
 						
-							userData?.partnerOnBoardingStep >= 3 ? "Update Bank Details" : "Submit Bank Details"
+							(userData?.partnerOnBoardingStep ?? 0) >= 3 ? "Update Bank Details" : "Submit Bank Details"
 						
 					)}
 				</button>

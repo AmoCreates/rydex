@@ -7,7 +7,6 @@ import {
 	Bus,
 	Car,
 	CircleDashed,
-	Loader2,
 	Package,
 	Truck,
 } from "lucide-react";
@@ -222,10 +221,10 @@ const Page = () => {
 						{isSubmitting ? (
 							<>
 								<CircleDashed className="w-5 h-5 text-white animate-spin" />
-								<span>{userData?.partnerOnBoardingStep >= 1 ? "Updating Details..." :  "Submitting Vehicle Details..."}</span>
+								<span>{(userData?.partnerOnBoardingStep ?? 0) >= 1 ? "Updating Details..." :  "Submitting Vehicle Details..."}</span>
 							</>
 						) : (
-							userData?.partnerOnBoardingStep >= 1 ? "Update Vehicle Details" : "Submit Vehicle Details"
+							(userData?.partnerOnBoardingStep ?? 0) >= 1 ? "Update Vehicle Details" : "Submit Vehicle Details"
 						)}
 					</button>
 
