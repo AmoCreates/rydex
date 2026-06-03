@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "@/Toolkit/store";
-import { signOut } from "next-auth/react";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/Toolkit/store";
+import { signOut, useSession } from "next-auth/react";
 import { RiHome9Fill, RiPhoneFill, RiTaxiFill } from "@remixicon/react";
 import {
 	BadgeInfo,
@@ -30,7 +30,8 @@ const Nav = ({ onOpen }: Props) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(true);
-	const { userData } = useSelector((state: RootState) => state.user);
+	const { data: session } = useSession();
+	const userData = session?.user;
 	const router = useRouter();
 
 	const handleSignOut = async () => {

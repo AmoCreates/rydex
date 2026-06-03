@@ -4,19 +4,20 @@ import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
 import PartnerDashboard from "@/components/PartnerDashboard";
 import PublicHome from "@/components/PublicHome";
-import { RootState } from "@/Toolkit/store";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { useSelector } from "react-redux";
 
 export default function Home() {
 	const [authOpen, setAuthOpen] = useState(false);
-	const { userData } = useSelector((state: RootState) => state.user);
+	const { data: session } = useSession();
+	const role = session?.user?.role;
+
 	return (
 		<div className="w-full min-h-screen bg-white">
 			<Nav onOpen={() => setAuthOpen(true)} />
-			{userData?.role === "partner" ? (
+			{role === "partner" ? (
 				<PartnerDashboard />
-			) : userData?.role === "admin" ? (
+			) : role === "admin" ? (
 				<AdminDashboard />
 			) : (
 				<PublicHome
@@ -25,7 +26,6 @@ export default function Home() {
 					onClose={() => setAuthOpen(false)}
 				/>
 			)}
-			{userData?.role === "admin" && <AdminDashboard />}
 			<Footer />
 		</div>
 	);
