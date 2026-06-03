@@ -11,6 +11,7 @@ export interface IUser extends mongoose.Document {
 	mobile?: number;
 	partnerOnBoardingStep?: number;
 	role: "customer" | "partner" | "admin";
+	partnerStatus?: "approved" | "rejected" | "pending";
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
 }
@@ -64,6 +65,12 @@ const userSchema = new mongoose.Schema<IUser>(
 			type: String,
 			default: "customer",
 			enum: ["customer", "partner", "admin"],
+		},
+
+		partnerStatus: {
+			type: String,
+			enum: ["approved", "rejected", "pending"],
+			default: "pending",
 		},
 	},
 	{ timestamps: true },
