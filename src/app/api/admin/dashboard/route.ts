@@ -52,16 +52,18 @@ export async function GET() {
 		}));
 
 		return NextResponse.json({
-			totalPartners,
-			totalPendingPartners,
-			totalRejectedPartners,
-			totalApprovedPartners,
+			stats: {
+				totalPartners,
+				totalPendingPartners,
+				totalRejectedPartners,
+				totalApprovedPartners,
+			},
 			pendingPartnerReviews,
 		});
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ message: "Admin Dashboard error",error },
+			{ message: "Admin Dashboard error", error },
 			{ status: 500 },
 		);
 	}
