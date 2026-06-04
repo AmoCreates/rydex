@@ -3,7 +3,7 @@ import { RiGroupLine, RiUserSettingsLine } from "@remixicon/react";
 import axios from "axios";
 import { CheckCircle2, Clock4, Truck, Video, XCircle } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import KPI from "./KPI";
 import TabButton from "./TabButton";
 
@@ -18,13 +18,10 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
-	const [pendingPartnerReviews, setPendingPartnerReviews] = useState<unknown[]>([]);
-	const [pendingKYC] = useState<unknown[]>([]);
-	const [vehicleReviews] = useState<unknown[]>([]);
+	const [pendingPartnerReviews, setPendingPartnerReviews] = useState<any>();
+	const [pendingKYC, setPendingKYC] = useState<any>();
+	const [vehicleReviews, setvehicleReviews] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Video KYC");
-	const kycCount = pendingKYC?.length ?? 0;
-	const partnerCount = pendingPartnerReviews?.length ?? 0;
-	const vehicleCount = vehicleReviews?.length ?? 0;
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -42,19 +39,6 @@ const AdminDashboard = () => {
 
 		fetchData();
 	}, []);
-
-	const activeTabToShow = useMemo<Tab>(() => {
-		if (kycCount > 0 && partnerCount === 0 && vehicleCount === 0) {
-			return "Video KYC";
-		}
-		if (partnerCount > 0 && kycCount === 0 && vehicleCount === 0) {
-			return "Partner Reviews";
-		}
-		if (vehicleCount > 0 && kycCount === 0 && partnerCount === 0) {
-			return "Pricing & Images";
-		}
-		return activeTab;
-	}, [activeTab, kycCount, partnerCount, vehicleCount]);
 
 	return (
 		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
@@ -117,22 +101,22 @@ const AdminDashboard = () => {
 					<TabButton
 						icon={<Video size={17} />}
 						tag="Video KYC"
-						active={activeTabToShow === "Video KYC"}
-						count={kycCount}
+						active={activeTab === "Video KYC"}
+						count={pendingKYC?.length ?? 0}
 						onClick={() => setActiveTab("Video KYC")}
 					/>
 					<TabButton
 						icon={<RiGroupLine size={16} />}
 						tag="Partner Reviews"
-						active={activeTabToShow === "Partner Reviews"}
-						count={partnerCount}
+						active={activeTab === "Partner Reviews"}
+						count={pendingPartnerReviews?.length ?? 0}
 						onClick={() => setActiveTab("Partner Reviews")}
 					/>
 					<TabButton
 						icon={<Truck size={17} />}
 						tag="Pricing & Images"
-						active={activeTabToShow === "Pricing & Images"}
-						count={vehicleCount}
+						active={activeTab === "Pricing & Images"}
+						count={vehicleReviews?.length ?? 0}
 						onClick={() => setActiveTab("Pricing & Images")}
 					/>
 				</section>
