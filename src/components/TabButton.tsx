@@ -11,7 +11,7 @@ type Props = {
 const TabButton = ({ icon, tag, active, count, onClick }: Props) => {
 	return (
 		<div
-			className={` ${active ? "bg-black text-white shadow-xl" : "bg-gray-50 text-gray-800 hover:bg-gray-200"} shadow-gray-400 cursor-pointer flex rounded-xl py-2 px-3 items-center gap-2 transition-all duration-300 outline-none`}
+			className={` ${active ? "bg-black text-white" : "bg-gray-50 text-gray-800 hover:bg-gray-200 shadow-xl"} shadow-gray-400 cursor-pointer flex rounded-xl py-2 px-3 items-center gap-2 transition-all duration-300 outline-none `}
       onClick={onClick}
 		>
 			{icon} {tag}{" "}

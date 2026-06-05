@@ -12,6 +12,8 @@ type Stats = {
 	totalPendingPartners: number;
 	totalApprovedPartners: number;
 	totalRejectedPartners: number;
+	totalPendingVideoKyc: number;
+	totalPendingFinalReview: number,
 };
 
 type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
@@ -19,8 +21,6 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
 	const [pendingPartnerReviews, setPendingPartnerReviews] = useState<any>();
-	const [pendingKYC, setPendingKYC] = useState<any>();
-	const [vehicleReviews, setvehicleReviews] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Video KYC");
 	useEffect(() => {
 		const fetchData = async () => {
@@ -97,12 +97,12 @@ const AdminDashboard = () => {
 					/>
 				</section>
 
-				<section className="bg-white rounded-2xl flex flex-wrap gap-2 p-2 overflow-hidden shadow-2xl">
+				<section className="bg-white rounded-2xl flex flex-wrap gap-2 px-2 py-3 overflow-hidden shadow-2xl">
 					<TabButton
 						icon={<Video size={17} />}
 						tag="Video KYC"
 						active={activeTab === "Video KYC"}
-						count={pendingKYC?.length ?? 0}
+						count={stats?.totalPendingVideoKyc ?? 0}
 						onClick={() => setActiveTab("Video KYC")}
 					/>
 					<TabButton
@@ -116,7 +116,7 @@ const AdminDashboard = () => {
 						icon={<Truck size={17} />}
 						tag="Pricing & Images"
 						active={activeTab === "Pricing & Images"}
-						count={vehicleReviews?.length ?? 0}
+						count={stats?.totalPendingFinalReview ?? 0}
 						onClick={() => setActiveTab("Pricing & Images")}
 					/>
 				</section>

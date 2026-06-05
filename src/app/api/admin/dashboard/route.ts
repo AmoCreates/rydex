@@ -19,10 +19,6 @@ export async function GET() {
 		}
 
 		const totalPartners = await User.countDocuments({ role: "partner" });
-		const totalPendingPartners = await User.countDocuments({
-			role: "partner",
-			partnerStatus: "pending",
-		});
 		const totalRejectedPartners = await User.countDocuments({
 			role: "partner",
 			partnerStatus: "rejected",
@@ -31,6 +27,20 @@ export async function GET() {
 			role: "partner",
 			partnerStatus: "approved",
 		});
+		
+		const totalPendingVideoKyc = await User.countDocuments({
+			role: "partner",
+			partnerStatus: "pending",
+			partnerOnBoardingStep: 4
+		})
+		
+		const totalPendingFinalReview = await User.countDocuments({
+			role: "partner",
+			partnerStatus: "pending",
+			partnerOnBoardingStep: 6
+		})
+
+		const totalPendingPartners = totalPendingVideoKyc + totalPendingFinalReview;
 
 		const pendingPartnerUser = await User.find({
 			role: "partner",
@@ -57,6 +67,8 @@ export async function GET() {
 				totalPendingPartners,
 				totalRejectedPartners,
 				totalApprovedPartners,
+				totalPendingVideoKyc,
+				totalPendingFinalReview,
 			},
 			pendingPartnerReviews,
 		});
