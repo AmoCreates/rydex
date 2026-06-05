@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import KPI from "./KPI";
 import TabButton from "./TabButton";
+import { motion, AnimatePresence } from "motion/react";
+import PendingList from "./PendingList";
 
 type Stats = {
 	totalPartners: number;
@@ -13,7 +15,7 @@ type Stats = {
 	totalApprovedPartners: number;
 	totalRejectedPartners: number;
 	totalPendingVideoKyc: number;
-	totalPendingFinalReview: number,
+	totalPendingFinalReview: number;
 };
 
 type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
@@ -21,7 +23,9 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
 	const [pendingPartnerReviews, setPendingPartnerReviews] = useState<any>();
-	const [activeTab, setActiveTab] = useState<Tab>("Video KYC");
+	const [pendingKyc, setPendingKyc] = useState<any>();
+	const [pendingPricing, setPendingPricing] = useState<any>();
+	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -99,18 +103,18 @@ const AdminDashboard = () => {
 
 				<section className="bg-white rounded-2xl flex flex-wrap gap-2 px-2 py-3 overflow-hidden shadow-2xl">
 					<TabButton
-						icon={<Video size={17} />}
-						tag="Video KYC"
-						active={activeTab === "Video KYC"}
-						count={stats?.totalPendingVideoKyc ?? 0}
-						onClick={() => setActiveTab("Video KYC")}
-					/>
-					<TabButton
 						icon={<RiGroupLine size={16} />}
 						tag="Partner Reviews"
 						active={activeTab === "Partner Reviews"}
 						count={pendingPartnerReviews?.length ?? 0}
 						onClick={() => setActiveTab("Partner Reviews")}
+					/>
+					<TabButton
+						icon={<Video size={17} />}
+						tag="Video KYC"
+						active={activeTab === "Video KYC"}
+						count={stats?.totalPendingVideoKyc ?? 0}
+						onClick={() => setActiveTab("Video KYC")}
 					/>
 					<TabButton
 						icon={<Truck size={17} />}
@@ -120,6 +124,27 @@ const AdminDashboard = () => {
 						onClick={() => setActiveTab("Pricing & Images")}
 					/>
 				</section>
+
+				<AnimatePresence>
+					<motion.div
+						key={activeTab}
+						initial={{ opacity: 0, y: 16 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -8 }}
+						transition={{ duration: 0.2, ease: "easeOut" }}
+						className="space-y-3"
+					>
+						{activeTab === "Partner Reviews" && (
+							<PendingList list={pendingPartnerReviews ?? []} type={activeTab} />
+						)}
+						{activeTab === "Video KYC" && (
+							<PendingList list={pendingKyc ?? []} type={activeTab} />
+						)}
+						{activeTab === "Pricing & Images" && (
+							<PendingList list={pendingPricing ?? []} type={activeTab} />
+						)}
+					</motion.div>
+				</AnimatePresence>
 			</main>
 		</div>
 	);
