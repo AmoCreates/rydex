@@ -58,6 +58,6 @@ const partnerDocsSchema = new mongoose.Schema<IPartnerDocs>(
 );
 
 const PartnerDocs =
-	mongoose.models?.partnerDocs ||
+	mongoose.models?.PartnerDocs ||
 	mongoose.model("PartnerDocs", partnerDocsSchema);
 export default PartnerDocs;

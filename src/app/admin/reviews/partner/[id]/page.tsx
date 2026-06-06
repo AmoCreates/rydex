@@ -1,15 +1,18 @@
 'use client'
 import axios from 'axios'
 import { useParams } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const Page = () => {
   const {id} = useParams();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
   useEffect(() => {
     const getPartner = async () => {
       try {
-        const res = await axios.get(`/api/admin/reviews/partner/${id}`)
-        console.log(res)
+        const {data} = await axios.get(`/api/admin/reviews/partner/${id}`)
+        console.log(data)
       } catch (error) {
         console.log(error)
       }
