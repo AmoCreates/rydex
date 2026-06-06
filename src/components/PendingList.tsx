@@ -2,8 +2,10 @@
 import React from "react";
 import { motion } from "motion/react";
 import { ArrowRight, CheckCircle2, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const PendingList = ({ list, type }: any) => {
+	const router = useRouter();
 	if (list?.length === 0) {
 		return (
 			<motion.div
@@ -78,7 +80,12 @@ const PendingList = ({ list, type }: any) => {
 						</div>
 
 						<div className="shrink-0">
-							<button className="active:scale-96 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-sm font-semibold transition-all">
+							<button
+								className="active:scale-96 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-sm font-semibold transition-all"
+								onClick={() =>
+									type == "Partner Reviews" && router.push(`/admin/reviews/partner/${item._id}`)
+								}
+							>
 								Review <ArrowRight size={16} />{" "}
 							</button>
 						</div>
