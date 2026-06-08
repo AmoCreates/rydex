@@ -8,7 +8,7 @@ export interface IPartnerBank extends mongoose.Document {
 	mobile: number;
 	upi?: string;
 	rejectionMsg?: string;
-	status: "not added" | "added" | "verified" | "rejected";
+	status: "not added" | "added" | "verified";
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
 }
@@ -46,7 +46,7 @@ const partnerBankSchema = new mongoose.Schema<IPartnerBank>(
 
 		status: {
 			type: String,
-			enum: ["not added", "added", "verified", "rejected"],
+			enum: ["not added", "added", "verified"],
 			default: "not added",
 		},
 

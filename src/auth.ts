@@ -70,17 +70,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		async signIn({ user, account }) {
 			if (account?.provider === "google") {
 				await dbConnect();
-				const userExists = await User.findOne({ email: user.email });
-				if (!userExists) {
-					await User.create({
+				let userDoc = await User.findOne({ email: user.email });
+				if (!userDoc) {
+					userDoc = await User.create({
 						name: user.name,
 						email: user.email,
+						isEmailVerified: true,
 					});
+				} else if (!userDoc.isEmailVerified) {
+					userDoc.isEmailVerified = true;
+					await userDoc.save();
 				}
 
 				// update manually **Google doesn't give these
-				user.id = userExists._id;
-				user.role = userExists.role;
+				user.id = userDoc._id;
+				user.role = userDoc.role;
 			}
 
 			return true;

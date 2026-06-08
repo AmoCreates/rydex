@@ -14,7 +14,7 @@ const DocPreview = ({
 	const isImg = url?.match(/\.(jpeg|jpg|webp|png)$/i);
 	const isPdf = url?.endsWith(".pdf");
 	return (
-		<div className="bg-gray-50 rounded-2xl border overflow-hidden shadow-sm group">
+		<div className="bg-gray-50 rounded-2xl shadow-2xl shadow-gray-400 overflow-hidden  group">
 			<div className="px-4 py-2 text-sm font-semibold text-white bg-black/80">
 				{label}
 			</div>

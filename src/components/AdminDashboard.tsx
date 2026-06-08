@@ -30,8 +30,6 @@ const AdminDashboard = () => {
 		const fetchData = async () => {
 			try {
 				const { data } = await axios.get("/api/admin/dashboard");
-				console.log(data);
-
 				if (data) {
 					setStats(data.stats);
 					setPendingPartnerReviews(data.pendingPartnerReviews);
