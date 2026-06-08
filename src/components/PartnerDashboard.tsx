@@ -63,6 +63,7 @@ const PartnerDashboard = () => {
 							const isCompleted = step.id < currentStep;
 							const isActive = step.id === currentStep;
 							const route = isActive || isCompleted ? step.route : undefined;
+							console.log(route)
 							return (
 								<div key={step.id} className="flex flex-col items-center z-10">
 									<div
