@@ -33,7 +33,7 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
-	const [pendingPartnerReviews, setPendingPartnerReviews] = useState<any>();
+	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] = useState<any>();
 	const [pendingKyc, setPendingKyc] = useState<any>();
 	const [pendingPricing, setPendingPricing] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
@@ -45,8 +45,9 @@ const AdminDashboard = () => {
 			try {
 				const { data } = await axios.get("/api/admin/dashboard");
 				if (data) {
+					console.log(data)
 					setStats(data.stats);
-					setPendingPartnerReviews(data.pendingPartnerReviews);
+					setTotalPendingPartnerReviews(data.totalPendingPartnerReviews);
 				}
 			} catch (error) {
 				console.log(error);
@@ -140,7 +141,7 @@ const AdminDashboard = () => {
 						hover="hover:shadow-blue-100/60"
 					/>
 					<KPI
-						label="PENDING PARTNER'S REVIEWS"
+						label="PENDING PARTNER'S REVIEWS/KYC"
 						value={stats?.totalPendingPartners}
 						icon={<Clock4 size={16} />}
 						desc="awaiting review"
@@ -162,7 +163,7 @@ const AdminDashboard = () => {
 						icon={<RiGroupLine size={16} />}
 						tag="Partner Reviews"
 						active={activeTab === "Partner Reviews"}
-						count={pendingPartnerReviews?.length ?? 0}
+						count={totalPendingPartnerReviews?.length ?? 0}
 						onClick={() => setActiveTab("Partner Reviews")}
 					/>
 					<TabButton
@@ -192,7 +193,7 @@ const AdminDashboard = () => {
 					>
 						{activeTab === "Partner Reviews" && (
 							<PendingList
-								list={pendingPartnerReviews ?? []}
+								list={totalPendingPartnerReviews ?? []}
 								type={activeTab}
 							/>
 						)}

@@ -62,6 +62,7 @@ const Page = () => {
 			console.log("done")
 		} catch (error: any) {
 			setErr(error.response?.data?.message || "Something went wrong");
+			console.log(error.response?.data?.message)
 		} finally {
 			setLoading(false);
 			setAdminCheck(null);

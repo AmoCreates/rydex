@@ -19,9 +19,13 @@ export async function PUT(
 		await dbConnect();
 
 		const { partnerStatus, reason } = await req.json();
-    if(!partnerStatus || !reason) {
+    if(!partnerStatus) {
       return Response.json({ message: "Invalid request" }, { status: 400 });
     }
+
+		if(partnerStatus === "rejected" && !reason) {
+			return Response.json({ message: "Rejection reason is required" }, { status: 400 });
+		}
 
 		const partnerId = (await context.params).id;
 		const partner = await User.findById(partnerId);
@@ -55,9 +59,9 @@ export async function PUT(
 			bank.status = "verified";
 			await bank.save();
 
-			partner.partnerStatus = "approved";
+			partner.partnerStatus = "pending";
 			partner.partnerOnBoardingStep = 4;
-
+			partner.rejectionMsg = "";
 			await partner.save();
 
 			return Response.json({ message: "Partner approved" }, { status: 200 });

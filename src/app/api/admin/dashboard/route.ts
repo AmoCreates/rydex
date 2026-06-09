@@ -27,6 +27,12 @@ export async function GET() {
 			role: "partner",
 			partnerStatus: "approved",
 		});
+
+		const totalPendingDocsReview = await User.countDocuments({
+			role: "partner",
+			partnerStatus: "pending",
+			partnerOnBoardingStep: 3
+		})
 		
 		const totalPendingVideoKyc = await User.countDocuments({
 			role: "partner",
@@ -40,12 +46,12 @@ export async function GET() {
 			partnerOnBoardingStep: 6
 		})
 
-		const totalPendingPartners = totalPendingVideoKyc + totalPendingFinalReview;
+		const totalPendingPartners = totalPendingDocsReview + totalPendingVideoKyc + totalPendingFinalReview;
 
 		const pendingPartnerUser = await User.find({
 			role: "partner",
 			partnerStatus: "pending",
-			partnerOnBoardingStep: 3,
+			partnerOnBoardingStep: {$gte:3},
 		});
 
 		const partnerIds = pendingPartnerUser.map((partner) => partner._id);
@@ -54,12 +60,13 @@ export async function GET() {
 			partnerVehicle.map((v) => [String(v.owner), v.type]),
 		);
 
-		const pendingPartnerReviews = pendingPartnerUser.map((p) => ({
+		const totalPendingPartnerReviews = pendingPartnerUser.map((p) => ({
 			_id: p._id,
 			name: p.name,
 			email: p.email,
 			vehicleType: vehicleTypesMap.get(String(p._id)),
 		}));
+		
 
 		return NextResponse.json({
 			stats: {
@@ -70,7 +77,7 @@ export async function GET() {
 				totalPendingVideoKyc,
 				totalPendingFinalReview,
 			},
-			pendingPartnerReviews,
+			totalPendingPartnerReviews,
 		});
 	} catch (error) {
 		console.log(error);
