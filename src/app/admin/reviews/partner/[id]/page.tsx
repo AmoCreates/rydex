@@ -5,7 +5,6 @@ import { IPartnerBank } from "@/model/partnerBank.model";
 import { IPartnerDocs } from "@/model/partnerDocs.model";
 import { IUser } from "@/model/user.model";
 import { IVehicle } from "@/model/vehicle.model";
-import { RiFileTextLine } from "@remixicon/react";
 import axios from "axios";
 import {
 	ArrowLeft,
@@ -50,7 +49,7 @@ const Page = () => {
 			}
 		};
 		getPartner();
-	}, []);
+	}, [id]);
 
 	const handleDecision = async () => {
 		setLoading(true);
@@ -59,7 +58,7 @@ const Page = () => {
 				partnerStatus: adminCheck ? "approved" : "rejected",
 				reason: adminCheck ? "" : rejectionReason,
 			});
-			console.log("done")
+			router.push('/')
 		} catch (error: any) {
 			setErr(error.response?.data?.message || "Something went wrong");
 			console.log(error.response?.data?.message)

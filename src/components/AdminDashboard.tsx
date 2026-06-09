@@ -33,7 +33,7 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
-	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] = useState<any>();
+	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] = useState<[]>();
 	const [pendingKyc, setPendingKyc] = useState<any>();
 	const [pendingPricing, setPendingPricing] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
