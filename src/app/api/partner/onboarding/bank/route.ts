@@ -59,12 +59,12 @@ export async function POST(req: Request) {
 		);
 
     user.mobile = mobile;
-    await user.save();
+    user.partnerStatus = "pending";
 
 		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 3) {
 			user.partnerOnBoardingStep = 3;
-			await user.save();
 		}
+    await user.save();
 
 		return Response.json(partnerBank, { status: 200 });
 	} catch (error) {

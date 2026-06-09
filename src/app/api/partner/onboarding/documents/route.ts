@@ -101,9 +101,9 @@ export async function POST(req: Request) {
 		// Update the step robustly if it hasn't reached step 2 yet
 		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 2) {
 			user.partnerOnBoardingStep = 2;
-			// Save the user document change explicitly
-			await user.save();
 		}
+		user.partnerStatus = "pending";
+		await user.save();
 
 		return Response.json(partnerDocs, { status: 200 });
 	} catch (error) {

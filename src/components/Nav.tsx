@@ -113,7 +113,7 @@ const Nav = ({ onOpen }: Props) => {
 													<p className="text-xs -mt-1 text-gray-500">
 														{userData.role}
 													</p>
-													{userData.role !== "partner" && (
+													{userData.role == "customer" && (
 														<div
 															onClick={() => {
 																setProfileOpen(false);

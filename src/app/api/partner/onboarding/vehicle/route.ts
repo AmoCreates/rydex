@@ -44,7 +44,11 @@ export async function POST(req: Request) {
 			vehicle.vehicleModel = vehicleModel;
 			vehicle.vehicleNumber = vehicleNumberCapitalize;
 			vehicle.status = "pending";
+			
 			await vehicle.save();
+
+			user.partnerStatus = "pending";
+			await user.save();
 			
 			return Response.json(vehicle, { status: 200 });
 		}
@@ -71,6 +75,7 @@ export async function POST(req: Request) {
 		}
 
 		user.role = "partner"
+		user.partnerStatus = "pending";
 		await user.save();
 
 		return Response.json(vehicle, { status: 201 });

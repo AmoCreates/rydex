@@ -1,13 +1,24 @@
 "use client";
 import { RiGroupLine, RiUserSettingsLine } from "@remixicon/react";
 import axios from "axios";
-import { CheckCircle2, Clock4, Truck, Video, XCircle } from "lucide-react";
+import {
+	CheckCircle2,
+	Clock4,
+	LogOut,
+	Truck,
+	Video,
+	XCircle,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import KPI from "./KPI";
 import TabButton from "./TabButton";
 import { motion, AnimatePresence } from "motion/react";
 import PendingList from "./PendingList";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/Toolkit/store";
+import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 type Stats = {
 	totalPartners: number;
@@ -26,6 +37,9 @@ const AdminDashboard = () => {
 	const [pendingKyc, setPendingKyc] = useState<any>();
 	const [pendingPricing, setPendingPricing] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
+	const [profileOpen, setProfileOpen] = useState(false);
+	const { userData } = useSelector((state: RootState) => state.user);
+	const dispatch = useDispatch<AppDispatch>();
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -42,9 +56,15 @@ const AdminDashboard = () => {
 		fetchData();
 	}, []);
 
+		const handleSignOut = async () => {
+			await signOut({ callbackUrl: "/", redirect: false });
+			dispatch({ type: "user/setUserData", payload: null });
+			setProfileOpen(false);
+		};
+
 	return (
 		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
-			<div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b z-40">
+			<header className="sticky top-0 bg-white/80 backdrop-blur-lg border-b z-40">
 				<div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
 					<div className="flex items-center gap-3">
 						<Image
@@ -56,12 +76,50 @@ const AdminDashboard = () => {
 							className="w-auto h-auto"
 						/>
 					</div>
-					<div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-black text-white ">
-						<RiUserSettingsLine size={17} />
-						Admin Dashboard
+
+					<div className="relative">
+						<div
+							className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-black text-white cursor-pointer"
+							onClick={() => {
+								setProfileOpen(!profileOpen);
+							}}
+						>
+							<RiUserSettingsLine size={17} />
+							Admin Dashboard
+						</div>
+						<AnimatePresence>
+							{profileOpen && (
+								<motion.div
+									initial={{ opacity: 0, scale: 0.95 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.95 }}
+									className="absolute hidden md:block right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200"
+								>
+									<div className="py-2 text-center border-b border-gray-200 mb-1">
+										<p className="text-lg font-semibold">{userData?.name}</p>
+										<p className="text-xs -mt-1 text-gray-500">
+											{userData?.role}
+										</p>
+									</div>
+									<Link
+										href="/profile"
+										className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+									>
+										Profile
+									</Link>
+									<button
+										className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"
+										onClick={handleSignOut}
+									>
+										<LogOut size={16} className="text-black" />
+										Logout
+									</button>
+								</motion.div>
+							)}
+						</AnimatePresence>
 					</div>
 				</div>
-			</div>
+			</header>
 
 			<main className="max-w-7xl mx-auto space-y-16 px-6 py-10 sm:py-16 sm:p-4 ">
 				<section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-4 sm:px-0">
@@ -133,7 +191,10 @@ const AdminDashboard = () => {
 						className="space-y-3"
 					>
 						{activeTab === "Partner Reviews" && (
-							<PendingList list={pendingPartnerReviews ?? []} type={activeTab} />
+							<PendingList
+								list={pendingPartnerReviews ?? []}
+								type={activeTab}
+							/>
 						)}
 						{activeTab === "Video KYC" && (
 							<PendingList list={pendingKyc ?? []} type={activeTab} />
