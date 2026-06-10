@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+type VideoKycStatus = 
+	| "not required"
+	| "pending"
+	| "in progress"
+	| "approved"
+	| "rejected";
+
 // extends with mongoose doucment will resolve the upcoming id type and timestamps
 export interface IUser extends mongoose.Document {
 	name: string;
@@ -12,6 +19,8 @@ export interface IUser extends mongoose.Document {
 	partnerOnBoardingStep?: number;
 	role: "customer" | "partner" | "admin";
 	partnerStatus?: "approved" | "rejected" | "pending";
+	videoKycStatus?: VideoKycStatus;
+	videoKycRoomId: string;
 	rejectionMsg?: string;
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
@@ -72,6 +81,17 @@ const userSchema = new mongoose.Schema<IUser>(
 			type: String,
 			enum: ["approved", "rejected", "pending"],
 			default: "pending",
+		},
+
+		videoKycStatus: {
+			type: String,
+			enum: ["not required", "pending", "in progress", "approved", "rejected"],
+			default: "not required",
+		},
+
+		videoKycRoomId: {
+			type: String,
+			default: ""
 		},
 
 		rejectionMsg: {

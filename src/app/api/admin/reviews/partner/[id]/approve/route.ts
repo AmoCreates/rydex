@@ -60,6 +60,7 @@ export async function PUT(
 			await bank.save();
 
 			partner.partnerStatus = "pending";
+			partner.videoKycStatus = "pending";
 			partner.partnerOnBoardingStep = 4;
 			partner.rejectionMsg = "";
 			await partner.save();
