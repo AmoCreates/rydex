@@ -86,7 +86,7 @@ const PendingList = ({ list, type }: any) => {
 									type == "Partner Reviews" && router.push(`/admin/reviews/partner/${item._id}`)
 								}
 							>
-								Review <ArrowRight size={16} />{" "}
+								{type == "Video KYC" ? "Start Video KYC" : list.videoKycStatus === "in progress" ? "Join Call" : "Review"} <ArrowRight size={16} />{" "}
 							</button>
 						</div>
 					</motion.div>

@@ -40,6 +40,7 @@ const AdminDashboard = () => {
 	const [profileOpen, setProfileOpen] = useState(false);
 	const { userData } = useSelector((state: RootState) => state.user);
 	const dispatch = useDispatch<AppDispatch>();
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
 				if (data) {
 					console.log(data)
 					setStats(data.stats);
+					setPendingKyc(data.pendingVideoKyc);
 					setTotalPendingPartnerReviews(data.totalPendingPartnerReviews);
 				}
 			} catch (error) {
