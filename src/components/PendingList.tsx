@@ -3,9 +3,20 @@ import React from "react";
 import { motion } from "motion/react";
 import { ArrowRight, CheckCircle2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const PendingList = ({ list, type }: any) => {
 	const router = useRouter();
+	const handleStartVideoKyc = async (id: any) => {
+		try {
+			await axios.get(`/api/admin/videoKyc/${id}`);
+			alert("Room Id Created Successfully, Join Call Now")
+			window.location.reload();
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	if (list?.length === 0) {
 		return (
 			<motion.div
@@ -81,12 +92,19 @@ const PendingList = ({ list, type }: any) => {
 
 						<div className="shrink-0">
 							<button
-								className="active:scale-96 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white text-sm font-semibold transition-all"
+								className={`active:scale-96 cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl  text-sm font-semibold transition-all ${item.videoKycStatus === "in progress" ? "bg-blue-500 text-white animate-pulse hover:animate-none" : "bg-neutral-950 hover:bg-neutral-800 text-white"}`}
 								onClick={() =>
-									type == "Partner Reviews" && router.push(`/admin/reviews/partner/${item._id}`)
+									type == "Partner Reviews"
+										? router.push(`/admin/reviews/partner/${item._id}`)
+										: handleStartVideoKyc(item._id)
 								}
 							>
-								{type == "Video KYC" ? "Start Video KYC" : list.videoKycStatus === "in progress" ? "Join Call" : "Review"} <ArrowRight size={16} />{" "}
+								{type == "Video KYC"
+									? item.videoKycStatus === "in progress"
+										? "Join Call"
+										: "Start Video KYC"
+									: "Review"}{" "}
+								<ArrowRight size={16} />{" "}
 							</button>
 						</div>
 					</motion.div>
