@@ -58,13 +58,12 @@ export async function POST(req: Request) {
 			{ upsert: true, new: true }, // update if present, else create
 		);
 
-    user.mobile = mobile;
-    user.partnerStatus = "pending";
-
-		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 3) {
-			user.partnerOnBoardingStep = 3;
-		}
-    await user.save();
+		user.mobile = mobile;
+		user.partnerStatus = "pending";
+		user.partnerOnBoardingStep = 3;
+		user.videoKycRoomId = ""
+		user.videoKycStatus = "not required"
+		await user.save();
 
 		return Response.json(partnerBank, { status: 200 });
 	} catch (error) {
@@ -76,10 +75,9 @@ export async function POST(req: Request) {
 	}
 }
 
-
 export async function GET() {
-  try {
-    await dbConnect();
+	try {
+		await dbConnect();
 
 		const session = await auth();
 		if (!session || !session.user?.email) {
@@ -92,16 +90,16 @@ export async function GET() {
 		}
 
 		const partnerBank = await PartnerBank.findOne({ owner: user._id });
-    if (partnerBank) {
-      return Response.json(partnerBank, { status: 200 });
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.log("Get partner bank details error, err: ", error);
-    return Response.json(
+		if (partnerBank) {
+			return Response.json(partnerBank, { status: 200 });
+		} else {
+			return null;
+		}
+	} catch (error) {
+		console.log("Get partner bank details error, err: ", error);
+		return Response.json(
 			{ message: "Get partner bank details error, err: ", error },
 			{ status: 500 },
 		);
-  }
+	}
 }

@@ -99,9 +99,13 @@ export async function POST(req: Request) {
 		);
 
 		// Update the step robustly if it hasn't reached step 2 yet
-		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 2) {
+		if (user.partnerOnBoardingStep < 2) {
 			user.partnerOnBoardingStep = 2;
+		} else if(user.partnerOnBoardingStep >= 3) {
+			user.partnerOnBoardingStep = 3;
 		}
+		user.videoKycRoomId = ""
+		user.videoKycStatus = "not required"
 		user.partnerStatus = "pending";
 		await user.save();
 

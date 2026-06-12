@@ -70,10 +70,13 @@ export async function POST(req: Request) {
 			vehicleModel,
 		});
 
-		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 1) {
+		if (user.partnerOnBoardingStep < 1) {
 			user.partnerOnBoardingStep = 1;
+		} else if(user.partnerOnBoardingStep >= 3) {
+			user.partnerOnBoardingStep = 3;
 		}
-
+		user.videoKycRoomId = ""
+		user.videoKycStatus = "not required"
 		user.role = "partner"
 		user.partnerStatus = "pending";
 		await user.save();

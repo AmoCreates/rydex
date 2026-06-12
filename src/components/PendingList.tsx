@@ -6,11 +6,12 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const PendingList = ({ list, type }: any) => {
+	console.log(list);
 	const router = useRouter();
 	const handleStartVideoKyc = async (id: any) => {
 		try {
 			await axios.get(`/api/admin/videoKyc/${id}`);
-			alert("Room Id Created Successfully, Join Call Now")
+			alert("Room Id Created Successfully, Join Call Now");
 			window.location.reload();
 		} catch (error) {
 			console.log(error);
@@ -96,7 +97,11 @@ const PendingList = ({ list, type }: any) => {
 								onClick={() =>
 									type == "Partner Reviews"
 										? router.push(`/admin/reviews/partner/${item._id}`)
-										: handleStartVideoKyc(item._id)
+										: type == "Video KYC"
+											? item.videoKycStatus === "in progress"
+												? router.push(`/video-kyc/${item.videoKycRoomId}`)
+												: handleStartVideoKyc(item._id)
+											: router.push("/")
 								}
 							>
 								{type == "Video KYC"

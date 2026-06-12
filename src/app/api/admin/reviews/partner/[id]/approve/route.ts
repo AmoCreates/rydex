@@ -19,12 +19,15 @@ export async function PUT(
 		await dbConnect();
 
 		const { partnerStatus, reason } = await req.json();
-    if(!partnerStatus) {
-      return Response.json({ message: "Invalid request" }, { status: 400 });
-    }
+		if (!partnerStatus) {
+			return Response.json({ message: "Invalid request" }, { status: 400 });
+		}
 
-		if(partnerStatus === "rejected" && !reason) {
-			return Response.json({ message: "Rejection reason is required" }, { status: 400 });
+		if (partnerStatus === "rejected" && !reason) {
+			return Response.json(
+				{ message: "Rejection reason is required" },
+				{ status: 400 },
+			);
 		}
 
 		const partnerId = (await context.params).id;
@@ -75,8 +78,8 @@ export async function PUT(
 			}
 			partner.partnerStatus = "rejected";
 			partner.rejectionMsg = reason;
-      await partner.save();
-      return Response.json({ message: "Partner rejected" }, { status: 200 });
+			await partner.save();
+			return Response.json({ message: "Partner rejected" }, { status: 200 });
 		} else {
 			return Response.json({ message: "Invalid status" }, { status: 400 });
 		}
