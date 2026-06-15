@@ -4,7 +4,15 @@ import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import Image from "next/image";
-import { Mic, MicOff, Video, VideoOff } from "lucide-react";
+import {
+	CheckCircle,
+	Mic,
+	MicOff,
+	PhoneOff,
+	Video,
+	VideoOff,
+	XCircle,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 
 const Page = () => {
@@ -16,7 +24,7 @@ const Page = () => {
 	const [stream, setStream] = useState<MediaStream>();
 	const [camera, setCamera] = useState(true);
 	const [mic, setMic] = useState(true);
-	const {roomId} = useParams();
+	const { roomId } = useParams();
 
 	useEffect(() => {
 		if (isCallStarted) return;
@@ -54,7 +62,10 @@ const Page = () => {
 	};
 
 	const startCall = async () => {
-		const displayName = userData?.role == "admin" ? "Admin" : `${userData?.name} (${userData?.email})`;
+		const displayName =
+			userData?.role == "admin"
+				? "Admin"
+				: `${userData?.name} (${userData?.email})`;
 		try {
 			setIsLoading(true);
 			const appId = Number(process.env.NEXT_PUBLIC_ZEGO_APP_ID);
@@ -76,6 +87,10 @@ const Page = () => {
 				scenario: {
 					mode: ZegoUIKitPrebuilt.OneONoneCall,
 				},
+				showMyCameraToggleButton: true,
+				showMyMicrophoneToggleButton: true,
+				turnOnCameraWhenJoining: camera,
+				turnOnMicrophoneWhenJoining: mic,
 				showPreJoinView: false,
 			});
 		} catch (error) {
@@ -84,6 +99,16 @@ const Page = () => {
 		}
 	};
 
+	if (isLoading) {
+		return (
+			<div className="h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
+				<div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+				<p className="text-zinc-400 animate-pulse">
+					Setting up secure connection...
+				</p>
+			</div>
+		);
+	}
 	return (
 		<div className="h-screen bg-zinc-950 text-zinc-100 flex flex-col">
 			<header className="px-6 py-4 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -102,10 +127,49 @@ const Page = () => {
 							: "Partner Video KYC"}
 					</p>
 				</div>
+
+				{isCallStarted && (
+					<div className="flex gap-3 flex-wrap">
+						{userData?.role === "admin" && (
+							<>
+								<button
+									onClick={() => {
+										/* Add your approve logic here */
+									}}
+									className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
+								>
+									<CheckCircle size={16} />
+									Approve KYC
+								</button>
+								<button
+									onClick={() => {
+										/* Add your reject logic here */
+									}}
+									className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
+								>
+									<XCircle />
+									Reject KYC
+								</button>
+							</>
+						)}
+						<button
+							onClick={() => {
+								/* Add your reject logic here */
+							}}
+							className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
+						>
+							<PhoneOff size={16} />
+							End Call
+						</button>
+					</div>
+				)}
 			</header>
 
 			<main className="flex-1 relative">
-				<div ref={containerRef} className={`absolute inset-0 w-full h-full ${!isCallStarted && 'hidden'}`}/>
+				<div
+					ref={containerRef}
+					className={`absolute inset-0 w-full h-full ${!isCallStarted && "hidden"}`}
+				/>
 				{!isCallStarted && (
 					<div className="h-full flex items-center justify-center px-4 py-10">
 						<div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -137,13 +201,14 @@ const Page = () => {
 										{mic ? <Mic /> : <MicOff />}
 									</button>
 								</div>
-								
-								<button className="w-full bg-white text-black py-4 font-semibold rounded-xl cursor-pointer active:scale-97"
-								onClick={startCall}>
+
+								<button
+									className="w-full bg-white text-black py-4 font-semibold rounded-xl cursor-pointer active:scale-97"
+									onClick={startCall}
+								>
 									Join Secure Call
 								</button>
 							</div>
-
 						</div>
 					</div>
 				)}
