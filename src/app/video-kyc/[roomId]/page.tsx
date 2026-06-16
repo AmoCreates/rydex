@@ -162,14 +162,14 @@ const Page = () => {
 							<>
 								<button
 									onClick={() => setAdminCheck(true)}
-									className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
+									className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95 cursor-pointer"
 								>
 									<CheckCircle size={16} />
 									Approve KYC
 								</button>
 								<button
 									onClick={() => setAdminCheck(false)}
-									className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
+									className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95 cursor-pointer"
 								>
 									<XCircle />
 									Reject KYC
