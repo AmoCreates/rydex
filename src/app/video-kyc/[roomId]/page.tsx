@@ -31,6 +31,7 @@ const Page = () => {
 	const [adminCheck, setAdminCheck] = useState<boolean | null>(null);
 	const [rejectionReason, setRejectionReason] = useState("");
 	const [isProcessing, setIsProcessing] = useState(false);
+	const [errorMsg, setErrorMsg] = useState("");
 	const { roomId } = useParams();
 
 	useEffect(() => {
@@ -70,20 +71,30 @@ const Page = () => {
 
 	const handleDecision = async () => {
 		setIsProcessing(true);
+		setErrorMsg("");
 		try {
 			// Placeholder: Implement actual API logic here
-			const res = await axios.patch(`/api/admin/videoKyc/${roomId}/Kyc-approve-reject`, {
-				roomId,
-				action: adminCheck ? "approve" : "reject",
-				reason: rejectionReason,
-			})
+			const res = await axios.patch(
+				`/api/admin/videoKyc/${roomId}/Kyc-approve-reject`,
+				{
+					roomId,
+					action: adminCheck ? "approve" : "reject",
+					reason: rejectionReason,
+				},
+			);
 
 			console.log(res);
-			
+
 			setAdminCheck(null);
 			setRejectionReason("");
-		} catch (error) {
-			console.error(error);
+		} catch (error: any) {
+			const axiosError = error;
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				"Faild to approve/reject kyc",
+				axiosError?.response?.data || axiosError?.message || axiosError,
+			);
+			setErrorMsg(serverMessage || "Something went wrong");
 		} finally {
 			setIsProcessing(false);
 		}
@@ -236,7 +247,6 @@ const Page = () => {
 						</div>
 					</div>
 				)}
-				
 			</main>
 
 			{/*Admin Decision Confirmation Popup*/}
@@ -257,15 +267,21 @@ const Page = () => {
 							className="relative bg-zinc-900 border border-white/10 p-8 max-w-md w-full shadow-2xl space-y-6 rounded-3xl"
 						>
 							<div className="flex items-center gap-3">
-								<div className={`p-3 rounded-2xl ${adminCheck ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}>
-									{adminCheck ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+								<div
+									className={`p-3 rounded-2xl ${adminCheck ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}
+								>
+									{adminCheck ? (
+										<CheckCircle2 size={24} />
+									) : (
+										<XCircle size={24} />
+									)}
 								</div>
 								<div>
 									<h3 className="text-xl font-bold text-zinc-100">
 										{adminCheck ? "Approve Video KYC" : "Reject Video KYC"}
 									</h3>
 									<p className="text-sm text-zinc-400">
-										{adminCheck 
+										{adminCheck
 											? "Confirm that you have successfully verified the partner identity and details via video call."
 											: "Please provide a specific reason for rejecting this Video KYC session."}
 									</p>
@@ -286,6 +302,16 @@ const Page = () => {
 								</div>
 							)}
 
+							{errorMsg && (
+								<motion.p
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									className="text-xs text-red-500 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20"
+								>
+									*{errorMsg}
+								</motion.p>
+							)}
+
 							<div className="flex gap-3 pt-2">
 								<button
 									className="flex-1 py-3 rounded-xl font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
@@ -300,7 +326,11 @@ const Page = () => {
 									}`}
 									onClick={handleDecision}
 								>
-									{isProcessing ? "Processing..." : adminCheck ? "Confirm Approval" : "Confirm Rejection"}
+									{isProcessing
+										? "Processing..."
+										: adminCheck
+											? "Confirm Approval"
+											: "Confirm Rejection"}
 								</button>
 							</div>
 						</motion.div>

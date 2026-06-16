@@ -28,9 +28,9 @@ export async function PATCH(req: Request) {
 				);
 			}
 		}
-		// if (!reason) {
-		// 	return Response.json({ message: "reason is required" }, { status: 400 });
-		// }
+		if (action === "reject" && !reason) {
+			return Response.json({ message: "reason is required" }, { status: 400 });
+		}
 
 		const partner = await User.findOne({
 			videoKycRoomId: roomId,
