@@ -116,7 +116,7 @@ const PartnerDashboard = () => {
 
 				{/* Rejection Card */}
 				{userData?.partnerStatus === "rejected" && (
-					<RejectionCard rejectionMsg={userData?.rejectionMsg} />
+					<RejectionCard rejectionMsg={userData?.rejectionMsg} step={userData?.partnerOnBoardingStep}/>
 				)}
 
 				{/* Status Card */}
