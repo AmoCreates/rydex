@@ -28,7 +28,7 @@ export async function PATCH(req: Request) {
 				);
 			}
 		}
-		if (action === "reject" && !reason) {
+		if (action === "reject" && !reason && reason.trim() === ""){
 			return Response.json({ message: "reason is required" }, { status: 400 });
 		}
 

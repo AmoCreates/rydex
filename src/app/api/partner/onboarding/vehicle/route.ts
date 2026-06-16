@@ -37,19 +37,28 @@ export async function POST(req: Request) {
 
 		const vehicleNumberCapitalize = vehicleNumber.toUpperCase();
 
-		
-		let vehicle = await Vehicle.findOne({ owner: user._id, vehicleNumber: vehicleNumberCapitalize});
+		let vehicle = await Vehicle.findOne({
+			owner: user._id,
+			vehicleNumber: vehicleNumberCapitalize,
+		});
 		if (vehicle) {
 			vehicle.type = vehicleType;
 			vehicle.vehicleModel = vehicleModel;
 			vehicle.vehicleNumber = vehicleNumberCapitalize;
 			vehicle.status = "pending";
-			
+
 			await vehicle.save();
 
 			user.partnerStatus = "pending";
+			if (user.partnerOnBoardingStep >= 3) {
+				user.partnerOnBoardingStep = 3;
+			}
+			user.videoKycRoomId = "";
+			user.videoKycStatus = "not required";
+			user.role = "partner";
+			user.partnerStatus = "pending";
 			await user.save();
-			
+
 			return Response.json(vehicle, { status: 200 });
 		}
 
@@ -62,7 +71,7 @@ export async function POST(req: Request) {
 				{ status: 400 },
 			);
 		}
-		
+
 		vehicle = await Vehicle.create({
 			owner: user._id,
 			type: vehicleType,
@@ -72,18 +81,12 @@ export async function POST(req: Request) {
 
 		if (user.partnerOnBoardingStep < 1) {
 			user.partnerOnBoardingStep = 1;
-		} else if(user.partnerOnBoardingStep >= 3) {
-			user.partnerOnBoardingStep = 3;
 		}
-		user.videoKycRoomId = ""
-		user.videoKycStatus = "not required"
-		user.role = "partner"
-		user.partnerStatus = "pending";
-		await user.save();
 
 		return Response.json(vehicle, { status: 201 });
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : "Unknown error";
+		const errorMessage =
+			error instanceof Error ? error.message : "Unknown error";
 		console.error("Vehicle add/update error:", error);
 		return Response.json(
 			{ message: "Vehicle add/update error", error: errorMessage },
@@ -111,10 +114,10 @@ export async function GET() {
 		if (vehicle) {
 			return Response.json(vehicle, { status: 200 });
 		} else {
-			return Response.json({ message: "vehicle not found" }, {status: 404});
+			return Response.json({ message: "vehicle not found" }, { status: 404 });
 		}
 	} catch (error) {
-		console.log("Get vehicle details error, err: ",error)
+		console.log("Get vehicle details error, err: ", error);
 		return Response.json(
 			{ message: "Get vehicle details error, err: ", error },
 			{ status: 500 },
