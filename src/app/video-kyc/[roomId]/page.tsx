@@ -5,7 +5,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import Image from "next/image";
 import {
+	CheckCircle2,
 	CheckCircle,
+	Info,
 	Mic,
 	MicOff,
 	PhoneOff,
@@ -14,6 +16,8 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
+import axios from "axios";
 
 const Page = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -24,6 +28,9 @@ const Page = () => {
 	const [stream, setStream] = useState<MediaStream>();
 	const [camera, setCamera] = useState(true);
 	const [mic, setMic] = useState(true);
+	const [adminCheck, setAdminCheck] = useState<boolean | null>(null);
+	const [rejectionReason, setRejectionReason] = useState("");
+	const [isProcessing, setIsProcessing] = useState(false);
 	const { roomId } = useParams();
 
 	useEffect(() => {
@@ -59,6 +66,27 @@ const Page = () => {
 		const audioTrack = stream.getAudioTracks()[0];
 		audioTrack.enabled = !audioTrack.enabled;
 		setMic(!mic);
+	};
+
+	const handleDecision = async () => {
+		setIsProcessing(true);
+		try {
+			// Placeholder: Implement actual API logic here
+			const res = await axios.patch(`/api/admin/videoKyc/${roomId}/Kyc-approve-reject`, {
+				roomId,
+				action: adminCheck ? "approve" : "reject",
+				reason: rejectionReason,
+			})
+
+			console.log(res);
+			
+			setAdminCheck(null);
+			setRejectionReason("");
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsProcessing(false);
+		}
 	};
 
 	const startCall = async () => {
@@ -133,18 +161,14 @@ const Page = () => {
 						{userData?.role === "admin" && (
 							<>
 								<button
-									onClick={() => {
-										/* Add your approve logic here */
-									}}
+									onClick={() => setAdminCheck(true)}
 									className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
 								>
 									<CheckCircle size={16} />
 									Approve KYC
 								</button>
 								<button
-									onClick={() => {
-										/* Add your reject logic here */
-									}}
+									onClick={() => setAdminCheck(false)}
 									className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
 								>
 									<XCircle />
@@ -212,7 +236,77 @@ const Page = () => {
 						</div>
 					</div>
 				)}
+				
 			</main>
+
+			{/*Admin Decision Confirmation Popup*/}
+			<AnimatePresence>
+				{adminCheck !== null && (
+					<div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+							onClick={() => setAdminCheck(null)}
+						/>
+						<motion.div
+							initial={{ scale: 0.9, opacity: 0, y: 20 }}
+							animate={{ scale: 1, opacity: 1, y: 0 }}
+							exit={{ scale: 0.9, opacity: 0, y: 20 }}
+							className="relative bg-zinc-900 border border-white/10 p-8 max-w-md w-full shadow-2xl space-y-6 rounded-3xl"
+						>
+							<div className="flex items-center gap-3">
+								<div className={`p-3 rounded-2xl ${adminCheck ? "bg-green-500/10 text-green-500" : "bg-red-500/10 text-red-500"}`}>
+									{adminCheck ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+								</div>
+								<div>
+									<h3 className="text-xl font-bold text-zinc-100">
+										{adminCheck ? "Approve Video KYC" : "Reject Video KYC"}
+									</h3>
+									<p className="text-sm text-zinc-400">
+										{adminCheck 
+											? "Confirm that you have successfully verified the partner identity and details via video call."
+											: "Please provide a specific reason for rejecting this Video KYC session."}
+									</p>
+								</div>
+							</div>
+
+							{!adminCheck && (
+								<div className="space-y-2">
+									<label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+										<Info size={14} /> Rejection Reason
+									</label>
+									<textarea
+										className="w-full bg-zinc-800 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:ring-2 ring-red-500/20 transition-all min-h-32 text-zinc-100 placeholder:text-zinc-600"
+										placeholder="e.g. Identity documents not visible, Poor network, or Mismatched details..."
+										value={rejectionReason}
+										onChange={(e) => setRejectionReason(e.target.value)}
+									/>
+								</div>
+							)}
+
+							<div className="flex gap-3 pt-2">
+								<button
+									className="flex-1 py-3 rounded-xl font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors cursor-pointer"
+									onClick={() => setAdminCheck(null)}
+								>
+									Cancel
+								</button>
+								<button
+									disabled={isProcessing || (!adminCheck && !rejectionReason)}
+									className={`flex-1 py-3 rounded-xl font-semibold text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+										adminCheck ? "bg-green-600" : "bg-red-600"
+									}`}
+									onClick={handleDecision}
+								>
+									{isProcessing ? "Processing..." : adminCheck ? "Confirm Approval" : "Confirm Rejection"}
+								</button>
+							</div>
+						</motion.div>
+					</div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };

@@ -102,7 +102,11 @@ const PartnerDashboard = () => {
 										</div>
 									</div>
 									<p className="mt-3 text-sm font-semibold text-center">
-										{step.id === 4 && rejected ? "Rejected" : step.title}
+										{step.id === 4 && rejected
+											? "Rejected"
+											: step.id === 5 && userData?.videoKycStatus === "rejected"
+												? "Rejected"
+												: step.title}
 									</p>
 								</div>
 							);
@@ -111,10 +115,9 @@ const PartnerDashboard = () => {
 				</div>
 
 				{/* Rejection Card */}
-				{userData?.partnerStatus === "rejected" &&
-					userData?.partnerOnBoardingStep === 3 && (
-						<RejectionCard rejectionMsg={userData?.rejectionMsg} />
-					)}
+				{userData?.partnerStatus === "rejected" && (
+					<RejectionCard rejectionMsg={userData?.rejectionMsg} />
+				)}
 
 				{/* Status Card */}
 				{userData?.partnerStatus === "pending" &&
