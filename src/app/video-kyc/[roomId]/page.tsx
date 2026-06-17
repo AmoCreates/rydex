@@ -15,7 +15,7 @@ import {
 	VideoOff,
 	XCircle,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";
 
@@ -32,6 +32,7 @@ const Page = () => {
 	const [rejectionReason, setRejectionReason] = useState("");
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [errorMsg, setErrorMsg] = useState("");
+	const router = useRouter();
 	const { roomId } = useParams();
 
 	useEffect(() => {
@@ -97,6 +98,7 @@ const Page = () => {
 			setErrorMsg(serverMessage || "Something went wrong");
 		} finally {
 			setIsProcessing(false);
+			router.push("/");
 		}
 	};
 
@@ -189,7 +191,7 @@ const Page = () => {
 						)}
 						<button
 							onClick={() => {
-								/* Add your reject logic here */
+								router.push('/')
 							}}
 							className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
 						>

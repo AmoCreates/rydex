@@ -21,7 +21,7 @@ const STEPS: Step[] = [
 	{ id: 3, title: "Bank", route: "/partner/onboarding/bank" },
 	{ id: 4, title: "Review" },
 	{ id: 5, title: "Video KYC" },
-	{ id: 6, title: "Pricing" },
+	{ id: 6, title: "Pricing", route: "/partner/onboarding/pricing&vehicle"  },
 	{ id: 7, title: "Final Review" },
 	{ id: 8, title: "Live" },
 ];
