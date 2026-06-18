@@ -13,15 +13,25 @@ import {
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Toolkit/store";
 
-type condition = "good" | "fair" | "poor";
+type data = {
+	AC: boolean;
+	vehicleCondition: "good" | "fair" | "poor";
+	baseFare: number;
+	pricePerKm: number;
+	waitingChargerPerMin: number;
+};
 
 const Page = () => {
 	const router = useRouter();
+	const { userData } = useSelector((state: RootState) => state.user);
 	const [isLoading, setIsLoading] = useState(false);
-	const [formData, setFormData] = useState({
+	const [data, setData] = useState({
 		AC: false,
-		vehicleCondition: "good" as condition,
+		vehicleCondition: "good",
 		baseFare: 0,
 		pricePerKm: 0,
 		waitingChargerPerMin: 0,
@@ -42,12 +52,27 @@ const Page = () => {
 	const handleSubmit = async () => {
 		try {
 			setIsLoading(true);
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-			setIsLoading(false);
-			console.log("done");
+			const formData = new FormData();
+			formData.append("AC", String(data.AC));
+			formData.append("vehicleCondition", String(data.vehicleCondition));
+			formData.append("baseFare", String(data.baseFare));
+			formData.append("pricePerKm", String(data.pricePerKm));
+			formData.append(
+				"waitingChargerPerMin",
+				String(data.waitingChargerPerMin),
+			);
+			if (imageFile) formData.append("image", imageFile);
+
+			const res = await axios.post(
+				"/api/partner/onboarding/pricing&image",
+				formData,
+			);
+			console.log(res);
 		} catch (error) {
 			console.log(error);
-		} 
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
@@ -134,23 +159,23 @@ const Page = () => {
 								<button
 									type="button"
 									onClick={() => {
-										setFormData({
-											...formData,
-											AC: !formData.AC,
+										setData({
+											...data,
+											AC: !data.AC,
 										});
 									}}
 									className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border-2 transition-all ${
-										formData.AC
+										data.AC
 											? "border-black bg-black text-white"
 											: "border-gray-100 bg-gray-50 text-gray-600"
 									}`}
 								>
 									<span className="font-bold">Air Conditioning</span>
 									<div
-										className={`w-12 h-6 rounded-full relative ${formData.AC ? "bg-white/20" : "bg-gray-200"}`}
+										className={`w-12 h-6 rounded-full relative ${data.AC ? "bg-white/20" : "bg-gray-200"}`}
 									>
 										<div
-											className={`absolute top-1 w-4 h-4 rounded-full transition-all ${formData.AC ? "right-1 bg-white" : "left-1 bg-gray-400"}`}
+											className={`absolute top-1 w-4 h-4 rounded-full transition-all ${data.AC ? "right-1 bg-white" : "left-1 bg-gray-400"}`}
 										/>
 									</div>
 								</button>
@@ -168,13 +193,13 @@ const Page = () => {
 											key={c}
 											type="button"
 											onClick={() =>
-												setFormData({
-													...formData,
+												setData({
+													...data,
 													vehicleCondition: c as condition,
 												})
 											}
 											className={`flex-1 rounded-xl text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${
-												formData.vehicleCondition === c
+												data.vehicleCondition === c
 													? "bg-black text-white shadow-md scale-[1.02]"
 													: "text-gray-400 hover:text-gray-600"
 											}`}
@@ -219,10 +244,10 @@ const Page = () => {
 											</span>
 											<input
 												type="number"
-												value={formData[item.key]}
+												value={data[item.key]}
 												onChange={(e) =>
-													setFormData({
-														...formData,
+													setData({
+														...data,
 														[item.key]: e.target.value,
 													})
 												}
@@ -245,7 +270,9 @@ const Page = () => {
 								<div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
 							) : (
 								<>
-									Save Vehicle Details
+									{ (userData?.partnerOnBoardingStep ?? 0) >= 6
+										? "Update Vehicle Details"
+										: "Save Vehicle Details"}
 									<ArrowRight className="w-6 h-6" />
 								</>
 							)}
