@@ -17,7 +17,8 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 
-type data = {
+type VehicleData = {
+	type: string;
 	AC: boolean;
 	vehicleCondition: "good" | "fair" | "poor";
 	baseFare: number;
@@ -29,7 +30,11 @@ const Page = () => {
 	const router = useRouter();
 	const { userData } = useSelector((state: RootState) => state.user);
 	const [isLoading, setIsLoading] = useState(false);
-	const [data, setData] = useState({
+	const [imgErr, setImgErr] = useState("");
+	const [resErr, setResErr] = useState("");
+
+	const [data, setData] = useState<VehicleData>({
+		type: "",
 		AC: false,
 		vehicleCondition: "good",
 		baseFare: 0,
@@ -38,6 +43,7 @@ const Page = () => {
 	});
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const [imageFile, setImageFile] = useState<File | null>(null);
+	const conditionOptions = ["good", "fair", "poor"] as const;
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -47,8 +53,8 @@ const Page = () => {
 				const { data } = await axios.get(
 					"/api/partner/onboarding/pricing&image",
 				);
-				console.log(data);
 				const {
+					type,
 					AC,
 					vehicleCondition,
 					baseFare,
@@ -58,14 +64,15 @@ const Page = () => {
 				} = data;
 
 				setData({
+					type,
 					AC,
 					vehicleCondition,
 					baseFare,
 					pricePerKM,
 					waitingChargerPerMin,
 				});
+				setImagePreview(imageUrl);
 				setImageFile(imageUrl)
-				setImagePreview(imageUrl)
 			} catch (error) {
 				console.log(error);
 			} finally {
@@ -80,12 +87,23 @@ const Page = () => {
 		if (file) {
 			setImageFile(file); // Save the raw binary file to send to route.ts later
 			setImagePreview(URL.createObjectURL(file)); // Create a fast, lightweight preview URL for the screen
+			setImgErr("");
+			setResErr("");
 		}
 	};
 
 	const handleSubmit = async () => {
+		setResErr("");
+		setImgErr("");
+
+		if (!imageFile && !imagePreview) {
+			setImgErr("Please select an image");
+			return;
+		}
+
 		try {
 			setIsLoading(true);
+
 			const formData = new FormData();
 			formData.append("AC", String(data.AC));
 			formData.append("vehicleCondition", String(data.vehicleCondition));
@@ -101,9 +119,21 @@ const Page = () => {
 				"/api/partner/onboarding/pricing&image",
 				formData,
 			);
-			console.log(res);
-		} catch (error) {
-			console.log(error);
+			if(res.status == 200) {
+				router.push('/');
+			}
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: { data?: { message?: string } };
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				"vehicle submit error",
+				axiosError?.response?.data ||
+					(axiosError as { message?: string })?.message ||
+					axiosError,
+			);
+			setResErr(serverMessage || "Something went wrong");
 		} finally {
 			setIsLoading(false);
 		}
@@ -120,7 +150,7 @@ const Page = () => {
 				{/* Back Button */}
 				<button
 					onClick={() => router.back()}
-					className="absolute cursor-pointer left-8 top-8 z-10 p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all group"
+					className="absolute cursor-pointer left-8 top-8 z-10 p-1 sm:p-3 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all group sm:ml-0 sm:mt-0 -ml-4 -mt-1"
 				>
 					<RiArrowLeftLine className="w-5 h-5 text-gray-600 group-hover:-translate-x-1 transition-transform" />
 				</button>
@@ -136,6 +166,22 @@ const Page = () => {
 					</div>
 
 					<div className="space-y-8">
+						{(resErr || imgErr) && (
+							<div className="rounded-3xl border border-red-100 bg-red-50 p-4 text-red-700 shadow-sm">
+								<div className="flex items-start gap-3">
+									<div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-red-500/10 text-red-700">
+										<Info className="h-4 w-4" />
+									</div>
+									<div className="space-y-1">
+										<p className="text-sm font-bold text-red-800">
+											Something went wrong
+										</p>
+										{imgErr && <p className="text-sm text-red-700">{imgErr}</p>}
+										{resErr && <p className="text-sm text-red-700">{resErr}</p>}
+									</div>
+								</div>
+							</div>
+						)}
 						{/* Vehicle Image Upload Section */}
 						<div className="space-y-4">
 							<label className="flex items-center gap-2 text-sm font-bold text-gray-800 uppercase tracking-widest">
@@ -174,6 +220,9 @@ const Page = () => {
 									</div>
 								)}
 							</div>
+							{imgErr && !resErr && (
+								<p className="text-sm text-red-600 mt-2 ml-1">{imgErr}</p>
+							)}
 							<input
 								type="file"
 								ref={fileInputRef}
@@ -199,10 +248,13 @@ const Page = () => {
 										});
 									}}
 									className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border-2 transition-all ${
-										data.AC
-											? "border-black bg-black text-white"
-											: "border-gray-100 bg-gray-50 text-gray-600"
-									}`}
+										data.type !== "bike"
+											? data.AC
+												? "border-black bg-black text-white"
+												: "border-gray-100 bg-gray-50 text-gray-600"
+											: "cursor-not-allowed bg-gray-500 border-none"
+									} `}
+									disabled={data.type == "bike"}
 								>
 									<span className="font-bold">Air Conditioning</span>
 									<div
@@ -222,7 +274,7 @@ const Page = () => {
 									Condition
 								</label>
 								<div className="flex p-1.5 bg-gray-100 rounded-2xl h-15">
-									{["good", "fair", "poor"].map((c) => (
+									{conditionOptions.map((c) => (
 										<button
 											key={c}
 											type="button"
@@ -257,8 +309,16 @@ const Page = () => {
 
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 								{[
-									{ label: "Base Fare", key: "baseFare" as const, icon: Banknote },
-									{ label: "Price / KM", key: "pricePerKM" as const, icon: Car },
+									{
+										label: "Base Fare",
+										key: "baseFare" as const,
+										icon: Banknote,
+									},
+									{
+										label: "Price / KM",
+										key: "pricePerKM" as const,
+										icon: Car,
+									},
 									{
 										label: "Wait / Min",
 										key: "waitingChargerPerMin" as const,

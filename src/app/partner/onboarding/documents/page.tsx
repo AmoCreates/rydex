@@ -3,17 +3,22 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
-import { FileCheck, UploadCloud, File, Check, CircleDashed } from "lucide-react";
+import {
+	FileCheck,
+	UploadCloud,
+	File,
+	Check,
+	CircleDashed,
+} from "lucide-react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
-
 
 const Page = () => {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [err, setErr] = useState("");
-	const {userData} = useSelector((state: RootState) => state.user);
+	const { userData } = useSelector((state: RootState) => state.user);
 
 	type docsType = "aadhaar" | "license" | "rc" | "puc" | "motorInsurance";
 	const [docs, setDocs] = useState<Record<docsType, File | null>>({
@@ -74,8 +79,9 @@ const Page = () => {
 				axiosError?.response?.data || axiosError?.message || axiosError,
 			);
 			setErr(serverMessage || "Something went wrong");
+		} finally {
+			setIsLoading(false);
 		}
-		setIsLoading(false);
 	};
 
 	return (
@@ -192,7 +198,8 @@ const Page = () => {
 					>
 						<div>
 							<p className="text-sm font-semibold">
-								Vehicle Registration Certificate(RC) <span className="text-red-500">*</span>
+								Vehicle Registration Certificate(RC){" "}
+								<span className="text-red-500">*</span>
 							</p>
 							<p
 								className={`truncate text-xs ${docs.rc ? "text-green-600 font-medium" : "text-gray-500"}`}
@@ -231,7 +238,8 @@ const Page = () => {
 					>
 						<div>
 							<p className="text-sm font-semibold">
-								Pollution Under Control(PUC) <span className="text-red-500">*</span>
+								Pollution Under Control(PUC){" "}
+								<span className="text-red-500">*</span>
 							</p>
 							<p
 								className={`truncate text-xs ${docs.puc ? "text-green-600 font-medium" : "text-gray-500"}`}
@@ -270,7 +278,8 @@ const Page = () => {
 					>
 						<div>
 							<p className="text-sm font-semibold">
-								Motor Insurance Certificate(MIC) <span className="text-red-500">*</span>
+								Motor Insurance Certificate(MIC){" "}
+								<span className="text-red-500">*</span>
 							</p>
 							<p
 								className={`truncate text-xs ${docs.motorInsurance ? "text-green-600 font-medium" : "text-gray-500"}`}
@@ -336,10 +345,16 @@ const Page = () => {
 					{isLoading ? (
 						<>
 							<CircleDashed className="w-5 h-5 text-white animate-spin" />
-							<span>{(userData?.partnerOnBoardingStep ?? 0) >= 2 ? "Updating Documents..." :  "Uploading Documents..."}</span>
+							<span>
+								{(userData?.partnerOnBoardingStep ?? 0) >= 2
+									? "Updating Documents..."
+									: "Uploading Documents..."}
+							</span>
 						</>
+					) : (userData?.partnerOnBoardingStep ?? 0) >= 2 ? (
+						"Update Documents"
 					) : (
-						(userData?.partnerOnBoardingStep ?? 0) >= 2 ? "Update Documents" : "Submit Documents"
+						"Submit Documents"
 					)}
 				</button>
 			</motion.div>

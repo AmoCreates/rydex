@@ -39,7 +39,6 @@ export async function POST(req: Request) {
 			| null;
 
 		if (
-			!AC ||
 			!vehicleCondition ||
 			!baseFare ||
 			!pricePerKM ||
