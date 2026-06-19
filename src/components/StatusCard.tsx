@@ -1,7 +1,7 @@
 import { Clock4 } from "lucide-react";
 import { motion } from "motion/react";
 
-const StatusCard = () => {
+const StatusCard = ({ step }: { step: number }) => {
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 10 }}
@@ -13,9 +13,13 @@ const StatusCard = () => {
 			</div>
 
 			<div>
-				<p className="font-semibold sm:text-lg md:text-xl text-base ">Documents Under Review</p>
+				<p className="font-semibold sm:text-lg md:text-xl text-base ">
+					{step === 6 ? "Image & Pricing Under Review" : "Documents Under Review"}
+					
+				</p>
 				<p className="text-gray-500 text-[13px] sm:text-[15px] ">
-					Rydex team will verify your documents.
+					{step === 6 ? "Rydex team will verify pricing & vehicle" : "Rydex team will verify your documents."}
+					
 				</p>
 			</div>
 		</motion.div>

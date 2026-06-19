@@ -122,7 +122,7 @@ const PartnerDashboard = () => {
 				{/* Status Card */}
 				{userData?.partnerStatus === "pending" &&
 					(userData?.partnerOnBoardingStep === 3 ||
-						userData?.partnerOnBoardingStep === 6) && <StatusCard />}
+						userData?.partnerOnBoardingStep === 6) && <StatusCard step={userData?.partnerOnBoardingStep} />}
 
 				{/* Action Card */}
 				{userData?.partnerStatus === "pending" &&
