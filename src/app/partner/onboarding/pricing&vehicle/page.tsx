@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { RiArrowLeftLine, RiImageAddLine } from "@remixicon/react";
 import {
 	Car,
@@ -21,7 +21,7 @@ type data = {
 	AC: boolean;
 	vehicleCondition: "good" | "fair" | "poor";
 	baseFare: number;
-	pricePerKm: number;
+	pricePerKM: number;
 	waitingChargerPerMin: number;
 };
 
@@ -33,14 +33,48 @@ const Page = () => {
 		AC: false,
 		vehicleCondition: "good",
 		baseFare: 0,
-		pricePerKm: 0,
+		pricePerKM: 0,
 		waitingChargerPerMin: 0,
 	});
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
-	// 3. Simplified Image Capture logic
+	useEffect(() => {
+		const getVehicleData = async () => {
+			try {
+				setIsLoading(true);
+				const { data } = await axios.get(
+					"/api/partner/onboarding/pricing&image",
+				);
+				console.log(data);
+				const {
+					AC,
+					vehicleCondition,
+					baseFare,
+					pricePerKM,
+					waitingChargerPerMin,
+					imageUrl,
+				} = data;
+
+				setData({
+					AC,
+					vehicleCondition,
+					baseFare,
+					pricePerKM,
+					waitingChargerPerMin,
+				});
+				setImageFile(imageUrl)
+				setImagePreview(imageUrl)
+			} catch (error) {
+				console.log(error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		getVehicleData();
+	}, []);
+
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
@@ -56,7 +90,7 @@ const Page = () => {
 			formData.append("AC", String(data.AC));
 			formData.append("vehicleCondition", String(data.vehicleCondition));
 			formData.append("baseFare", String(data.baseFare));
-			formData.append("pricePerKm", String(data.pricePerKm));
+			formData.append("pricePerKM", String(data.pricePerKM));
 			formData.append(
 				"waitingChargerPerMin",
 				String(data.waitingChargerPerMin),
@@ -195,7 +229,7 @@ const Page = () => {
 											onClick={() =>
 												setData({
 													...data,
-													vehicleCondition: c as condition,
+													vehicleCondition: c,
 												})
 											}
 											className={`flex-1 rounded-xl text-xs font-black uppercase tracking-tighter transition-all cursor-pointer ${
@@ -223,11 +257,11 @@ const Page = () => {
 
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 								{[
-									{ label: "Base Fare", key: "baseFare", icon: Banknote },
-									{ label: "Price / KM", key: "pricePerKm", icon: Car },
+									{ label: "Base Fare", key: "baseFare" as const, icon: Banknote },
+									{ label: "Price / KM", key: "pricePerKM" as const, icon: Car },
 									{
 										label: "Wait / Min",
-										key: "waitingChargerPerMin",
+										key: "waitingChargerPerMin" as const,
 										icon: Clock,
 									},
 								].map((item) => (
@@ -244,11 +278,11 @@ const Page = () => {
 											</span>
 											<input
 												type="number"
-												value={data[item.key]}
+												value={data[item.key] || 0}
 												onChange={(e) =>
 													setData({
 														...data,
-														[item.key]: e.target.value,
+														[item.key]: Number(e.target.value) || 0,
 													})
 												}
 												className="w-full bg-transparent font-black text-xl outline-none placeholder:text-gray-200"
@@ -270,7 +304,7 @@ const Page = () => {
 								<div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
 							) : (
 								<>
-									{ (userData?.partnerOnBoardingStep ?? 0) >= 6
+									{(userData?.partnerOnBoardingStep ?? 0) >= 6
 										? "Update Vehicle Details"
 										: "Save Vehicle Details"}
 									<ArrowRight className="w-6 h-6" />

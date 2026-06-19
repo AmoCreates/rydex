@@ -33,7 +33,7 @@ export async function POST(req: Request) {
 		const AC = formData.get("AC") as boolean | null;
 		const vehicleCondition = formData.get("vehicleCondition") as string | null;
 		const baseFare = formData.get("baseFare") as number | null;
-		const pricePerKm = formData.get("pricePerKm") as number | null;
+		const pricePerKM = formData.get("pricePerKM") as number | null;
 		const waitingChargerPerMin = formData.get("waitingChargerPerMin") as
 			| number
 			| null;
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 			!AC ||
 			!vehicleCondition ||
 			!baseFare ||
-			!pricePerKm ||
+			!pricePerKM ||
 			!waitingChargerPerMin ||
 			!imageFile
 		) {
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
 			AC: AC,
 			vehicleCondition: vehicleCondition,
 			baseFare: baseFare,
-			pricePerKM: pricePerKm,
+			pricePerKM: pricePerKM,
 			waitingChargerPerMin: waitingChargerPerMin,
 		};
 
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
 	}
 }
 
-export async function GET(req: Request) {
+export async function GET() {
 	try {
 		await dbConnect();
 
