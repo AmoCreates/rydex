@@ -62,6 +62,12 @@ export async function GET() {
 			videoKycStatus: {$in: ["pending", "in progress"]}
 		});
 
+		const pendingVehicle = await User.find({
+			role: "partner",
+			partnerStatus: "pending",
+			partnerOnBoardingStep: 6,
+		})
+
 		const partnerIds = pendingPartnerUser.map((partner) => partner._id);
 		const partnerVehicle = await Vehicle.find({ owner: { $in: partnerIds } });
 		const vehicleTypesMap = new Map(
@@ -75,6 +81,9 @@ export async function GET() {
 			vehicleType: vehicleTypesMap.get(String(p._id)),
 		}));
 
+		const partnerPricingReview = pendingVehicle.map((partner) => partner._id);
+		const pendingPricing = await Vehicle.find({owner: {$in: partnerPricingReview}}).populate("owner")
+
 		return NextResponse.json({
 			stats: {
 				totalPartners,
@@ -85,6 +94,7 @@ export async function GET() {
 				totalPendingFinalReview,
 			},
 			pendingVideoKyc,
+			pendingPricing,
 			totalPendingPartnerReviews,
 		});
 	} catch (error) {

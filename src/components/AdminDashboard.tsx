@@ -46,9 +46,9 @@ const AdminDashboard = () => {
 			try {
 				const { data } = await axios.get("/api/admin/dashboard");
 				if (data) {
-					console.log(data)
 					setStats(data.stats);
 					setPendingKyc(data.pendingVideoKyc);
+					setPendingPricing(data.pendingPricing)
 					setTotalPendingPartnerReviews(data.totalPendingPartnerReviews);
 				}
 			} catch (error) {

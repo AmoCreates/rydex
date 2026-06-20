@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 const PendingList = ({ list, type }: any) => {
-	console.log(list);
 	const router = useRouter();
 	const handleStartVideoKyc = async (id: any) => {
 		try {
@@ -50,8 +49,8 @@ const PendingList = ({ list, type }: any) => {
 			</div>
 
 			{list.map((item: any, idx: number) => {
-				const name = item.name;
-				const email = item.email;
+				const name = item.name || item.owner.name;
+				const email = item.email || item.owner.email;
 				const initial = name.charAt(0).toUpperCase();
 				const colorPallate =
 					initial === "A"
