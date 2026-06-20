@@ -100,7 +100,7 @@ const PendingList = ({ list, type }: any) => {
 											? item.videoKycStatus === "in progress"
 												? router.push(`/video-kyc/${item.videoKycRoomId}`)
 												: handleStartVideoKyc(item._id)
-											: router.push("/")
+											: router.push(`/admin/reviews/pricing&vehicle/${item._id}`)
 								}
 							>
 								{type == "Video KYC"
