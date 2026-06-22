@@ -81,6 +81,7 @@ export async function POST(req: Request) {
 
 		if (user.partnerOnBoardingStep < 1) {
 			user.partnerOnBoardingStep = 1;
+			await user.save();
 		}
 
 		return Response.json(vehicle, { status: 201 });
