@@ -93,7 +93,7 @@ export async function GET() {
 		if (partnerBank) {
 			return Response.json(partnerBank, { status: 200 });
 		} else {
-			return null;
+			return Response.json(null);
 		}
 	} catch (error) {
 		console.log("Get partner bank details error, err: ", error);
