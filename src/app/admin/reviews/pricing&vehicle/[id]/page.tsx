@@ -47,23 +47,23 @@ const Page = () => {
 		getData();
 	}, [id]);
 
-	// const handleDecision = async () => {
-	// 	setLoading(true);
-	// 	try {
-	// 		await axios.put(`/api/admin/reviews/pricing&image/${id}/approve`, {
-	// 			partnerStatus: adminCheck ? "approved" : "rejected",
-	// 			reason: adminCheck ? "" : rejectionReason,
-	// 		});
-	// 		router.push("/");
-	// 	} catch (error: any) {
-	// 		setErr(error.response?.data?.message || "Something went wrong");
-	// 		console.log(error.response?.data?.message);
-	// 	} finally {
-	// 		setLoading(false);
-	// 		setAdminCheck(null);
-	// 		setRejectionReason("");
-	// 	}
-	// };
+	const handleDecision = async () => {
+		setLoading(true);
+		try {
+			await axios.put(`/api/admin/reviews/vehicle/${id}/approve-reject`, {
+				vehicleStatus: adminCheck ? "approved" : "rejected",
+				reason: adminCheck ? "" : rejectionReason,
+			});
+			router.push("/");
+		} catch (error: any) {
+			setErr(error.response?.data?.message || "Something went wrong");
+			console.log(error.response?.data?.message);
+		} finally {
+			setLoading(false);
+			setAdminCheck(null);
+			setRejectionReason("");
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
@@ -98,7 +98,7 @@ const Page = () => {
 				<Link
 					href={vehicleData?.imageUrl || "#"}
 					target="_blank"
-					className="h-[450px] w-full sm:row-span-3 lg:h-full relative flex items-center justify-center hover:-translate-y-1.5 bg-white overflow-hidden transition duration-300 rounded-2xl sm:rounded-4xl"
+					className="h-[450px] w-full sm:row-span-2 lg:h-full relative flex items-center justify-center hover:-translate-y-1.5 bg-white overflow-hidden transition duration-300 rounded-2xl sm:rounded-4xl"
 				>
 					{!vehicleData?.imageUrl ? (
 						<span className="text-xs text-gray-400">Image Not Uploaded</span>
@@ -159,19 +159,19 @@ const Page = () => {
 					<div className="flex justify-between items-center text-sm capitalize">
 						<span className="text-gray-500">Base Fare</span>
 						<span className="font-semibold">
-							₹{vehicleData?.baseFare || "N/A"}
+							₹ {vehicleData?.baseFare || "N/A"}
 						</span>
 					</div>
 					<div className="flex justify-between items-center text-sm capitalize">
 						<span className="text-gray-500">Price Per Km</span>
 						<span className="font-semibold">
-							₹{vehicleData?.pricePerKM || "N/A"}
+							₹ {vehicleData?.pricePerKM || "N/A"}
 						</span>
 					</div>
 					<div className="flex justify-between items-center text-sm capitalize">
 						<span className="text-gray-500">Waiting Charge</span>
 						<span className="font-semibold">
-							₹{vehicleData?.waitingChargerPerMin || "N/A"}
+							₹ {vehicleData?.waitingChargerPerMin || "N/A"}
 						</span>
 					</div>
 				</AnimatedCard>

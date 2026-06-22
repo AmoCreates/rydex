@@ -54,7 +54,7 @@ export async function PUT(
 
 			//updating partner details
 			partner.partnerStatus = "approved";
-			partner.partnerOnBoardingStep = 8;
+			partner.partnerOnBoardingStep = 7;
 			partner.rejectionMsg = undefined;
 			await partner.save();
 

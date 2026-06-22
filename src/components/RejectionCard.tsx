@@ -14,17 +14,20 @@ const RejectionCard = ({ rejectionMsg, step }: any) => {
 		setIsRequesting(true);
 		setRequestError("");
 		try {
-			const res = await axios.patch('/api/partner/request-video-kyc');
+			const res = await axios.patch("/api/partner/request-video-kyc");
 			console.log(res);
 			setShowConfirmation(false); // Close popup on success
 		} catch (error) {
-			setRequestError((error as any).response?.data?.message || "Failed to send request. Please try again.");
+			setRequestError(
+				(error as any).response?.data?.message ||
+					"Failed to send request. Please try again.",
+			);
 		} finally {
 			setIsRequesting(false);
 			window.location.reload(); // Reload page regardless of success/failure to reflect potential status change or clear error
-			alert("Video KYC Request Sent Successfully")
+			alert("Video KYC Request Sent Successfully");
 		}
-	}
+	};
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 10 }}
@@ -55,11 +58,15 @@ const RejectionCard = ({ rejectionMsg, step }: any) => {
 			<div className="flex flex-wrap gap-4 items-center">
 				<button
 					className="py-3 px-2 rounded-xl bg-black text-white font-semibold hover:opacity-80 transition-all cursor-pointer active:scale-97"
-					onClick={() => router.push("/partner/onboarding/vehicle")}
+					onClick={() =>
+						step == 6
+							? router.push(`/partner/onboarding/pricing&vehicle`)
+							: router.push(`/partner/onboarding/vehicle`)
+					}
 				>
 					Update Documents/Details
 				</button>
-				{step === 4 && (<p>OR</p>)}
+				{step === 4 && <p>OR</p>}
 				{step === 4 && (
 					<button
 						className="py-3 px-2 rounded-xl bg-blue-500 text-white font-semibold hover:opacity-80 transition-all cursor-pointer active:scale-97" // Changed to open popup

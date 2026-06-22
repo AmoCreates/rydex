@@ -66,7 +66,7 @@ const Page = () => {
 				setData({
 					type,
 					AC,
-					vehicleCondition,
+					vehicleCondition : vehicleCondition ?? "good",
 					baseFare,
 					pricePerKM,
 					waitingChargerPerMin,
@@ -357,7 +357,7 @@ const Page = () => {
 						<button
 							type="submit"
 							disabled={isLoading}
-							className="w-full bg-black text-white p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-gray-900 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-xl shadow-black/10"
+							className="w-full cursor-pointer bg-black text-white p-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-gray-900 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-xl shadow-black/10"
 							onClick={handleSubmit}
 						>
 							{isLoading ? (

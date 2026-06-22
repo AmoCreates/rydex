@@ -3,11 +3,13 @@ import { RootState } from "@/Toolkit/store";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { motion } from "motion/react";
-import { Check, Clock, Lock, Video } from "lucide-react";
+import { ArrowRight, Bike, Check, Clock, Lock, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import RejectionCard from "./RejectionCard";
 import StatusCard from "./StatusCard";
 import ActionCard from "./ActionCard";
+import axios from "axios";
+import { IVehicle } from "@/model/vehicle.model";
 
 type Step = {
 	id: number;
@@ -21,7 +23,7 @@ const STEPS: Step[] = [
 	{ id: 3, title: "Bank", route: "/partner/onboarding/bank" },
 	{ id: 4, title: "Review" },
 	{ id: 5, title: "Video KYC" },
-	{ id: 6, title: "Pricing", route: "/partner/onboarding/pricing&vehicle"  },
+	{ id: 6, title: "Pricing", route: "/partner/onboarding/pricing&vehicle" },
 	{ id: 7, title: "Final Review" },
 	{ id: 8, title: "Live" },
 ];
@@ -29,8 +31,23 @@ const TOTAL_STEPS = 8;
 
 const PartnerDashboard = () => {
 	const [currentStep, setCurrentStep] = useState(0);
+	const [vehicleData, setVehicleData] = useState<IVehicle>();
 	const { userData } = useSelector((state: RootState) => state.user);
 	const router = useRouter();
+
+	useEffect(() => {
+		const getData = async () => {
+			try {
+				const { data } = await axios.get("/api/partner/onboarding/vehicle");
+				console.log(data);
+				setVehicleData(data);
+			} catch (error) {
+				console.log(error);
+			}
+		};
+		getData();
+	}, []);
+
 	useEffect(() => {
 		if (userData) {
 			setCurrentStep(userData.partnerOnBoardingStep! + 1 || 0);
@@ -68,7 +85,6 @@ const PartnerDashboard = () => {
 							const isActive = step.id === currentStep;
 							const rejected = userData?.partnerStatus === "rejected";
 							const route = isActive || isCompleted ? step.route : undefined;
-							console.log(route);
 							return (
 								<div key={step.id} className="flex flex-col items-center z-10">
 									<div
@@ -78,7 +94,9 @@ const PartnerDashboard = () => {
 												: isActive && rejected
 													? "bg-red-100 text-red-500 border-red-500 border"
 													: isActive
-														? "bg-gray-100 border border-black text-white cursor-pointer"
+														? userData?.partnerOnBoardingStep === 7
+															? "bg-green-500"
+															: "bg-gray-100 border border-black text-white cursor-pointer"
 														: "bg-gray-300 text-white cursor-not-allowed"
 										} transition-colors duration-300 `}
 										onClick={() => {
@@ -95,7 +113,11 @@ const PartnerDashboard = () => {
 											) : step.id == currentStep && rejected ? (
 												<Clock className="absolute text-red-500" />
 											) : step.id == currentStep && !rejected ? (
-												<Clock className="absolute text-gray-500" />
+												step.id == 8 ? (
+													<Bike className="absolute text-white" />
+												) : (
+													<Clock className="absolute text-gray-500" />
+												)
 											) : (
 												<Check className="absolute text-white" />
 											)}
@@ -116,21 +138,53 @@ const PartnerDashboard = () => {
 
 				{/* Rejection Card */}
 				{userData?.partnerStatus === "rejected" && (
-					<RejectionCard rejectionMsg={userData?.rejectionMsg} step={userData?.partnerOnBoardingStep}/>
+					<RejectionCard
+						rejectionMsg={userData?.rejectionMsg}
+						step={userData?.partnerOnBoardingStep}
+					/>
+				)}
+
+				{/* Rejection Card */}
+				{vehicleData?.status === "rejected" && (
+					<RejectionCard
+						rejectionMsg={vehicleData?.rejectionMsg}
+						step={userData?.partnerOnBoardingStep}
+					/>
 				)}
 
 				{/* Status Card */}
-				{userData?.partnerStatus === "pending" &&
+				{vehicleData?.status !== "rejected" &&
+					userData?.partnerStatus === "pending" &&
 					(userData?.partnerOnBoardingStep === 3 ||
-						userData?.partnerOnBoardingStep === 6) && <StatusCard step={userData?.partnerOnBoardingStep} />}
+						userData?.partnerOnBoardingStep === 6) && (
+						<StatusCard step={userData?.partnerOnBoardingStep} />
+					)}
 
 				{/* Action Card */}
-				{userData?.partnerStatus === "pending" &&
+				{vehicleData?.status !== "rejected" &&
+					userData?.partnerStatus === "pending" &&
 					userData?.partnerOnBoardingStep === 4 && (
 						<ActionCard
 							videoKycStatus={userData?.videoKycStatus}
 							roomId={userData?.videoKycRoomId}
 						/>
+					)}
+
+				{vehicleData?.status === "approved" &&
+					userData?.partnerOnBoardingStep === 7 && (
+						<motion.div
+							initial={{ opacity: 0, y: 30 }}
+							animate={{ opacity: 1, y: 0 }}
+							className="bg-black text-white rounded-3xl p-10 shadow-2xl"
+						>
+							<h2 className="text-2xl font-semibold">
+								{"🚀 You're Live Now"}
+							</h2>
+
+							<button className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer active:scale-97">
+								Go to Bookings <ArrowRight size={16}/>
+							</button>
+						</motion.div>
 					)}
 			</div>
 		</div>
