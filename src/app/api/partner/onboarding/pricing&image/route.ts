@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 		if (!partner.partnerOnBoardingStep || partner.partnerOnBoardingStep < 5) {
 			return Response.json(
 				{
-					message: "please complete previous steps",
+					message: "please complete the previous steps",
 				},
 				{ status: 400 },
 			);
@@ -128,7 +128,7 @@ export async function GET() {
 		if (!partner.partnerOnBoardingStep || partner.partnerOnBoardingStep < 5) {
 			return Response.json(
 				{
-					message: "please complete previous steps",
+					message: "please complete the previous steps",
 				},
 				{ status: 400 },
 			);

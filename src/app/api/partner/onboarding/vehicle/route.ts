@@ -16,7 +16,10 @@ export async function POST(req: Request) {
 
 		const user = await User.findOne({ email: session.user.email });
 		if (!user) {
-			return Response.json({ message: "user not found" }, { status: 401 });
+			return Response.json(
+				{ message: "user not found" },
+				{ status: 401 },
+			);
 		}
 
 		const { vehicleType, vehicleNumber, vehicleModel } = await req.json();
@@ -81,6 +84,7 @@ export async function POST(req: Request) {
 
 		if (user.partnerOnBoardingStep < 1) {
 			user.partnerOnBoardingStep = 1;
+			user.role = "partner";
 			await user.save();
 		}
 
@@ -108,14 +112,20 @@ export async function GET() {
 
 		const user = await User.findOne({ email: session.user.email });
 		if (!user) {
-			return Response.json({ message: "user not found" }, { status: 401 });
+			return Response.json(
+				{ message: "user not found" },
+				{ status: 401 },
+			);
 		}
 
 		const vehicle = await Vehicle.findOne({ owner: user._id });
 		if (vehicle) {
 			return Response.json(vehicle, { status: 200 });
 		} else {
-			return Response.json({ message: "vehicle not found" }, { status: 404 });
+			return Response.json(
+				{ message: "vehicle not found" },
+				{ status: 404 },
+			);
 		}
 	} catch (error) {
 		console.log("Get vehicle details error, err: ", error);

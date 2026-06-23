@@ -2,15 +2,9 @@
 import { RootState } from "@/Toolkit/store";
 import { RiArrowLeftLine } from "@remixicon/react";
 import axios from "axios";
-import {
-	Bike,
-	Bus,
-	Car,
-	CircleDashed,
-	Package,
-	Truck,
-} from "lucide-react";
+import { Bike, Bus, Car, CircleDashed, Package, Truck } from "lucide-react";
 import { motion } from "motion/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -32,8 +26,12 @@ const Page = () => {
 	const [err, setErr] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const {userData} = useSelector((state: RootState) => state.user);
+	const { userData } = useSelector((state: RootState) => state.user);
 	const isBusy = isLoading || isSubmitting;
+
+	const { data: session, update } = useSession();
+
+	
 
 	useEffect(() => {
 		async function getDetails() {
@@ -45,15 +43,16 @@ const Page = () => {
 					setVehicleNumber(vehicleNumber);
 					setVehicleModel(vehicleModel);
 				}
-				
 			} catch (error: any) {
 				const axiosError = error;
 				const serverMessage = axiosError?.response?.data?.message;
 				console.log(
 					"vehicle submit error",
-					axiosError?.response?.data || axiosError?.message || axiosError,
+					axiosError?.response?.data ||
+						axiosError?.message ||
+						axiosError,
 				);
-				if(serverMessage === "vehicle not found") {
+				if (serverMessage === "vehicle not found") {
 					setErr("");
 					return;
 				}
@@ -89,6 +88,7 @@ const Page = () => {
 			});
 
 			if (res.status === 201 || res.status === 200) {
+				await update({ role: "partner" });
 				router.push("/partner/onboarding/documents");
 			} else {
 				setErr("Something went wrong");
@@ -122,7 +122,9 @@ const Page = () => {
 						<RiArrowLeftLine />
 					</button>
 
-					<p className="text-xs text-gray-500 font-medium">step 1 of 3</p>
+					<p className="text-xs text-gray-500 font-medium">
+						step 1 of 3
+					</p>
 					<h1 className="text-2xl font-bold mt-1">Vehicle Details</h1>
 					<p className="text-sm text-gray-500 mt-2 ">
 						Add your vehicle information
@@ -141,9 +143,13 @@ const Page = () => {
 								return (
 									<motion.div
 										key={i}
-										whileHover={{ scale: isBusy ? 1 : 1.05 }}
+										whileHover={{
+											scale: isBusy ? 1 : 1.05,
+										}}
 										whileTap={{ scale: isBusy ? 1 : 0.96 }}
-										onClick={() => !isBusy && setVehicleType(v.id)}
+										onClick={() =>
+											!isBusy && setVehicleType(v.id)
+										}
 										className={`rounded-2xl border p-4 flex flex-col items-center gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}
 									>
 										<div
@@ -152,7 +158,9 @@ const Page = () => {
 											<Icon />
 										</div>
 
-										<div className="text-sm font-semibold">{v.label}</div>
+										<div className="text-sm font-semibold">
+											{v.label}
+										</div>
 										<p
 											className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"} `}
 										>
@@ -165,8 +173,12 @@ const Page = () => {
 					</div>
 
 					<div>
-						<label htmlFor="vn" className="text-sm font-semibold text-gray-500">
-							Vehicle Number <span className="text-red-500">*</span>
+						<label
+							htmlFor="vn"
+							className="text-sm font-semibold text-gray-500"
+						>
+							Vehicle Number{" "}
+							<span className="text-red-500">*</span>
 						</label>
 						<input
 							type="text"
@@ -175,7 +187,9 @@ const Page = () => {
 							required
 							minLength={9}
 							maxLength={10}
-							onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+							onChange={(e) =>
+								setVehicleNumber(e.target.value.toUpperCase())
+							}
 							value={vehicleNumber}
 							disabled={isBusy}
 							className="mt-2 w-full border-b border-gray-300 pb-2 text-sm focus:outline-none focus:border-black transition disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
@@ -183,8 +197,12 @@ const Page = () => {
 					</div>
 
 					<div>
-						<label htmlFor="vm" className="text-sm font-semibold text-gray-500">
-							Vehicle Model <span className="text-red-500">*</span>
+						<label
+							htmlFor="vm"
+							className="text-sm font-semibold text-gray-500"
+						>
+							Vehicle Model{" "}
+							<span className="text-red-500">*</span>
 						</label>
 						<input
 							type="text"
@@ -221,10 +239,16 @@ const Page = () => {
 						{isSubmitting ? (
 							<>
 								<CircleDashed className="w-5 h-5 text-white animate-spin" />
-								<span>{(userData?.partnerOnBoardingStep ?? 0) >= 1 ? "Updating Details..." :  "Submitting Vehicle Details..."}</span>
+								<span>
+									{(userData?.partnerOnBoardingStep ?? 0) >= 1
+										? "Updating Details..."
+										: "Submitting Vehicle Details..."}
+								</span>
 							</>
+						) : (userData?.partnerOnBoardingStep ?? 0) >= 1 ? (
+							"Update Vehicle Details"
 						) : (
-							(userData?.partnerOnBoardingStep ?? 0) >= 1 ? "Update Vehicle Details" : "Submit Vehicle Details"
+							"Submit Vehicle Details"
 						)}
 					</button>
 

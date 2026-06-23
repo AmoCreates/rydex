@@ -33,7 +33,8 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
-	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] = useState<[]>();
+	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] =
+		useState<[]>();
 	const [pendingKyc, setPendingKyc] = useState<any>();
 	const [pendingPricing, setPendingPricing] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
@@ -45,11 +46,12 @@ const AdminDashboard = () => {
 		const fetchData = async () => {
 			try {
 				const { data } = await axios.get("/api/admin/dashboard");
+				console.log(data);
 				if (data) {
 					setStats(data.stats);
 					setPendingKyc(data.pendingVideoKyc);
-					setPendingPricing(data.pendingPricing)
-					setTotalPendingPartnerReviews(data.totalPendingPartnerReviews);
+					setPendingPricing(data.pendingPricing);
+					setTotalPendingPartnerReviews(data.pendingPartnerReviews);
 				}
 			} catch (error) {
 				console.log(error);
@@ -59,11 +61,11 @@ const AdminDashboard = () => {
 		fetchData();
 	}, []);
 
-		const handleSignOut = async () => {
-			await signOut({ callbackUrl: "/", redirect: false });
-			dispatch({ type: "user/setUserData", payload: null });
-			setProfileOpen(false);
-		};
+	const handleSignOut = async () => {
+		await signOut({ callbackUrl: "/", redirect: false });
+		dispatch({ type: "user/setUserData", payload: null });
+		setProfileOpen(false);
+	};
 
 	return (
 		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
@@ -99,7 +101,9 @@ const AdminDashboard = () => {
 									className="absolute hidden md:block right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200"
 								>
 									<div className="py-2 text-center border-b border-gray-200 mb-1">
-										<p className="text-lg font-semibold">{userData?.name}</p>
+										<p className="text-lg font-semibold">
+											{userData?.name}
+										</p>
 										<p className="text-xs -mt-1 text-gray-500">
 											{userData?.role}
 										</p>
@@ -114,7 +118,10 @@ const AdminDashboard = () => {
 										className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"
 										onClick={handleSignOut}
 									>
-										<LogOut size={16} className="text-black" />
+										<LogOut
+											size={16}
+											className="text-black"
+										/>
 										Logout
 									</button>
 								</motion.div>
@@ -200,10 +207,16 @@ const AdminDashboard = () => {
 							/>
 						)}
 						{activeTab === "Video KYC" && (
-							<PendingList list={pendingKyc ?? []} type={activeTab} />
+							<PendingList
+								list={pendingKyc ?? []}
+								type={activeTab}
+							/>
 						)}
 						{activeTab === "Pricing & Images" && (
-							<PendingList list={pendingPricing ?? []} type={activeTab} />
+							<PendingList
+								list={pendingPricing ?? []}
+								type={activeTab}
+							/>
 						)}
 					</motion.div>
 				</AnimatePresence>

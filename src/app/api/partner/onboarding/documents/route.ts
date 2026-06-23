@@ -15,14 +15,20 @@ export async function POST(req: Request) {
 
 		const user = await User.findOne({ email: session.user.email });
 		if (!user) {
-			return Response.json({ message: "user not found" }, { status: 401 });
+			return Response.json(
+				{ message: "user not found" },
+				{ status: 401 },
+			);
 		}
 
 		// Handle 'undefined' or '0' values robustly
 		if (!user.partnerOnBoardingStep || user.partnerOnBoardingStep < 1) {
-			return Response.json({
-				message: "please complete previous steps",
-			}, { status: 400 });
+			return Response.json(
+				{
+					message: "please complete the previous steps",
+				},
+				{ status: 400 },
+			);
 		}
 
 		const formData = await req.formData();
@@ -33,9 +39,12 @@ export async function POST(req: Request) {
 		const motorInsurance = formData.get("motorInsurance") as Blob | null;
 
 		if (!aadhaar || !rc || !license || !motorInsurance || !puc) {
-			return Response.json({
-				message: "missing required documents"
-			}, { status: 400 });
+			return Response.json(
+				{
+					message: "missing required documents",
+				},
+				{ status: 400 },
+			);
 		}
 
 		const updatePayload: any = {
@@ -45,9 +54,12 @@ export async function POST(req: Request) {
 		if (aadhaar) {
 			const url = await cloudinaryUpload(aadhaar);
 			if (!url) {
-				return Response.json({
-					message: "aadhaar upload failed"
-				}, { status: 500 });
+				return Response.json(
+					{
+						message: "aadhaar upload failed",
+					},
+					{ status: 500 },
+				);
 			}
 			updatePayload.aadhaarUrl = url;
 		}
@@ -55,9 +67,12 @@ export async function POST(req: Request) {
 		if (license) {
 			const url = await cloudinaryUpload(license);
 			if (!url) {
-				return Response.json({
-					message: "license upload failed"
-				}, { status: 500 });
+				return Response.json(
+					{
+						message: "license upload failed",
+					},
+					{ status: 500 },
+				);
 			}
 			updatePayload.licenseUrl = url;
 		}
@@ -65,9 +80,12 @@ export async function POST(req: Request) {
 		if (rc) {
 			const url = await cloudinaryUpload(rc);
 			if (!url) {
-				return Response.json({
-					message: "registration certificate upload failed"
-				}, { status: 500 });
+				return Response.json(
+					{
+						message: "registration certificate upload failed",
+					},
+					{ status: 500 },
+				);
 			}
 			updatePayload.rcUrl = url;
 		}
@@ -75,9 +93,12 @@ export async function POST(req: Request) {
 		if (puc) {
 			const url = await cloudinaryUpload(puc);
 			if (!url) {
-				return Response.json({
-					message: "pollution certificate upload failed"
-				}, { status: 500 });
+				return Response.json(
+					{
+						message: "pollution certificate upload failed",
+					},
+					{ status: 500 },
+				);
 			}
 			updatePayload.pucUrl = url;
 		}
@@ -85,9 +106,12 @@ export async function POST(req: Request) {
 		if (motorInsurance) {
 			const url = await cloudinaryUpload(motorInsurance);
 			if (!url) {
-				return Response.json({
-					message: "motor insurance certificate upload failed"
-				}, { status: 500 });
+				return Response.json(
+					{
+						message: "motor insurance certificate upload failed",
+					},
+					{ status: 500 },
+				);
 			}
 			updatePayload.motorInsuranceUrl = url;
 		}
@@ -101,21 +125,22 @@ export async function POST(req: Request) {
 		// Update the step robustly if it hasn't reached step 2 yet
 		if (user.partnerOnBoardingStep < 2) {
 			user.partnerOnBoardingStep = 2;
-		} else if(user.partnerOnBoardingStep >= 3) {
+		} else if (user.partnerOnBoardingStep >= 3) {
 			user.partnerOnBoardingStep = 3;
 		}
-		user.videoKycRoomId = ""
-		user.videoKycStatus = "not required"
+		user.videoKycRoomId = "";
+		user.videoKycStatus = "not required";
 		user.partnerStatus = "pending";
 		await user.save();
 
 		return Response.json(partnerDocs, { status: 200 });
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+		const errorMessage =
+			error instanceof Error ? error.message : "Unknown error occurred";
 		console.error("Partner documents upload error details:", error);
 		return Response.json(
 			{ message: "Upload documents error", error: errorMessage },
-			{ status: 500 }
+			{ status: 500 },
 		);
 	}
 }

@@ -16,31 +16,40 @@ export async function POST(req: Request) {
 
 		const user = await User.findOne({ email: session.user.email });
 		if (!user) {
-			return Response.json({ message: "user not found" }, { status: 401 });
+			return Response.json(
+				{ message: "user not found" },
+				{ status: 401 },
+			);
 		}
 
 		if (user.partnerOnBoardingStep < 2) {
-			return Response.json({
-				message: "please complete previous steps",
-				status: 400,
-			});
+			return Response.json(
+				{
+					message: "please complete the previous steps",
+				},
+				{ status: 400 },
+			);
 		}
 
 		const { accountHolder, accountNumber, ifscCode, mobile, upi } =
 			await req.json();
 
 		if (!accountHolder || !accountNumber || !ifscCode || !mobile) {
-			return Response.json({
-				message: "missing required documents",
-				status: 400,
-			});
+			return Response.json(
+				{
+					message: "missing required documents",
+				},
+				{ status: 400 },
+			);
 		}
 
 		if (ifscCode.length !== 11 || !IFSC_RAGEX.test(ifscCode)) {
-			return Response.json({
-				message: "invalid ifsc code",
-				status: 400,
-			});
+			return Response.json(
+				{
+					message: "invalid ifsc code",
+				},
+				{ status: 400 },
+			);
 		}
 
 		const partnerBank = await PartnerBank.findOneAndUpdate(
@@ -61,8 +70,8 @@ export async function POST(req: Request) {
 		user.mobile = mobile;
 		user.partnerStatus = "pending";
 		user.partnerOnBoardingStep = 3;
-		user.videoKycRoomId = ""
-		user.videoKycStatus = "not required"
+		user.videoKycRoomId = "";
+		user.videoKycStatus = "not required";
 		await user.save();
 
 		return Response.json(partnerBank, { status: 200 });
@@ -86,7 +95,10 @@ export async function GET() {
 
 		const user = await User.findOne({ email: session.user.email });
 		if (!user) {
-			return Response.json({ message: "user not found" }, { status: 401 });
+			return Response.json(
+				{ message: "user not found" },
+				{ status: 401 },
+			);
 		}
 
 		const partnerBank = await PartnerBank.findOne({ owner: user._id });

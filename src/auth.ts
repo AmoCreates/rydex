@@ -43,7 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						);
 					}
 
-					const isMatch = await bcrypt.compare(password, user.password);
+					const isMatch = await bcrypt.compare( password, user.password );
 					if (!isMatch) {
 						throw new Error("password is incorrect");
 					}
@@ -90,13 +90,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			return true;
 		},
 
-		async jwt({ token, user }) {
+		async jwt({ token, user, trigger, session }) {
 			if (user) {
 				token.id = user.id;
 				token.role = user.role;
 				token.name = user.name;
 				token.email = user.email;
 			}
+
+			if (trigger === "update" && session?.role) {
+				token.role = session.role;
+			}
+
 			return token;
 		},
 

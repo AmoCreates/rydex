@@ -18,7 +18,10 @@ export async function PUT(
 
 		const { vehicleStatus, reason } = await req.json();
 		if (!vehicleStatus) {
-			return Response.json({ message: "Invalid request" }, { status: 400 });
+			return Response.json(
+				{ message: "Invalid request" },
+				{ status: 400 },
+			);
 		}
 
 		if (vehicleStatus === "rejected" && !reason) {
@@ -34,10 +37,16 @@ export async function PUT(
 		const partner = await User.findById(vehicle.owner);
 
 		if (!vehicle) {
-			return Response.json({ message: "vehicle not found" }, { status: 400 });
+			return Response.json(
+				{ message: "vehicle not found" },
+				{ status: 400 },
+			);
 		}
 		if (!partner) {
-			return Response.json({ message: "partner not found" }, { status: 400 });
+			return Response.json(
+				{ message: "partner not found" },
+				{ status: 400 },
+			);
 		}
 
 		if (vehicleStatus === "approved") {
@@ -58,7 +67,10 @@ export async function PUT(
 			partner.rejectionMsg = undefined;
 			await partner.save();
 
-			return Response.json({ message: "Partner approved" }, { status: 200 });
+			return Response.json(
+				{ message: "Partner approved" },
+				{ status: 200 },
+			);
 		} else if (vehicleStatus === "rejected") {
 			if (vehicle.status === "rejected") {
 				return Response.json(
@@ -66,13 +78,19 @@ export async function PUT(
 					{ status: 400 },
 				);
 			}
-      vehicle.status = "rejected";
-      vehicle.rejectionMsg = reason;
+			vehicle.status = "rejected";
+			vehicle.rejectionMsg = reason;
 			await vehicle.save();
 
-			return Response.json({ message: "Partner rejected" }, { status: 200 });
+			return Response.json(
+				{ message: "Partner rejected" },
+				{ status: 200 },
+			);
 		} else {
-			return Response.json({ message: "Invalid status" }, { status: 400 });
+			return Response.json(
+				{ message: "Invalid status" },
+				{ status: 400 },
+			);
 		}
 	} catch (error) {
 		console.log(error);

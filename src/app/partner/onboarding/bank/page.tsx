@@ -22,7 +22,7 @@ const Page = () => {
 	const isBusy = isLoading || isInitialLoading;
 	const [err, setErr] = useState("");
 	const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-	const {userData} = useSelector((state: RootState) => state.user);
+	const { userData } = useSelector((state: RootState) => state.user);
 	const IFSC_RAGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
 
 	const [formData, setFormData] = useState({
@@ -39,7 +39,13 @@ const Page = () => {
 			try {
 				const res = await axios.get("/api/partner/onboarding/bank");
 				if (res.status === 200 && res.data) {
-					const { accountHolder, accountNumber, ifscCode, mobile, upi } = res.data;
+					const {
+						accountHolder,
+						accountNumber,
+						ifscCode,
+						mobile,
+						upi,
+					} = res.data;
 					setFormData({
 						accountHolder: accountHolder || "",
 						accountNumber: accountNumber || "",
@@ -53,7 +59,9 @@ const Page = () => {
 				const serverMessage = axiosError?.response?.data?.message;
 				console.log(
 					"vehicle submit error",
-					axiosError?.response?.data || axiosError?.message || axiosError,
+					axiosError?.response?.data ||
+						axiosError?.message ||
+						axiosError,
 				);
 				setErr(serverMessage || "Something went wrong");
 			} finally {
@@ -62,7 +70,7 @@ const Page = () => {
 		}
 
 		getDetails();
-	},[]);
+	}, []);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -78,7 +86,7 @@ const Page = () => {
 			});
 		}
 	};
-	
+
 	const handleSubmit = async () => {
 		setIsLoading(true);
 		setErr("");
@@ -87,17 +95,26 @@ const Page = () => {
 		const errors: Record<string, string> = {};
 
 		if (!formData.accountHolder) errors.accountHolder = "Required";
-		else if (formData.accountHolder.length < 3 || formData.accountHolder.length > 35) {
+		else if (
+			formData.accountHolder.length < 3 ||
+			formData.accountHolder.length > 35
+		) {
 			errors.accountHolder = "Must be 3-35 characters";
 		}
 
 		if (!formData.accountNumber) errors.accountNumber = "Required";
-		else if (formData.accountNumber.length < 9 || formData.accountNumber.length > 18) {
+		else if (
+			formData.accountNumber.length < 9 ||
+			formData.accountNumber.length > 18
+		) {
 			errors.accountNumber = "Must be 9-18 digits";
 		}
 
 		if (!formData.ifscCode) errors.ifscCode = "Required";
-		else if (formData.ifscCode.length !== 11 || !IFSC_RAGEX.test(formData.ifscCode)) {
+		else if (
+			formData.ifscCode.length !== 11 ||
+			!IFSC_RAGEX.test(formData.ifscCode)
+		) {
 			errors.ifscCode = "Invalid IFSC format";
 		}
 
@@ -113,9 +130,11 @@ const Page = () => {
 		}
 
 		try {
-			const res = await axios.post("/api/partner/onboarding/bank", formData);
+			const res = await axios.post(
+				"/api/partner/onboarding/bank",
+				formData,
+			);
 			if (res.status === 200) {
-				console.log("done")
 				router.push("/");
 			} else {
 				setErr("Something went wrong");
@@ -127,8 +146,9 @@ const Page = () => {
 				error?.response?.data || error?.message || error,
 			);
 			setErr(serverMessage || "Something went wrong");
+		} finally {
+			setIsLoading(false);
 		}
-		setIsLoading(false);
 	};
 
 	return (
@@ -147,8 +167,12 @@ const Page = () => {
 						<RiArrowLeftLine />
 					</button>
 
-					<p className="text-xs text-gray-500 font-medium">step 3 of 3</p>
-					<h1 className="text-2xl font-bold mt-1">Bank & Payout Setup</h1>
+					<p className="text-xs text-gray-500 font-medium">
+						step 3 of 3
+					</p>
+					<h1 className="text-2xl font-bold mt-1">
+						Bank & Payout Setup
+					</h1>
 					<p className="text-sm text-gray-500 mt-2 ">
 						User for partner payouts
 					</p>
@@ -160,7 +184,8 @@ const Page = () => {
 							htmlFor="ahn"
 							className="text-sm font-semibold text-gray-500"
 						>
-							Account Holder Name <span className="text-red-500">*</span>
+							Account Holder Name{" "}
+							<span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -173,18 +198,24 @@ const Page = () => {
 								name="accountHolder"
 								value={formData.accountHolder}
 								onChange={handleChange}
-							disabled={isLoading || isInitialLoading}
+								disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.accountHolder && "border-red-500 focus:border-red-500"} `}
 							/>
 						</div>
 						{fieldErrors.accountHolder && (
-							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.accountHolder}</p>
+							<p className="text-red-500 text-[10px] mt-1 ml-8">
+								{fieldErrors.accountHolder}
+							</p>
 						)}
 					</div>
 
 					<div>
-						<label htmlFor="an" className="text-sm font-semibold text-gray-500">
-							Bank Account Number <span className="text-red-500">*</span>
+						<label
+							htmlFor="an"
+							className="text-sm font-semibold text-gray-500"
+						>
+							Bank Account Number{" "}
+							<span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -197,17 +228,22 @@ const Page = () => {
 								name="accountNumber"
 								value={formData.accountNumber}
 								onChange={handleChange}
-							disabled={isLoading || isInitialLoading}
+								disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.accountNumber && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
 						{fieldErrors.accountNumber && (
-							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.accountNumber}</p>
+							<p className="text-red-500 text-[10px] mt-1 ml-8">
+								{fieldErrors.accountNumber}
+							</p>
 						)}
 					</div>
 
 					<div>
-						<label htmlFor="ic" className="text-sm font-semibold text-gray-500">
+						<label
+							htmlFor="ic"
+							className="text-sm font-semibold text-gray-500"
+						>
 							IFSC Code <span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
@@ -221,18 +257,24 @@ const Page = () => {
 								name="ifscCode"
 								value={formData.ifscCode.toUpperCase()}
 								onChange={handleChange}
-							disabled={isLoading || isInitialLoading}
+								disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.ifscCode && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
 						{fieldErrors.ifscCode && (
-							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.ifscCode}</p>
+							<p className="text-red-500 text-[10px] mt-1 ml-8">
+								{fieldErrors.ifscCode}
+							</p>
 						)}
 					</div>
 
 					<div>
-						<label htmlFor="mn" className="text-sm font-semibold text-gray-500">
-							Mobile Number <span className="text-red-500">*</span>
+						<label
+							htmlFor="mn"
+							className="text-sm font-semibold text-gray-500"
+						>
+							Mobile Number{" "}
+							<span className="text-red-500">*</span>
 						</label>
 						<div className="flex items-center gap-2 mt-2">
 							<div className="text-gray-400">
@@ -245,12 +287,14 @@ const Page = () => {
 								name="mobile"
 								value={formData.mobile}
 								onChange={handleChange}
-							disabled={isLoading || isInitialLoading}
+								disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.mobile && "border-red-500 focus:border-red-500"}`}
 							/>
 						</div>
 						{fieldErrors.mobile && (
-							<p className="text-red-500 text-[10px] mt-1 ml-8">{fieldErrors.mobile}</p>
+							<p className="text-red-500 text-[10px] mt-1 ml-8">
+								{fieldErrors.mobile}
+							</p>
 						)}
 					</div>
 
@@ -282,8 +326,8 @@ const Page = () => {
 				<div className="mt-6 flex items-center gap-3 text-xs text-gray-500">
 					<CheckCircle size={16} className="text-green-500 mt-0.6" />
 					<p>
-						Bank details are verified before first payout. This usually takes
-						24-48 hours.
+						Bank details are verified before first payout. This
+						usually takes 24-48 hours.
 					</p>
 				</div>
 
@@ -303,7 +347,9 @@ const Page = () => {
 						<div className="flex flex-col items-center gap-3 p-6">
 							<CircleDashed className="w-8 h-8 text-gray-700 animate-spin" />
 							<p className="text-sm font-medium text-gray-600 text-center">
-								{isInitialLoading ? "Loading your bank details..." : "Saving bank details..."}
+								{isInitialLoading
+									? "Loading your bank details..."
+									: "Saving bank details..."}
 							</p>
 						</div>
 					</div>
@@ -318,12 +364,16 @@ const Page = () => {
 					{isLoading ? (
 						<>
 							<CircleDashed className="w-5 h-5 text-white animate-spin" />
-							<span>{(userData?.partnerOnBoardingStep ?? 0) >= 3 ? "Updating Details..." :  "Submitting Bank Details..."}</span>
+							<span>
+								{(userData?.partnerOnBoardingStep ?? 0) >= 3
+									? "Updating Details..."
+									: "Submitting Bank Details..."}
+							</span>
 						</>
+					) : (userData?.partnerOnBoardingStep ?? 0) >= 3 ? (
+						"Update Bank Details"
 					) : (
-						
-							(userData?.partnerOnBoardingStep ?? 0) >= 3 ? "Update Bank Details" : "Submit Bank Details"
-						
+						"Submit Bank Details"
 					)}
 				</button>
 			</motion.div>

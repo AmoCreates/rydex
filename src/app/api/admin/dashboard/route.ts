@@ -47,56 +47,65 @@ export async function GET() {
 		});
 
 		const totalPendingPartners =
-			totalPendingDocsReview + totalPendingVideoKyc + totalPendingFinalReview;
+			totalPendingDocsReview +
+			totalPendingVideoKyc +
+			totalPendingFinalReview;
 
-		const pendingPartnerUser = await User.find({
+		const pendingPartnerReviews = await User.find({
 			role: "partner",
 			partnerStatus: "pending",
-			partnerOnBoardingStep: { $gte: 3 },
+			partnerOnBoardingStep: 3,
 		});
 
 		const pendingVideoKyc = await User.find({
 			role: "partner",
 			partnerStatus: "pending",
 			partnerOnBoardingStep: 4,
-			videoKycStatus: {$in: ["pending", "in progress"]}
+			videoKycStatus: { $in: ["pending", "in progress"] },
 		});
 
 		const pendingVehicle = await User.find({
 			role: "partner",
 			partnerStatus: "pending",
 			partnerOnBoardingStep: 6,
-		})
-
-		const partnerIds = pendingPartnerUser.map((partner) => partner._id);
-		const partnerVehicle = await Vehicle.find({ owner: { $in: partnerIds } });
-		const vehicleTypesMap = new Map(
-			partnerVehicle.map((v) => [String(v.owner), v.type]),
-		);
-
-		const totalPendingPartnerReviews = pendingPartnerUser.map((p) => ({
-			_id: p._id,
-			name: p.name,
-			email: p.email,
-			vehicleType: vehicleTypesMap.get(String(p._id)),
-		}));
-
-		const partnerPricingReview = pendingVehicle.map((partner) => partner._id);
-		const pendingPricing = await Vehicle.find({owner: {$in: partnerPricingReview}}).populate("owner")
-
-		return NextResponse.json({
-			stats: {
-				totalPartners,
-				totalPendingPartners,
-				totalRejectedPartners,
-				totalApprovedPartners,
-				totalPendingVideoKyc,
-				totalPendingFinalReview,
-			},
-			pendingVideoKyc,
-			pendingPricing,
-			totalPendingPartnerReviews,
 		});
+
+		// const partnerIds = pendingPartnerUser.map((partner) => partner._id);
+		// const partnerVehicle = await Vehicle.find({ owner: { $in: partnerIds } });
+		// const vehicleTypesMap = new Map(
+		// 	partnerVehicle.map((v) => [String(v.owner), v.type]),
+		// );
+
+		// const totalPendingPartnerReviews = pendingPartnerUser.map((p) => ({
+		// 	_id: p._id,
+		// 	name: p.name,
+		// 	email: p.email,
+		// 	vehicleType: vehicleTypesMap.get(String(p._id)),
+		// }));
+
+		const partnerPricingReview = pendingVehicle.map(
+			(partner) => partner._id,
+		);
+		const pendingPricing = await Vehicle.find({
+			owner: { $in: partnerPricingReview },
+		}).populate("owner");
+
+		return NextResponse.json(
+			{
+				stats: {
+					totalPartners,
+					totalPendingPartners,
+					totalRejectedPartners,
+					totalApprovedPartners,
+					totalPendingVideoKyc,
+					totalPendingFinalReview,
+				},
+				pendingVideoKyc,
+				pendingPricing,
+				pendingPartnerReviews,
+			},
+			{ status: 200 },
+		);
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
