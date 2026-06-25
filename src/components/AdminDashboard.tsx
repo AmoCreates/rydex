@@ -185,7 +185,7 @@ const AdminDashboard = () => {
 						icon={<Truck size={17} />}
 						tag="Pricing & Images"
 						active={activeTab === "Pricing & Images"}
-						count={stats?.totalPendingFinalReview ?? 0}
+						count={pendingPricing?.length ?? 0}
 						onClick={() => setActiveTab("Pricing & Images")}
 					/>
 				</section>
