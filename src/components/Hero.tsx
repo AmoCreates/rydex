@@ -51,7 +51,7 @@ const Hero = ({ onOpen }: Props) => {
 					className="cursor-pointer active:scale-95 mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition"
 					onClick={() => {
 						if (!userData) onOpen();
-						else router.push("/user/book");
+						else router.push("/customer/book");
 					}}
 				>
 					Book Now
