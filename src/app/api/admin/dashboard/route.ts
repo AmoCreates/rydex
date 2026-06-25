@@ -70,24 +70,13 @@ export async function GET() {
 			partnerOnBoardingStep: 6,
 		});
 
-		// const partnerIds = pendingPartnerUser.map((partner) => partner._id);
-		// const partnerVehicle = await Vehicle.find({ owner: { $in: partnerIds } });
-		// const vehicleTypesMap = new Map(
-		// 	partnerVehicle.map((v) => [String(v.owner), v.type]),
-		// );
-
-		// const totalPendingPartnerReviews = pendingPartnerUser.map((p) => ({
-		// 	_id: p._id,
-		// 	name: p.name,
-		// 	email: p.email,
-		// 	vehicleType: vehicleTypesMap.get(String(p._id)),
-		// }));
-
 		const partnerPricingReview = pendingVehicle.map(
 			(partner) => partner._id,
 		);
 		const pendingPricing = await Vehicle.find({
 			owner: { $in: partnerPricingReview },
+			status: "pending"
+
 		}).populate("owner");
 
 		return NextResponse.json(

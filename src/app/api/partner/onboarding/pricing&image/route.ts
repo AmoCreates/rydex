@@ -9,17 +9,27 @@ export async function POST(req: Request) {
 		await dbConnect();
 
 		const session = await auth();
-		if (!session || !session.user?.email || session.user.role !== "partner") {
+		if (
+			!session ||
+			!session.user?.email ||
+			session.user.role !== "partner"
+		) {
 			return Response.json({ message: "unauthorized" }, { status: 401 });
 		}
 
 		const partner = await User.findOne({ email: session.user.email });
 		if (!partner) {
-			return Response.json({ message: "parnter not found" }, { status: 401 });
+			return Response.json(
+				{ message: "parnter not found" },
+				{ status: 401 },
+			);
 		}
 
 		// Handle 'undefined' or '0' values robustly
-		if (!partner.partnerOnBoardingStep || partner.partnerOnBoardingStep < 5) {
+		if (
+			!partner.partnerOnBoardingStep ||
+			partner.partnerOnBoardingStep < 5
+		) {
 			return Response.json(
 				{
 					message: "please complete the previous steps",
@@ -31,7 +41,9 @@ export async function POST(req: Request) {
 		const formData = await req.formData();
 		const imageFile = formData.get("image") as Blob | null;
 		const AC = formData.get("AC") as boolean | null;
-		const vehicleCondition = formData.get("vehicleCondition") as string | null;
+		const vehicleCondition = formData.get("vehicleCondition") as
+			| string
+			| null;
 		const baseFare = formData.get("baseFare") as number | null;
 		const pricePerKM = formData.get("pricePerKM") as number | null;
 		const waitingChargerPerMin = formData.get("waitingChargerPerMin") as
@@ -90,11 +102,9 @@ export async function POST(req: Request) {
 			);
 		}
 
-		if (
-			partner.partnerOnBoardingStep < 6 &&
-			partner.partnerOnBoardingStep >= 5
-		) {
+		if (partner.partnerOnBoardingStep >= 5) {
 			partner.partnerOnBoardingStep = 6;
+			partner.partnerStatus = "pending"
 		}
 		await partner.save();
 
@@ -115,17 +125,27 @@ export async function GET() {
 		await dbConnect();
 
 		const session = await auth();
-		if (!session || !session.user?.email || session.user.role !== "partner") {
+		if (
+			!session ||
+			!session.user?.email ||
+			session.user.role !== "partner"
+		) {
 			return Response.json({ message: "unauthorized" }, { status: 401 });
 		}
 
 		const partner = await User.findOne({ email: session.user.email });
 		if (!partner) {
-			return Response.json({ message: "parnter not found" }, { status: 401 });
+			return Response.json(
+				{ message: "parnter not found" },
+				{ status: 401 },
+			);
 		}
 
 		// Handle 'undefined' or '0' values robustly
-		if (!partner.partnerOnBoardingStep || partner.partnerOnBoardingStep < 5) {
+		if (
+			!partner.partnerOnBoardingStep ||
+			partner.partnerOnBoardingStep < 5
+		) {
 			return Response.json(
 				{
 					message: "please complete the previous steps",

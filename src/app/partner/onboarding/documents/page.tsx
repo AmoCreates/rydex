@@ -117,7 +117,7 @@ const Page = () => {
 								Aadhaar / ID Proof <span className="text-red-500">*</span>
 							</p>
 							<p
-								className={`truncate w-62.5 text-xs ${docs.aadhaar ? "text-green-600 font-medium" : "text-gray-500"}`}
+								className={`truncate w-50 text-xs ${docs.aadhaar ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
 								{docs.aadhaar ? docs.aadhaar.name : "Government issued ID"}
 							</p>
@@ -159,7 +159,7 @@ const Page = () => {
 								Driving License <span className="text-red-500">*</span>
 							</p>
 							<p
-								className={`truncate text-xs ${docs.license ? "text-green-600 font-medium" : "text-gray-500"}`}
+								className={`truncate w-50 text-xs ${docs.license ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
 								{docs.license ? docs.license.name : "RTO/RTA issued ID"}
 							</p>
@@ -202,7 +202,7 @@ const Page = () => {
 								<span className="text-red-500">*</span>
 							</p>
 							<p
-								className={`truncate text-xs ${docs.rc ? "text-green-600 font-medium" : "text-gray-500"}`}
+								className={`truncate w-50 text-xs ${docs.rc ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
 								{docs.rc ? docs.rc.name : "MoRTH/RTO issued certificate"}
 							</p>
@@ -242,7 +242,7 @@ const Page = () => {
 								<span className="text-red-500">*</span>
 							</p>
 							<p
-								className={`truncate text-xs ${docs.puc ? "text-green-600 font-medium" : "text-gray-500"}`}
+								className={`truncate w-50 text-xs ${docs.puc ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
 								{docs.puc ? docs.puc.name : "MoRTH issued Certificate"}
 							</p>
@@ -282,7 +282,7 @@ const Page = () => {
 								<span className="text-red-500">*</span>
 							</p>
 							<p
-								className={`truncate text-xs ${docs.motorInsurance ? "text-green-600 font-medium" : "text-gray-500"}`}
+								className={`truncate w-50 text-xs ${docs.motorInsurance ? "text-green-600 font-medium" : "text-gray-500"}`}
 							>
 								{docs.motorInsurance
 									? docs.motorInsurance.name
