@@ -1,15 +1,50 @@
 "use client";
 import React, { useState } from "react";
-import { motion } from "motion/react";
-import { ArrowLeft } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+	ArrowLeft,
+	Bike,
+	Bus,
+	Car,
+	CheckCircle,
+	Package,
+	Phone,
+	Truck,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { RiUserLine } from "@remixicon/react";
+
+const stepVariants = {
+	hidden: { opacity: 0, y: 16 },
+	visible: { opacity: 1, y: 0 },
+};
+
+const VEHICLES = [
+	{ id: "Bike", label: "Bike/Scooter", icon: Bike, desc: "2 Wheeler" },
+	{ id: "Auto", label: "Auto", icon: Car, desc: "3 Wheeler ride" },
+	{ id: "Car", label: "Car", icon: Car, desc: "4 Wheeler ride" },
+	{ id: "Loading", label: "Loading", icon: Package, desc: "Small goods" },
+	{ id: "Truck", label: "Truck", icon: Truck, desc: "Heavy transport" },
+	{ id: "Bus", label: "Bus", icon: Bus, desc: "Passenger" },
+];
 
 const Page = () => {
-	const [vehicle, setVehicle] = useState<string>("Bike");
-	const [mobile, setMobile] = useState<number | null>(null);
+	const [vehicle, setVehicle] = useState("");
+	const [name, setName] = useState("");
+	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
-  const [step, setStep] = useState(0);
-  const progress = [!!vehicle, !!mobile, !!pickUp, !!drop].filter(Boolean).length
+	const [isLoading, setIsLoading] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const isBusy = isLoading || isSubmitting;
+	const progress = [
+		!!vehicle,
+		!!name,
+		!!(mobile.length === 10),
+		!!pickUp,
+		!!drop,
+	].filter(Boolean).length;
+	const router = useRouter();
 
 	return (
 		<div className="min-h-screen  bg-zinc-100 flex items-center justify-center px-4 py-10">
@@ -22,10 +57,12 @@ const Page = () => {
 				<header className="flex items-center gap-4 mb-6 px-1">
 					<motion.button
 						whileTap={{ scale: 0.88 }}
-						className="w-11 h-11 rounded-2xl bg-white border-zinc-200 shadow-sm flex items-center justify-center hover:bg-zinc-50 transition-colors shrink-0"
+						className="w-11 h-11 rounded-2xl cursor-pointer bg-white border-zinc-200 shadow-sm flex items-center justify-center hover:bg-zinc-50 transition-colors shrink-0"
+						onClick={() => router.back()}
 					>
 						<ArrowLeft className="text-zinc-900" />
 					</motion.button>
+
 					<div className="flex-1 min-w-0">
 						<h1 className="text-zinc-900 text-xl font-black tracking-tight">
 							Book a Ride
@@ -34,7 +71,195 @@ const Page = () => {
 							Fill in the details below
 						</p>
 					</div>
+
+					<div className="flex items-center gap-1.5 shrink-0">
+						{[0, 1, 2, 3, 4].map((d, i) => (
+							<motion.div
+								key={i}
+								animate={{
+									width: i < progress ? 20 : 8,
+									background:
+										i < progress ? "#09090b" : "#d4d4d8",
+								}}
+								transition={{ duration: 0.3 }}
+								className="h-2 rounded-full"
+							></motion.div>
+						))}
+					</div>
 				</header>
+
+				<main className="bg-white rounded-3xl border border-zinc-200 shadow-[0_8px_40px_rgba(0,0,0,0.08)] overflow-hidden">
+					<div className="h-1 bg-zinc-900 w-full" />
+					<div className="p-6 space-y-7">
+						<motion.div
+							variants={stepVariants}
+							initial={"hidden"}
+							animate={"visible"}
+							transition={{ delay: 0.05 }}
+						>
+							<div className="flex items-center gap-2 mb-3">
+								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
+									<span className="text-white text-[9px] font-black ">
+										1
+									</span>
+								</div>
+								<p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+									Choose Vehicle <span className="text-red-500">*</span>
+								</p>
+							</div>
+
+							<div className="grid grid-cols-2 gap-3">
+								{VEHICLES.map((v, i) => {
+									const Icon = v.icon;
+									const isActive = vehicle === v.id;
+									return (
+										<motion.div
+											key={i}
+											whileHover={{
+												scale: isBusy ? 1 : 1.05,
+											}}
+											whileTap={{
+												scale: isBusy ? 1 : 0.96,
+											}}
+											onClick={() =>
+												!isBusy && setVehicle(v.id)
+											}
+											className={`relative rounded-2xl border p-4  flex items-center gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}
+										>
+											<div
+												className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+											>
+												<Icon />
+											</div>
+											<div>
+												<div className="text-sm font-semibold">
+													{v.label}
+												</div>
+												<p
+													className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"} `}
+												>
+													{v.desc}
+												</p>
+											</div>
+
+											{isActive && (
+												<span className="absolute top-2 right-2 text-white">
+													<CheckCircle size={15} />
+												</span>
+											)}
+										</motion.div>
+									);
+								})}
+							</div>
+						</motion.div>
+
+						<div className="h-px bg-zinc-200 my-7" />
+
+						<motion.div
+							variants={stepVariants}
+							initial={"hidden"}
+							animate={"visible"}
+							transition={{ delay: 0.05 }}
+						>
+							<div className="flex items-center gap-2 mb-3">
+								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
+									<span className="text-white text-[9px] font-black ">
+										2
+									</span>
+								</div>
+								<p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+									CUSTOMER NAME <span className="text-red-500">*</span>
+								</p>
+							</div>
+
+							<div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 focus-within:border-zinc-900 focus-within:bg-white transition-all">
+								<div className="w-8 h-8 rounded-xl bg-zinc-200 flex items-center justify-center shrink-0">
+									<RiUserLine
+										size={18}
+										className="text-zinc-800"
+									/>
+								</div>
+								<input
+									type="text"
+									value={name}
+									required
+									maxLength={25}
+									onChange={(e) =>
+										setName(
+											e.target.value,
+										)
+									}
+									placeholder="Enter your name"
+									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+								/>
+								<AnimatePresence>
+									{name.length > 1 && (
+										<motion.div
+											initial={{ scale: 0 }}
+											animate={{ scale: 1 }}
+											exit={{ scale: 0 }}
+										>
+											<CheckCircle size={16} className="text-emerald-500 fill-emerald-50 shrink-0"/>
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+						</motion.div>
+
+						<motion.div
+							variants={stepVariants}
+							initial={"hidden"}
+							animate={"visible"}
+							transition={{ delay: 0.05 }}
+						>
+							<div className="flex items-center gap-2 mb-3">
+								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
+									<span className="text-white text-[9px] font-black ">
+										3
+									</span>
+								</div>
+								<p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+									MOBILE NUMBER <span className="text-red-500">*</span>
+								</p>
+							</div>
+
+							<div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 focus-within:border-zinc-900 focus-within:bg-white transition-all">
+								<div className="w-8 h-8 rounded-xl bg-zinc-200 flex items-center justify-center shrink-0">
+									<Phone
+										size={18}
+										className="text-zinc-800"
+									/>
+								</div>
+								<input
+									type="tel"
+									value={mobile}
+									inputMode="numeric"
+									required
+									maxLength={10}
+									onChange={(e) =>
+										setMobile(
+											e.target.value.replace(/\D/g, ""),
+										)
+									}
+									placeholder="Enter your mobile number"
+									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+								/>
+								<AnimatePresence>
+									{mobile.length == 10 && (
+										<motion.div
+											initial={{ scale: 0 }}
+											animate={{ scale: 1 }}
+											exit={{ scale: 0 }}
+										>
+											<CheckCircle size={16} className="text-emerald-500 fill-emerald-50 shrink-0"/>
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+							<p className="text-zinc-400 text-xs ml-1">Ride update will be sent to this number</p>
+						</motion.div>
+					</div>
+				</main>
 			</motion.div>
 		</div>
 	);

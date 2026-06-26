@@ -146,6 +146,14 @@ const Nav = ({ onOpen }: Props) => {
 												>
 													Profile
 												</Link>
+												{ userData?.role === "customer" &&
+													<Link
+													href="/profile"
+													className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+												>
+													Book Vehicle
+												</Link>
+												}
 												<Link
 													href="/bookings"
 													className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
