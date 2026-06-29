@@ -7,7 +7,9 @@ import {
 	Bus,
 	Car,
 	CheckCircle,
+	ChevronRight,
 	LocateFixed,
+	MapPin,
 	Package,
 	Phone,
 	Truck,
@@ -19,6 +21,14 @@ import axios from "axios";
 const stepVariants = {
 	hidden: { opacity: 0, y: 16 },
 	visible: { opacity: 1, y: 0 },
+};
+
+type place = {
+	name: string;
+	city?: string;
+	state?: string;
+	country?: string;
+	countrycode?: string;
 };
 
 const VEHICLES = [
@@ -36,9 +46,10 @@ const Page = () => {
 	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
-	const [locating, setLocating] = useState(false);
+	const [suggestions, setSuggestions] = useState<place[]>([]);
+	const [loading, setLoading] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const isBusy = locating || isSubmitting;
+	const isBusy = loading || isSubmitting;
 	const progress = [
 		!!vehicle,
 		!!name,
@@ -49,7 +60,7 @@ const Page = () => {
 	const router = useRouter();
 
 	const getCurrentLocation = async () => {
-		setLocating(true);
+		setLoading(true);
 		if (!navigator.geolocation) {
 			console.log("cant find navigator");
 			return;
@@ -64,14 +75,45 @@ const Page = () => {
 					const currentLocation = `${data.features[0].properties.name}, ${data.features[0].properties.city}, ${data.features[0].properties.state}, ${data.features[0].properties.country}`;
 
 					setPickUp(currentLocation);
+					setSuggestions([]);
 				}
 			} catch (error) {
 				console.log(error);
 			} finally {
-				setLocating(false);
+				setLoading(false);
 			}
 		});
 	};
+
+	const searchLocation = async (
+		q: string,
+		setSearch: (r: place[]) => void,
+	) => {
+		if (q.length === 0) {
+			setSearch([]);
+			return;
+		}
+		try {
+			const { data } = await axios.get(
+				`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&limit=8&lang=en`,
+			);
+			console.log(data);
+			const places: place[] = (data.features ?? []).map((f: any) => ({
+				name: f.properties.name,
+				city: f.properties.city,
+				state: f.properties.state,
+				country: f.properties.country,
+				countrycode: f.properties.countrycode,
+			}));
+			setSearch(places);
+		} catch (error) {
+			console.log(error);
+			setSearch([]);
+		}
+	};
+
+	const suggestion = (p: place) =>
+		[p.name, p.city, p.state, p.country].filter(Boolean).join(",");
 
 	return (
 		<div className="min-h-screen  bg-zinc-100 flex items-center justify-center px-4 py-10">
@@ -303,27 +345,83 @@ const Page = () => {
 										<div className="w-px h-5 bg-zinc-300 mt-1" />
 									</div>
 									<input
-										onChange={(e) =>
-											setPickUp(e.target.value)
-										}
+										onChange={(e) => {
+											setPickUp(e.target.value);
+											searchLocation(
+												e.target.value,
+												setSuggestions,
+											);
+										}}
 										value={pickUp}
-										placeholder={`${locating ? "Finding you" : "PickUp location"}`}
+										placeholder={`${loading ? "Finding you" : "PickUp location"}`}
 										className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
-										disabled={locating}
+										disabled={loading}
 									/>
 
 									<motion.button
 										whileTap={{ scale: 0.8 }}
 										className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
-										disabled={locating}
+										disabled={loading}
 										onClick={getCurrentLocation}
 									>
 										<LocateFixed
 											size={14}
-											className={`text-zinc-700 ${locating && "animate-spin"}`}
+											className={`text-zinc-700 ${loading && "animate-spin"}`}
 										/>
 									</motion.button>
 								</div>
+
+								<AnimatePresence>
+									{suggestions.length > 0 && (
+										<motion.div
+											initial={{
+												opacity: 0,
+												y: -4,
+												scale: 0.98,
+											}}
+											animate={{
+												opacity: 1,
+												y: 0,
+												scale: 1,
+											}}
+											exit={{
+												opacity: 0,
+												y: -4,
+												scale: 0.98,
+											}}
+											transition={{ duration: 0.2 }}
+											className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-52 overflow-y-auto z-50"
+										>
+											{suggestions.map((p, i) => (
+												<motion.div
+													key={i}
+													onClick={() =>
+														setPickUp(suggestion(p))
+													}
+													initial={{ opacity: 0 }}
+													animate={{ opacity: 1 }}
+													transition={{
+														delay: i * 0.03,
+													}}
+													className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b border-zinc-100 last:border-0"
+												>
+													<MapPin
+														size={13}
+														className="text-zinc-400 shrink-0"
+													/>
+													<span className="text-sm text-zinc-800 font-medium truncate">
+														{suggestion(p)}
+													</span>
+													<ChevronRight
+														size={13}
+														className="text-zinc-400 shrink-0 ml-auto"
+														
+													/>
+												</motion.div>
+											))}
+										</motion.div>
+									)}
+								</AnimatePresence>
 							</div>
 						</div>
 					</div>
