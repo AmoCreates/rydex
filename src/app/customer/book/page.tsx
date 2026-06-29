@@ -36,10 +36,9 @@ const Page = () => {
 	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
 	const [locating, setLocating] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const isBusy = isLoading || isSubmitting;
+	const isBusy = locating || isSubmitting;
 	const progress = [
 		!!vehicle,
 		!!name,
@@ -321,7 +320,7 @@ const Page = () => {
 									>
 										<LocateFixed
 											size={14}
-											className={`text-zinc-700 ${locating && 'animate-spin'}`}
+											className={`text-zinc-700 ${locating && "animate-spin"}`}
 										/>
 									</motion.button>
 								</div>
