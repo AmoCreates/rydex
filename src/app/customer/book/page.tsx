@@ -15,7 +15,11 @@ import {
 	Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { RiUserLine } from "@remixicon/react";
+import {
+	RiSendPlane2Fill,
+	RiSendPlaneFill,
+	RiUserLine,
+} from "@remixicon/react";
 import axios from "axios";
 
 const stepVariants = {
@@ -46,9 +50,11 @@ const Page = () => {
 	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
-	const [suggestions, setSuggestions] = useState<place[]>([]);
+	const [pickupSuggestion, setPickupSuggestion] = useState<place[]>([]);
+	const [dropSuggestion, setDropSuggestion] = useState<place[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [toFill, setToFill] = useState("Select a vehicle");
 	const isBusy = loading || isSubmitting;
 	const progress = [
 		!!vehicle,
@@ -75,7 +81,7 @@ const Page = () => {
 					const currentLocation = `${data.features[0].properties.name}, ${data.features[0].properties.city}, ${data.features[0].properties.state}, ${data.features[0].properties.country}`;
 
 					setPickUp(currentLocation);
-					setSuggestions([]);
+					setPickupSuggestion([]);
 				}
 			} catch (error) {
 				console.log(error);
@@ -95,7 +101,7 @@ const Page = () => {
 		}
 		try {
 			const { data } = await axios.get(
-				`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&limit=8&lang=en`,
+				`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&lang=en`,
 			);
 			console.log(data);
 			const places: place[] = (data.features ?? []).map((f: any) => ({
@@ -122,6 +128,10 @@ const Page = () => {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 				className="w-full max-w-md"
+				onClick={() => {
+					setPickupSuggestion([])
+					setDropSuggestion([])
+				}}
 			>
 				<header className="flex items-center gap-4 mb-6 px-1">
 					<motion.button
@@ -152,7 +162,7 @@ const Page = () => {
 								}}
 								transition={{ duration: 0.3 }}
 								className="h-2 rounded-full"
-							></motion.div>
+							/>
 						))}
 					</div>
 				</header>
@@ -255,7 +265,13 @@ const Page = () => {
 									value={name}
 									required
 									maxLength={25}
-									onChange={(e) => setName(e.target.value)}
+									onClick={() =>
+										setToFill("Enter customer name")
+									}
+									onChange={(e) => {
+										setName(e.target.value);
+										setToFill("Enter customer name");
+									}}
 									placeholder="Enter your name"
 									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
 								/>
@@ -307,11 +323,17 @@ const Page = () => {
 									inputMode="numeric"
 									required
 									maxLength={10}
-									onChange={(e) =>
+									onClick={() =>
+										setToFill("Enter a valid mobile number")
+									}
+									onChange={(e) => {
+										setToFill(
+											"Enter a valid mobile number",
+										);
 										setMobile(
 											e.target.value.replace(/\D/g, ""),
-										)
-									}
+										);
+									}}
 									placeholder="Enter your mobile number"
 									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
 								/>
@@ -337,19 +359,24 @@ const Page = () => {
 
 						<div className="h-px bg-zinc-200 my-7" />
 
-						<div className="bg-zinc-50 border-zinc-200 rounded-2xl overflow-visible">
-							<div className="relative z-20">
+						<div className="bg-zinc-50 border border-zinc-200 rounded-2xl overflow-visible">
+							<div className="relative z-30">
 								<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-t-2xl transition-colors">
 									<div className="flex flex-col items-center shrink-0">
 										<div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shoadow" />
 										<div className="w-px h-5 bg-zinc-300 mt-1" />
 									</div>
 									<input
+										onClick={() => {
+											setToFill("Enter pickup location");
+											setPickupSuggestion([])
+										}}
 										onChange={(e) => {
+											setToFill("Enter pickup location");
 											setPickUp(e.target.value);
 											searchLocation(
 												e.target.value,
-												setSuggestions,
+												setPickupSuggestion,
 											);
 										}}
 										value={pickUp}
@@ -372,7 +399,7 @@ const Page = () => {
 								</div>
 
 								<AnimatePresence>
-									{suggestions.length > 0 && (
+									{pickupSuggestion.length > 0 &&(
 										<motion.div
 											initial={{
 												opacity: 0,
@@ -390,13 +417,106 @@ const Page = () => {
 												scale: 0.98,
 											}}
 											transition={{ duration: 0.2 }}
-											className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-52 overflow-y-auto z-50"
+											className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-42 overflow-y-auto z-50"
 										>
-											{suggestions.map((p, i) => (
+											{pickupSuggestion.map((p, i) => (
 												<motion.div
 													key={i}
-													onClick={() =>
+													onClick={() => {
 														setPickUp(suggestion(p))
+														setPickupSuggestion([])
+													}
+													}
+													initial={{ opacity: 0 }}
+													animate={{ opacity: 1 }}
+													transition={{
+														delay: i * 0.03,
+													}}
+													className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b  border-zinc-100 last:border-0"
+												>
+													<MapPin
+														size={13}
+														className="text-zinc-400 shrink-0"
+													/>
+													<span className="text-sm text-zinc-800 font-medium truncate">
+														{suggestion(p)}
+													</span>
+													<ChevronRight
+														size={13}
+														className="text-zinc-400 shrink-0 ml-auto"
+													/>
+												</motion.div>
+											))}
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
+
+							<div className="h-px bg-zinc-300 mx-4" />
+
+							<div className="relative z-20">
+								<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-b-2xl transition-colors">
+									<div className="flex flex-col items-center shrink-0">
+										<div className="w-3 h-3 bg-zinc-900 border-2 border-white shoadow" />
+									</div>
+									<input
+										onClick={() => {
+											setToFill("Enter drop location");
+										}}
+										onChange={(e) => {
+											setToFill("Enter drop location");
+											setDrop(e.target.value);
+											searchLocation(
+												e.target.value,
+												setDropSuggestion,
+											);
+										}}
+										value={drop}
+										placeholder={`Drop location`}
+										className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
+										disabled={loading}
+									/>
+
+									<motion.button
+										whileTap={{ scale: 0.8 }}
+										className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
+										disabled={loading}
+									>
+										<RiSendPlaneFill
+											size={14}
+											className={`text-zinc-700 ${loading && "animate-spin"}`}
+										/>
+									</motion.button>
+								</div>
+
+								<AnimatePresence>
+									{dropSuggestion.length > 0 &&(
+										<motion.div
+											initial={{
+												opacity: 0,
+												y: -4,
+												scale: 0.98,
+											}}
+											animate={{
+												opacity: 1,
+												y: 0,
+												scale: 1,
+											}}
+											exit={{
+												opacity: 0,
+												y: -4,
+												scale: 0.98,
+											}}
+											transition={{ duration: 0.2 }}
+											className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-40 overflow-y-auto z-50"
+										>
+											{dropSuggestion.map((p, i) => (
+												<motion.div
+													key={i}
+													onClick={() =>{
+														setDrop(suggestion(p))
+														setDropSuggestion([])
+													}
 													}
 													initial={{ opacity: 0 }}
 													animate={{ opacity: 1 }}
@@ -415,7 +535,6 @@ const Page = () => {
 													<ChevronRight
 														size={13}
 														className="text-zinc-400 shrink-0 ml-auto"
-														
 													/>
 												</motion.div>
 											))}
@@ -423,6 +542,23 @@ const Page = () => {
 									)}
 								</AnimatePresence>
 							</div>
+						</div>
+
+						<motion.button
+							className="mt-5 w-full p-3 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
+							disabled={
+								mobile.length != 10 ||
+								!name ||
+								!vehicle ||
+								drop.length === 0 ||
+								pickUp.length === 0
+							}
+						>
+							Continue <Bike size={16} />
+						</motion.button>
+
+						<div className="text-xs text-gray-400 text-center w-full -mt-4">
+							{toFill}
 						</div>
 					</div>
 				</main>
