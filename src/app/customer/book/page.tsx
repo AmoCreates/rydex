@@ -32,11 +32,10 @@ type place = {
 	city?: string;
 	state?: string;
 	country?: string;
-	countrycode?: string;
 };
 
 const VEHICLES = [
-	{ id: "Bike", label: "Bike/Scooter", icon: Bike, desc: "2 Wheeler" },
+	{ id: "Bike", label: "Bike", icon: Bike, desc: "2 Wheeler" },
 	{ id: "Auto", label: "Auto", icon: Car, desc: "3 Wheeler ride" },
 	{ id: "Car", label: "Car", icon: Car, desc: "4 Wheeler ride" },
 	{ id: "Loading", label: "Loading", icon: Package, desc: "Small goods" },
@@ -50,6 +49,7 @@ const Page = () => {
 	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
+	const [country, setCountry] = useState("");
 	const [pickupSuggestion, setPickupSuggestion] = useState<place[]>([]);
 	const [dropSuggestion, setDropSuggestion] = useState<place[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -94,6 +94,7 @@ const Page = () => {
 	const searchLocation = async (
 		q: string,
 		setSearch: (r: place[]) => void,
+		restrict?: string | null,
 	) => {
 		if (q.length === 0) {
 			setSearch([]);
@@ -109,7 +110,6 @@ const Page = () => {
 				city: f.properties.city,
 				state: f.properties.state,
 				country: f.properties.country,
-				countrycode: f.properties.countrycode,
 			}));
 			setSearch(places);
 		} catch (error) {
@@ -129,8 +129,8 @@ const Page = () => {
 				transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 				className="w-full lg:max-w-150 max-w-md"
 				onClick={() => {
-					setPickupSuggestion([])
-					setDropSuggestion([])
+					setPickupSuggestion([]);
+					setDropSuggestion([]);
 				}}
 			>
 				<header className="flex items-center gap-4 mb-6 px-1">
@@ -358,191 +358,231 @@ const Page = () => {
 						</motion.div>
 
 						<div className="h-px bg-zinc-200 my-7" />
-
-						<div className="bg-zinc-50 border border-zinc-200 rounded-2xl overflow-visible">
-							<div className="relative z-30">
-								<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-t-2xl transition-colors">
-									<div className="flex flex-col items-center shrink-0">
-										<div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shoadow" />
-										<div className="w-px h-5 bg-zinc-300 mt-1" />
-									</div>
-									<input
-										onClick={() => {
-											setToFill("Enter pickup location");
-											setPickupSuggestion([])
-										}}
-										onChange={(e) => {
-											setToFill("Enter pickup location");
-											setPickUp(e.target.value);
-											searchLocation(
-												e.target.value,
-												setPickupSuggestion,
-											);
-										}}
-										value={pickUp}
-										placeholder={`${loading ? "Finding you" : "PickUp location"}`}
-										className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
-										disabled={loading}
-									/>
-
-									<motion.button
-										whileTap={{ scale: 0.8 }}
-										className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
-										disabled={loading}
-										onClick={getCurrentLocation}
-									>
-										<LocateFixed
-											size={14}
-											className={`text-zinc-700 ${loading && "animate-spin"}`}
-										/>
-									</motion.button>
+						<motion.div
+							variants={stepVariants}
+							initial={"hidden"}
+							animate={"visible"}
+							transition={{ delay: 0.05 }}
+						>
+							<div className="flex items-center gap-2 mb-3">
+								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
+									<span className="text-white text-[9px] font-black ">
+										4
+									</span>
 								</div>
-
-								<AnimatePresence>
-									{pickupSuggestion.length > 0 &&(
-										<motion.div
-											initial={{
-												opacity: 0,
-												y: -4,
-												scale: 0.98,
-											}}
-											animate={{
-												opacity: 1,
-												y: 0,
-												scale: 1,
-											}}
-											exit={{
-												opacity: 0,
-												y: -4,
-												scale: 0.98,
-											}}
-											transition={{ duration: 0.2 }}
-											className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-42 overflow-y-auto z-50"
-										>
-											{pickupSuggestion.map((p, i) => (
-												<motion.div
-													key={i}
-													onClick={() => {
-														setPickUp(suggestion(p))
-														setPickupSuggestion([])
-													}
-													}
-													initial={{ opacity: 0 }}
-													animate={{ opacity: 1 }}
-													transition={{
-														delay: i * 0.03,
-													}}
-													className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b  border-zinc-100 last:border-0"
-												>
-													<MapPin
-														size={13}
-														className="text-zinc-400 shrink-0"
-													/>
-													<span className="text-sm text-zinc-800 font-medium truncate">
-														{suggestion(p)}
-													</span>
-													<ChevronRight
-														size={13}
-														className="text-zinc-400 shrink-0 ml-auto"
-													/>
-												</motion.div>
-											))}
-										</motion.div>
-									)}
-								</AnimatePresence>
+								<p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+									ROUTE{" "}
+									<span className="text-red-500">*</span>
+								</p>
 							</div>
 
-							<div className="h-px bg-zinc-300 mx-4" />
-
-							<div className="relative z-20">
-								<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-b-2xl transition-colors">
-									<div className="flex flex-col items-center shrink-0">
-										<div className="w-3 h-3 bg-zinc-900 border-2 border-white shoadow" />
+							<div className="bg-zinc-50 border border-zinc-200 rounded-2xl overflow-visible">
+								<div className="relative z-30">
+									<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-t-2xl transition-colors">
+										<div className="flex flex-col items-center shrink-0">
+											<div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shoadow" />
+											<div className="w-px h-5 bg-zinc-300 mt-1" />
+										</div>
+										<input
+											onClick={() => {
+												setToFill(
+													"Enter pickup location",
+												);
+												setPickupSuggestion([]);
+											}}
+											onChange={(e) => {
+												setToFill(
+													"Enter pickup location",
+												);
+												setPickUp(e.target.value);
+												searchLocation(
+													e.target.value,
+													setPickupSuggestion,
+												);
+											}}
+											value={pickUp}
+											placeholder={`${loading ? "Finding you" : "PickUp location"}`}
+											className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
+											disabled={loading}
+										/>
+										<div className="flex flex-col items-center">
+											<motion.button
+												whileTap={{ scale: 0.8 }}
+												className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
+												disabled={loading}
+												onClick={getCurrentLocation}
+											>
+												<LocateFixed
+													size={14}
+													className={`text-zinc-700 ${loading && "animate-spin"}`}
+												/>
+											</motion.button>
+											<p className="text-xs text-zinc-400">
+												{loading
+													? "finding"
+													: "find me"}
+											</p>
+										</div>
 									</div>
-									<input
-										onClick={() => {
-											setToFill("Enter drop location");
-										}}
-										onChange={(e) => {
-											setToFill("Enter drop location");
-											setDrop(e.target.value);
-											searchLocation(
-												e.target.value,
-												setDropSuggestion,
-											);
-										}}
-										value={drop}
-										placeholder={`Drop location`}
-										className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
-										disabled={loading}
-									/>
 
-									<motion.button
-										whileTap={{ scale: 0.8 }}
-										className="w-8 h-8 rounded-xl bg-zinc-200 hover:bg-zinc-300 transition-colors flex items-center justify-center shrink-0 cursor-pointer disabled:cursor-not-allowed"
-										disabled={loading}
-									>
+									<AnimatePresence>
+										{pickupSuggestion.length > 0 && (
+											<motion.div
+												initial={{
+													opacity: 0,
+													y: -4,
+													scale: 0.98,
+												}}
+												animate={{
+													opacity: 1,
+													y: 0,
+													scale: 1,
+												}}
+												exit={{
+													opacity: 0,
+													y: -4,
+													scale: 0.98,
+												}}
+												transition={{ duration: 0.2 }}
+												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-42 overflow-y-auto z-50"
+											>
+												{pickupSuggestion.map(
+													(p, i) => (
+														<motion.div
+															key={i}
+															onClick={() => {
+																setPickUp(
+																	suggestion(
+																		p,
+																	),
+																);
+																setPickupSuggestion(
+																	[],
+																);
+															}}
+															initial={{
+																opacity: 0,
+															}}
+															animate={{
+																opacity: 1,
+															}}
+															transition={{
+																delay: i * 0.03,
+															}}
+															className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b  border-zinc-100 last:border-0"
+														>
+															<MapPin
+																size={13}
+																className="text-zinc-400 shrink-0"
+															/>
+															<span className="text-sm text-zinc-800 font-medium truncate">
+																{suggestion(p)}
+															</span>
+															<ChevronRight
+																size={13}
+																className="text-zinc-400 shrink-0 ml-auto"
+															/>
+														</motion.div>
+													),
+												)}
+											</motion.div>
+										)}
+									</AnimatePresence>
+								</div>
+
+								<div className="h-px bg-zinc-300 mx-4" />
+
+								<div className="relative z-20">
+									<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-b-2xl transition-colors">
+										<div className="flex flex-col items-center shrink-0">
+											<div className="w-3 h-3 bg-zinc-900 border-2 border-white shoadow" />
+										</div>
+										<input
+											onClick={() => {
+												setToFill(
+													"Enter drop location",
+												);
+											}}
+											onChange={(e) => {
+												setToFill(
+													"Enter drop location",
+												);
+												setDrop(e.target.value);
+												searchLocation(
+													e.target.value,
+													setDropSuggestion,
+												);
+											}}
+											value={drop}
+											placeholder={`Drop location`}
+											className="flex-1 bg-transparent text-sm font-semibold py-1 text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
+											disabled={loading}
+										/>
+
 										<RiSendPlaneFill
 											size={14}
-											className={`text-zinc-700 ${loading && "animate-spin"}`}
+											className="text-zinc-700 mr-2.5"
 										/>
-									</motion.button>
-								</div>
+									</div>
 
-								<AnimatePresence>
-									{dropSuggestion.length > 0 &&(
-										<motion.div
-											initial={{
-												opacity: 0,
-												y: -4,
-												scale: 0.98,
-											}}
-											animate={{
-												opacity: 1,
-												y: 0,
-												scale: 1,
-											}}
-											exit={{
-												opacity: 0,
-												y: -4,
-												scale: 0.98,
-											}}
-											transition={{ duration: 0.2 }}
-											className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-40 overflow-y-auto z-50"
-										>
-											{dropSuggestion.map((p, i) => (
-												<motion.div
-													key={i}
-													onClick={() =>{
-														setDrop(suggestion(p))
-														setDropSuggestion([])
-													}
-													}
-													initial={{ opacity: 0 }}
-													animate={{ opacity: 1 }}
-													transition={{
-														delay: i * 0.03,
-													}}
-													className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b border-zinc-100 last:border-0"
-												>
-													<MapPin
-														size={13}
-														className="text-zinc-400 shrink-0"
-													/>
-													<span className="text-sm text-zinc-800 font-medium truncate">
-														{suggestion(p)}
-													</span>
-													<ChevronRight
-														size={13}
-														className="text-zinc-400 shrink-0 ml-auto"
-													/>
-												</motion.div>
-											))}
-										</motion.div>
-									)}
-								</AnimatePresence>
+									<AnimatePresence>
+										{dropSuggestion.length > 0 && (
+											<motion.div
+												initial={{
+													opacity: 0,
+													y: -4,
+													scale: 0.98,
+												}}
+												animate={{
+													opacity: 1,
+													y: 0,
+													scale: 1,
+												}}
+												exit={{
+													opacity: 0,
+													y: -4,
+													scale: 0.98,
+												}}
+												transition={{ duration: 0.2 }}
+												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-40 overflow-y-auto z-50"
+											>
+												{dropSuggestion.map((p, i) => (
+													<motion.div
+														key={i}
+														onClick={() => {
+															setDrop(
+																suggestion(p),
+															);
+															setDropSuggestion(
+																[],
+															);
+														}}
+														initial={{ opacity: 0 }}
+														animate={{ opacity: 1 }}
+														transition={{
+															delay: i * 0.03,
+														}}
+														className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b border-zinc-100 last:border-0"
+													>
+														<MapPin
+															size={13}
+															className="text-zinc-400 shrink-0"
+														/>
+														<span className="text-sm text-zinc-800 font-medium truncate">
+															{suggestion(p)}
+														</span>
+														<ChevronRight
+															size={13}
+															className="text-zinc-400 shrink-0 ml-auto"
+														/>
+													</motion.div>
+												))}
+											</motion.div>
+										)}
+									</AnimatePresence>
+								</div>
 							</div>
-						</div>
+						</motion.div>
 
 						<motion.button
 							className="mt-5 w-full p-3 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
