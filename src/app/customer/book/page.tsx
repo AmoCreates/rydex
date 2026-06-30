@@ -122,12 +122,12 @@ const Page = () => {
 		[p.name, p.city, p.state, p.country].filter(Boolean).join(",");
 
 	return (
-		<div className="min-h-screen  bg-zinc-100 flex items-center justify-center px-4 py-10">
+		<div className="min-h-screen bg-zinc-100 flex items-center justify-center px-4 py-6">
 			<motion.div
 				initial={{ opacity: 0, y: 32 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-				className="w-full max-w-md"
+				className="w-full lg:max-w-150 max-w-md"
 				onClick={() => {
 					setPickupSuggestion([])
 					setDropSuggestion([])
