@@ -15,11 +15,7 @@ import {
 	Truck,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-	RiSendPlane2Fill,
-	RiSendPlaneFill,
-	RiUserLine,
-} from "@remixicon/react";
+import { RiSendPlaneFill, RiUserLine } from "@remixicon/react";
 import axios from "axios";
 
 const stepVariants = {
@@ -32,6 +28,7 @@ type place = {
 	city?: string;
 	state?: string;
 	country?: string;
+	countrycode?: string;
 };
 
 const VEHICLES = [
@@ -49,7 +46,7 @@ const Page = () => {
 	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
-	const [country, setCountry] = useState("");
+	const [pickUpCountry, setPickUpCountry] = useState<string | undefined>("");
 	const [pickupSuggestion, setPickupSuggestion] = useState<place[]>([]);
 	const [dropSuggestion, setDropSuggestion] = useState<place[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -104,13 +101,17 @@ const Page = () => {
 			const { data } = await axios.get(
 				`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&lang=en`,
 			);
-			console.log(data);
-			const places: place[] = (data.features ?? []).map((f: any) => ({
+			let places: place[] = (data.features ?? []).map((f: any) => ({
 				name: f.properties.name,
 				city: f.properties.city,
 				state: f.properties.state,
 				country: f.properties.country,
+				countrycode: f.properties.countrycode,
 			}));
+
+			if (restrict) {
+				places = places.filter((p) => p.country == restrict);
+			}
 			setSearch(places);
 		} catch (error) {
 			console.log(error);
@@ -127,7 +128,7 @@ const Page = () => {
 				initial={{ opacity: 0, y: 32 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-				className="w-full lg:max-w-150 max-w-md"
+				className="w-full lg:max-w-130 max-w-md"
 				onClick={() => {
 					setPickupSuggestion([]);
 					setDropSuggestion([]);
@@ -170,12 +171,15 @@ const Page = () => {
 				<main className="bg-white rounded-3xl border border-zinc-200 shadow-[0_8px_40px_rgba(0,0,0,0.08)] overflow-hidden">
 					<div className="h-1 bg-zinc-900 w-full" />
 					<div className="p-6 space-y-7">
+
+						{/* Choose Vehicle */}
 						<motion.div
 							variants={stepVariants}
 							initial={"hidden"}
 							animate={"visible"}
 							transition={{ delay: 0.05 }}
 						>
+							{/* Step 1 heading */}
 							<div className="flex items-center gap-2 mb-3">
 								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
 									<span className="text-white text-[9px] font-black ">
@@ -188,7 +192,7 @@ const Page = () => {
 								</p>
 							</div>
 
-							<div className="grid grid-cols-2 gap-3">
+							<div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
 								{VEHICLES.map((v, i) => {
 									const Icon = v.icon;
 									const isActive = vehicle === v.id;
@@ -232,15 +236,17 @@ const Page = () => {
 								})}
 							</div>
 						</motion.div>
-
+	
 						<div className="h-px bg-zinc-200 my-7" />
 
+						{/* Customer Name */}
 						<motion.div
 							variants={stepVariants}
 							initial={"hidden"}
 							animate={"visible"}
 							transition={{ delay: 0.05 }}
 						>
+							{/* Step 2 heading */}
 							<div className="flex items-center gap-2 mb-3">
 								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
 									<span className="text-white text-[9px] font-black ">
@@ -274,6 +280,7 @@ const Page = () => {
 									}}
 									placeholder="Enter your name"
 									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+									disabled={isBusy}
 								/>
 								<AnimatePresence>
 									{name.length > 1 && (
@@ -292,12 +299,14 @@ const Page = () => {
 							</div>
 						</motion.div>
 
+						{/* Mobile Number */}
 						<motion.div
 							variants={stepVariants}
 							initial={"hidden"}
 							animate={"visible"}
 							transition={{ delay: 0.05 }}
 						>
+							{/* Step 3 heading */}
 							<div className="flex items-center gap-2 mb-3">
 								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
 									<span className="text-white text-[9px] font-black ">
@@ -336,6 +345,7 @@ const Page = () => {
 									}}
 									placeholder="Enter your mobile number"
 									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+									disabled={isBusy}
 								/>
 								<AnimatePresence>
 									{mobile.length == 10 && (
@@ -358,12 +368,15 @@ const Page = () => {
 						</motion.div>
 
 						<div className="h-px bg-zinc-200 my-7" />
+
+						{/* Route: Pickup and drop location */}
 						<motion.div
 							variants={stepVariants}
 							initial={"hidden"}
 							animate={"visible"}
 							transition={{ delay: 0.05 }}
 						>
+							{/* Step 4 heading */}
 							<div className="flex items-center gap-2 mb-3">
 								<div className="w-5 h-5 rounded-full bg-zinc-900 flex items-center justify-center shrink-0">
 									<span className="text-white text-[9px] font-black ">
@@ -377,6 +390,7 @@ const Page = () => {
 							</div>
 
 							<div className="bg-zinc-50 border border-zinc-200 rounded-2xl overflow-visible">
+								{/* Pickup */}
 								<div className="relative z-30">
 									<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-t-2xl transition-colors">
 										<div className="flex flex-col items-center shrink-0">
@@ -403,7 +417,7 @@ const Page = () => {
 											value={pickUp}
 											placeholder={`${loading ? "Finding you" : "PickUp location"}`}
 											className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
-											disabled={loading}
+											disabled={isBusy}
 										/>
 										<div className="flex flex-col items-center">
 											<motion.button
@@ -425,6 +439,7 @@ const Page = () => {
 										</div>
 									</div>
 
+									{/* Suggestions */}
 									<AnimatePresence>
 										{pickupSuggestion.length > 0 && (
 											<motion.div
@@ -447,43 +462,52 @@ const Page = () => {
 												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-42 overflow-y-auto z-50"
 											>
 												{pickupSuggestion.map(
-													(p, i) => (
-														<motion.div
-															key={i}
-															onClick={() => {
-																setPickUp(
-																	suggestion(
+													(p, i) => {
+														return (
+															<motion.div
+																key={i}
+																onClick={() => {
+																	setPickUp(
+																		suggestion(
+																			p,
+																		),
+																	);
+																	setPickupSuggestion(
+																		[],
+																	);
+																	setPickUpCountry(
+																		p.country,
+																	);
+																}}
+																initial={{
+																	opacity: 0,
+																}}
+																animate={{
+																	opacity: 1,
+																}}
+																transition={{
+																	delay:
+																		i *
+																		0.03,
+																}}
+																className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b  border-zinc-100 last:border-0"
+															>
+																<MapPin
+																	size={13}
+																	className="text-zinc-400 shrink-0"
+																/>
+																<span className="text-sm text-zinc-800 font-medium truncate">
+																	{suggestion(
 																		p,
-																	),
-																);
-																setPickupSuggestion(
-																	[],
-																);
-															}}
-															initial={{
-																opacity: 0,
-															}}
-															animate={{
-																opacity: 1,
-															}}
-															transition={{
-																delay: i * 0.03,
-															}}
-															className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-zinc-50 transition-colors border-b  border-zinc-100 last:border-0"
-														>
-															<MapPin
-																size={13}
-																className="text-zinc-400 shrink-0"
-															/>
-															<span className="text-sm text-zinc-800 font-medium truncate">
-																{suggestion(p)}
-															</span>
-															<ChevronRight
-																size={13}
-																className="text-zinc-400 shrink-0 ml-auto"
-															/>
-														</motion.div>
-													),
+																	)}
+																</span>
+																<ChevronRight
+																	size={13}
+																	className="text-zinc-400 shrink-0 ml-auto"
+																/>
+															</motion.div>
+														);
+													},
 												)}
 											</motion.div>
 										)}
@@ -491,7 +515,8 @@ const Page = () => {
 								</div>
 
 								<div className="h-px bg-zinc-300 mx-4" />
-
+								
+								{/* Drop */}
 								<div className="relative z-20">
 									<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-b-2xl transition-colors">
 										<div className="flex flex-col items-center shrink-0">
@@ -511,12 +536,13 @@ const Page = () => {
 												searchLocation(
 													e.target.value,
 													setDropSuggestion,
+													pickUpCountry,
 												);
 											}}
 											value={drop}
-											placeholder={`Drop location`}
+											placeholder={`${!pickUp ? "Set pickup location first" : "Drop location"}`}
 											className="flex-1 bg-transparent text-sm font-semibold py-1 text-zinc-900 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed"
-											disabled={loading}
+											disabled={isBusy || !pickUp}
 										/>
 
 										<RiSendPlaneFill
@@ -584,7 +610,10 @@ const Page = () => {
 							</div>
 						</motion.div>
 
+						{/* Continue */}
 						<motion.button
+							initial={{ y: 16 }}
+							animate={{ y: 0 }}
 							className="mt-5 w-full p-3 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
 							disabled={
 								mobile.length != 10 ||
@@ -597,9 +626,11 @@ const Page = () => {
 							Continue <Bike size={16} />
 						</motion.button>
 
+						{/* Field indicator */}
 						<div className="text-xs text-gray-400 text-center w-full -mt-4">
 							{toFill}
 						</div>
+						
 					</div>
 				</main>
 			</motion.div>
