@@ -645,7 +645,7 @@ const Page = () => {
 							}
 							onClick={() =>
 								router.push(
-									`/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${vehicle}&mobile=${encodeURIComponent(mobile)}&name=${encodeURIComponent(name)}&pickuplat=${pickUpLatitude}&pickuplon=${pickUpLongitude}&droplat=${dropLatitude}&droplon=${dropLongitude}`,
+									`/customer/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${vehicle}&mobile=${encodeURIComponent(mobile)}&name=${encodeURIComponent(name)}&pickuplat=${pickUpLatitude}&pickuplon=${pickUpLongitude}&droplat=${dropLatitude}&droplon=${dropLongitude}`,
 								)
 							}
 						>
