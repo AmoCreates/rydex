@@ -29,8 +29,8 @@ type place = {
 	state?: string;
 	country?: string;
 	countrycode?: string;
-	latitude?: number;
 	longitude?: number;
+	latitude?: number;
 };
 
 const VEHICLES = [
@@ -49,10 +49,10 @@ const Page = () => {
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
 	const [pickUpCountry, setPickUpCountry] = useState<string | undefined>("");
-	const [pickUpLatitude, setPickUpLatitude] = useState<number | null>(null);
 	const [pickUpLongitude, setPickUpLongitude] = useState<number | null>(null);
-	const [dropLatitude, setDropLatitude] = useState<number | null>(null);
+	const [pickUpLatitude, setPickUpLatitude] = useState<number | null>(null);
 	const [dropLongitude, setDropLongitude] = useState<number | null>(null);
+	const [dropLatitude, setDropLatitude] = useState<number | null>(null);
 	const [pickupSuggestion, setPickupSuggestion] = useState<place[]>([]);
 	const [dropSuggestion, setDropSuggestion] = useState<place[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -79,11 +79,12 @@ const Page = () => {
 				const { data } = await axios.get(
 					`https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`,
 				);
+				console.log(data)
 				if (data.features.length) {
 					const currentLocation = `${data.features[0].properties.name}, ${data.features[0].properties.city}, ${data.features[0].properties.state}, ${data.features[0].properties.country}`;
 
-					setPickUpLatitude(data.features[0].geometry.coordinates[0]);
-					setPickUpLongitude(data.features[0].geometry.coordinates[1]);
+					setPickUpLongitude(data.features[0].geometry.coordinates[0]);
+					setPickUpLatitude(data.features[0].geometry.coordinates[1]);
 					setPickUpCountry(data.features[0].properties.country);
 					setPickUp(currentLocation);
 					setPickupSuggestion([]);
@@ -115,8 +116,8 @@ const Page = () => {
 				state: f.properties.state,
 				country: f.properties.country,
 				countrycode: f.properties.countrycode,
-				latitude: f.geometry.coordinates[0],
-				longitude: f.geometry.coordinates[1],
+				longitude: f.geometry.coordinates[0],
+				latitude: f.geometry.coordinates[1],
 			}));
 
 			if (restrict) {
@@ -288,7 +289,7 @@ const Page = () => {
 										setToFill("Enter customer name");
 									}}
 									placeholder="Enter your name"
-									className="flex-1 bg-transparent text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
+									className="flex-1 bg-transparent  text-sm font-semibold text-zinc-900 placeholder:text-zinc-400 outline-none"
 									disabled={isBusy}
 								/>
 								<AnimatePresence>
@@ -409,13 +410,13 @@ const Page = () => {
 										<input
 											onClick={() => {
 												setToFill(
-													"Enter pickup location",
+													"Enter pickup location, either you can select or type manually",
 												);
 												setPickupSuggestion([]);
 											}}
 											onChange={(e) => {
 												setToFill(
-													"Enter pickup location",
+													"Enter pickup location, either you can select or type manually",
 												);
 												setPickUp(e.target.value);
 												searchLocation(
@@ -540,12 +541,12 @@ const Page = () => {
 										<input
 											onClick={() => {
 												setToFill(
-													"Enter drop location",
+													"Enter drop location, either you can select or type manually",
 												);
 											}}
 											onChange={(e) => {
 												setToFill(
-													"Enter drop location",
+													"Enter drop location, either you can select or type manually",
 												);
 												setDrop(e.target.value);
 												searchLocation(
