@@ -29,6 +29,8 @@ type place = {
 	state?: string;
 	country?: string;
 	countrycode?: string;
+	latitude?: number;
+	longitude?: number;
 };
 
 const VEHICLES = [
@@ -47,6 +49,10 @@ const Page = () => {
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
 	const [pickUpCountry, setPickUpCountry] = useState<string | undefined>("");
+	const [pickUpLatitude, setPickUpLatitude] = useState<number | null>(null);
+	const [pickUpLongitude, setPickUpLongitude] = useState<number | null>(null);
+	const [dropLatitude, setDropLatitude] = useState<number | null>(null);
+	const [dropLongitude, setDropLongitude] = useState<number | null>(null);
 	const [pickupSuggestion, setPickupSuggestion] = useState<place[]>([]);
 	const [dropSuggestion, setDropSuggestion] = useState<place[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -73,10 +79,12 @@ const Page = () => {
 				const { data } = await axios.get(
 					`https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`,
 				);
-				console.log(data);
 				if (data.features.length) {
 					const currentLocation = `${data.features[0].properties.name}, ${data.features[0].properties.city}, ${data.features[0].properties.state}, ${data.features[0].properties.country}`;
 
+					setPickUpLatitude(data.features[0].geometry.coordinates[0]);
+					setPickUpLongitude(data.features[0].geometry.coordinates[1]);
+					setPickUpCountry(data.features[0].properties.country);
 					setPickUp(currentLocation);
 					setPickupSuggestion([]);
 				}
@@ -107,6 +115,8 @@ const Page = () => {
 				state: f.properties.state,
 				country: f.properties.country,
 				countrycode: f.properties.countrycode,
+				latitude: f.geometry.coordinates[0],
+				longitude: f.geometry.coordinates[1],
 			}));
 
 			if (restrict) {
@@ -171,7 +181,6 @@ const Page = () => {
 				<main className="bg-white rounded-3xl border border-zinc-200 shadow-[0_8px_40px_rgba(0,0,0,0.08)] overflow-hidden">
 					<div className="h-1 bg-zinc-900 w-full" />
 					<div className="p-6 space-y-7">
-
 						{/* Choose Vehicle */}
 						<motion.div
 							variants={stepVariants}
@@ -236,7 +245,7 @@ const Page = () => {
 								})}
 							</div>
 						</motion.div>
-	
+
 						<div className="h-px bg-zinc-200 my-7" />
 
 						{/* Customer Name */}
@@ -478,6 +487,12 @@ const Page = () => {
 																	setPickUpCountry(
 																		p.country,
 																	);
+																	setPickUpLatitude(
+																		p.latitude!,
+																	);
+																	setPickUpLatitude(
+																		p.longitude!,
+																	);
 																}}
 																initial={{
 																	opacity: 0,
@@ -515,7 +530,7 @@ const Page = () => {
 								</div>
 
 								<div className="h-px bg-zinc-300 mx-4" />
-								
+
 								{/* Drop */}
 								<div className="relative z-20">
 									<div className="flex items-center gap-3 px-4 py-3.5 focus-within:bg-white rounded-b-2xl transition-colors">
@@ -582,6 +597,12 @@ const Page = () => {
 															setDropSuggestion(
 																[],
 															);
+															setDropLatitude(
+																p.latitude!,
+															);
+															setDropLongitude(
+																p.longitude!,
+															);
 														}}
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
@@ -622,6 +643,11 @@ const Page = () => {
 								drop.length === 0 ||
 								pickUp.length === 0
 							}
+							onClick={() =>
+								router.push(
+									`/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${vehicle}&mobile=${encodeURIComponent(mobile)}&name=${encodeURIComponent(name)}&pickuplat=${pickUpLatitude}&pickuplon=${pickUpLongitude}&droplat=${dropLatitude}&droplon=${dropLongitude}`,
+								)
+							}
 						>
 							Continue <Bike size={16} />
 						</motion.button>
@@ -630,7 +656,6 @@ const Page = () => {
 						<div className="text-xs text-gray-400 text-center w-full -mt-4">
 							{toFill}
 						</div>
-						
 					</div>
 				</main>
 			</motion.div>
