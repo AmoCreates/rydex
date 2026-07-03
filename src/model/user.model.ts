@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { number } from "motion";
 
-type VideoKycStatus = 
+type VideoKycStatus =
 	| "not required"
 	| "pending"
 	| "in progress"
@@ -22,7 +23,16 @@ export interface IUser extends mongoose.Document {
 	videoKycStatus?: VideoKycStatus;
 	videoKycRoomId: string;
 	rejectionMsg?: string;
-	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
+
+	socketId: string | null;
+	location?: {
+		type: "Point";
+		coordinates: [number, number];
+	};
+	isOnline: boolean;
+
+	// no need to add these becaues extends above, only for more secureness
+	createdAt?: Date;
 	updatedAt?: Date;
 }
 
@@ -85,22 +95,49 @@ const userSchema = new mongoose.Schema<IUser>(
 
 		videoKycStatus: {
 			type: String,
-			enum: ["not required", "pending", "in progress", "approved", "rejected"],
+			enum: [
+				"not required",
+				"pending",
+				"in progress",
+				"approved",
+				"rejected",
+			],
 			default: "not required",
 		},
 
 		videoKycRoomId: {
 			type: String,
-			default: ""
+			default: "",
 		},
 
 		rejectionMsg: {
 			type: String,
-			default: ""
+			default: "",
+		},
+
+		socketId: {
+			type: String,
+			default: null,
+		},
+
+		location: {
+			type: {
+				type: String,
+				enum: ["Point"],
+			},
+			coordinates: [Number],
+		},
+
+		isOnline: {
+			type: Boolean,
+			default: false,
+			index: true
 		}
 	},
 	{ timestamps: true },
 );
+
+userSchema.index({location: "2dsphere"})
 
 const User = mongoose.models?.User || mongoose.model("User", userSchema);
 export default User;

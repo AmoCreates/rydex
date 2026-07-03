@@ -1,18 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, MapPin, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import Map from "@/components/Map";
 import { RiSendPlaneFill } from "@remixicon/react";
+import { getSocket } from "@/lib/socket";
+import { RootState } from "@/Toolkit/store";
+import { useSelector } from "react-redux";
 
 const Page = () => {
 	const router = useRouter();
 	const params = useSearchParams();
 
+	const { userData } = useSelector((state: RootState) => state.user);
 	const [pickUp, setPickUp] = useState(params.get("pickup") || "");
 	const [drop, setDrop] = useState(params.get("drop") || "");
-	const [distanc, setDistance] = useState<number>();
+	const [distance, setDistance] = useState<number>();
 	const vehicle = params.get("vehicle") || "";
 	const name = params.get("name") || "";
 	const mobile = Number(params.get("mobile"));
@@ -20,6 +24,16 @@ const Page = () => {
 	const pickupLon = Number(params.get("pickuplon"));
 	const dropLat = Number(params.get("droplat"));
 	const dropLon = Number(params.get("droplon"));
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.connect();
+		socket?.on("connect", () => console.log("Connected!"))
+
+		socket?.emit("identity", {userId:userData?._id})
+
+	}, [userData])
 
 	return (
 		<div className="min-h-screen bg-zinc-100 text-zinc-900 overflow-x-hidden">
@@ -52,7 +66,7 @@ const Page = () => {
 			>
 				<div className="px-5 lg:px-8 max-w-6xl mx-auto">
 
-					{/* Pickup & Drop Location */}
+					{/* Pickup & Drop Location  */}
 					<motion.div
 						initial={{ opacity: 0, y: 12 }}
 						animate={{ opacity: 1, y: 0 }}

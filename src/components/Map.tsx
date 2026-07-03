@@ -156,7 +156,6 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 			const url = `http://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson&steps=true`;
 
 			const { data } = await axios.get(url);
-			console.log(data);
 
 			if (!data.routes || data.routes.length === 0) {
 				console.error({ error: "No route found" });
