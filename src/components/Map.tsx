@@ -10,7 +10,8 @@ import {
 } from "react-leaflet";
 import axios from "axios";
 import { AnimatePresence, motion } from "motion/react";
-import { Clock4, MapPin, Navigation, Navigation2 } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { RiSendPlaneFill, RiTimeFill } from "@remixicon/react";
 
 type props = {
 	pickUp: string;
@@ -332,6 +333,7 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 				)}
 			</AnimatePresence>
 
+			{/* Time & Distance */}
 			<AnimatePresence>
 				{!loading && km !== 0 && (
 					<motion.div
@@ -339,15 +341,19 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 						animate={{ opacity: 1, y: 0, scale: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-						className="absolute bottom-6 left-4 z-500 flex items-center gap-2 bg-white border border-zinc-200 px-3.5 py-2 rounded-2xl shadow-lg"
+						className="absolute bottom-18 left-4 z-500 flex items-center gap-2 bg-white border border-zinc-200 px-3.5 py-2 rounded-2xl shadow-lg"
 					>
-						<Navigation2 size={13} className="text-zinc-900" />
+						{/* Distance */}
+						<RiSendPlaneFill size={13} className="text-zinc-900" />
 						<span className="text-zinc-900 text-xs font-bold">
 							{km} km
 						</span>
-						<span className="w-px h-3 bg-zinc-200" />
+
+						<span className="w-px h-3 bg-zinc-300" />
+
+						{/* Time */}
 						<span className="text-zinc-900 text-xs font-bold flex items-center gap-2">
-							<Clock4 size={13} /> ~{Math.round(km * 1.5)} min
+							<RiTimeFill size={13} /> ~{Math.round(km * 1.5)} min
 						</span>
 					</motion.div>
 				)}
