@@ -11,7 +11,7 @@ const Page = () => {
 
 	const [pickUp, setPickUp] = useState(params.get("pickup") || "");
 	const [drop, setDrop] = useState(params.get("drop") || "");
-	const [distanc, setDistance] = useState(0);
+	const [distanc, setDistance] = useState<number>();
 	const vehicle = params.get("vehicle") || "";
 	const name = params.get("name") || "";
 	const mobile = Number(params.get("mobile"));

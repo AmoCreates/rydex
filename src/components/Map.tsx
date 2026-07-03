@@ -9,6 +9,8 @@ import {
 	useMap,
 } from "react-leaflet";
 import axios from "axios";
+import { AnimatePresence, motion } from "motion/react";
+import { Clock4, MapPin, Navigation, Navigation2 } from "lucide-react";
 
 type props = {
 	pickUp: string;
@@ -119,6 +121,8 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 	const [p1, setP1] = useState<[number, number] | null>(null);
 	const [p2, setP2] = useState<[number, number] | null>(null);
 	const [route, setRoute] = useState<[number, number][]>([]);
+	const [km, setKm] = useState<number>(0);
+	const [loading, setLoading] = useState(false);
 
 	const geoCoding = async (q: string): Promise<[number, number] | null> => {
 		try {
@@ -164,22 +168,51 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 				),
 			);
 			// toFixed retuns the string '+' symbol convert it to number
-			const distance = +(data.routes[0].distance / 1000).toFixed(2);
-			setDistance(distance);
-			console.log(distance);
+			setKm(+(data.routes[0].distance / 1000).toFixed(2));
+			setDistance(km);
 		} catch (err) {
 			console.error('error: "Failed to fetch route');
 			console.error(err);
 		}
 	}
 
+	const updateLocation = async (lat: number, lon: number) => {
+		if (!lat || !lon) {
+			console.log("cant find route");
+			return;
+		}
+
+		setLoading(true);
+
+		try {
+			const { data } = await axios.get(
+				`https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}`,
+			);
+			if (data.features.length) {
+				const p = data.features[0].properties;
+				return [p.name, p.city, p.state, p.country]
+					.filter(Boolean)
+					.join(",");
+			}
+			return;
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const dragPickUP = async (lat: number, lon: number) => {
+		const p = await updateLocation(lat, lon);
 		setP1([lat, lon]);
 		loadRoute([lat, lon], p2);
+		setPickUpDrop?.(p!, drop);
 	};
 	const dragDrop = async (lat: number, lon: number) => {
+		const d = await updateLocation(lat, lon);
 		setP2([lat, lon]);
 		loadRoute(p1, [lat, lon]);
+		setPickUpDrop?.(pickUp, d!);
 	};
 
 	useEffect(() => {
@@ -187,6 +220,7 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 			return;
 		}
 		(async () => {
+			setLoading(true);
 			const a = await geoCoding(pickUp);
 			const b = await geoCoding(drop);
 			if (!a || !b) {
@@ -195,6 +229,7 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 			await loadRoute(a, b);
 			setP1(a);
 			setP2(b);
+			setLoading(false);
 		})();
 	}, [pickUp, drop]);
 
@@ -204,6 +239,7 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 				style={{ width: "100%", height: "100%" }}
 				center={p1 ?? [0, 0]}
 				zoom={13}
+				zoomControl={false}
 			>
 				<TileLayer
 					attribution='&copy; <a href="https://carto.com/">"CARTO"</a> contributors'
@@ -219,17 +255,24 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 						eventHandlers={{
 							dragend: (e) => {
 								const m = e.target.getLatLng();
-								dragPickUP(m.lat, m.lng)
+								dragPickUP(m.lat, m.lng);
 							},
 						}}
 					/>
 				)}
-				{p2 && <Marker position={p2} icon={dropIcon} draggable eventHandlers={{
+				{p2 && (
+					<Marker
+						position={p2}
+						icon={dropIcon}
+						draggable
+						eventHandlers={{
 							dragend: (e) => {
 								const m = e.target.getLatLng();
-								dragDrop(m.lat, m.lng)
+								dragDrop(m.lat, m.lng);
 							},
-						}}/>}
+						}}
+					/>
+				)}
 
 				{route.length !== 0 && (
 					<>
@@ -245,6 +288,70 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 					</>
 				)}
 			</MapContainer>
+
+			{/*Map Loading*/}
+			<AnimatePresence>
+				{loading && (
+					<motion.div
+						initial={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.45 }}
+						className="absolute inset-0 z-999 bg-white/90 backdrop:blur-md flex flex-col items-center justify-center gap-4"
+					>
+						<div className="relative w-14 h-14 flex items-center justify-center">
+							<motion.div
+								animate={{ rotate: 360 }}
+								transition={{
+									duration: 1.1,
+									repeat: Infinity,
+									ease: "linear",
+								}}
+								className="absolute inset-0 rounded-full border-2 border-transparent border-t-zinc-900"
+							/>
+							<motion.div
+								animate={{ rotate: -360 }}
+								transition={{
+									duration: 1.8,
+									repeat: Infinity,
+									ease: "linear",
+								}}
+								className="absolute inset-2 rounded-full border-2 border-transparent border-t-zinc-300"
+							/>
+							<MapPin size={15} className="text-zinc-800" />
+						</div>
+
+						<div className="text-center">
+							<p className="text-zinc-900 text-xs font-black tracking-[0.22em] uppercase">
+								Loading Map
+							</p>
+							<p className="text-zinc-400 text-[10px] font-medium tracking-wider mt-0.5">
+								Plotting your route...
+							</p>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
+
+			<AnimatePresence>
+				{!loading && km !== 0 && (
+					<motion.div
+						initial={{ opacity: 0, y: 8, scale: 0.95 }}
+						animate={{ opacity: 1, y: 0, scale: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+						className="absolute bottom-6 left-4 z-500 flex items-center gap-2 bg-white border border-zinc-200 px-3.5 py-2 rounded-2xl shadow-lg"
+					>
+						<Navigation2 size={13} className="text-zinc-900" />
+						<span className="text-zinc-900 text-xs font-bold">
+							{km} km
+						</span>
+						<span className="w-px h-3 bg-zinc-200" />
+						<span className="text-zinc-900 text-xs font-bold flex items-center gap-2">
+							<Clock4 size={13} /> ~{Math.round(km * 1.5)} min
+						</span>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };
