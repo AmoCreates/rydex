@@ -12,8 +12,6 @@ import { useSelector } from "react-redux";
 const Page = () => {
 	const router = useRouter();
 	const params = useSearchParams();
-
-	const { userData } = useSelector((state: RootState) => state.user);
 	const [pickUp, setPickUp] = useState(params.get("pickup") || "");
 	const [drop, setDrop] = useState(params.get("drop") || "");
 	const [distance, setDistance] = useState<number>();
@@ -25,15 +23,6 @@ const Page = () => {
 	const dropLat = Number(params.get("droplat"));
 	const dropLon = Number(params.get("droplon"));
 	const [loading, setLoading] = useState(false);
-
-	useEffect(() => {
-		const socket = getSocket();
-		socket?.connect();
-		socket?.on("connect", () => console.log("Connected!"))
-
-		socket?.emit("identity", {userId:userData?._id})
-
-	}, [userData])
 
 	return (
 		<div className="min-h-screen bg-zinc-100 text-zinc-900 overflow-x-hidden">
