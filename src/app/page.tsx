@@ -15,7 +15,10 @@ export default function Home() {
 	const role = userData?.role;
 	return (
 		<div className="w-full min-h-screen bg-white">
-			{userData?._id && <GeoUpdater userId={String(userData._id)} />}
+			{userData?.role !== "admin" && userData?._id && (
+				<GeoUpdater userId={String(userData._id)} />
+			)}
+			
 			{role !== "admin" && <Nav onOpen={() => setAuthOpen(true)} />}
 
 			{role === "partner" ? (
@@ -29,7 +32,7 @@ export default function Home() {
 					onClose={() => setAuthOpen(false)}
 				/>
 			)}
-			
+
 			<Footer />
 		</div>
 	);
