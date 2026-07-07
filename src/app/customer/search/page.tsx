@@ -8,6 +8,7 @@ import { RiSendPlaneFill } from "@remixicon/react";
 import { getSocket } from "@/lib/socket";
 import { RootState } from "@/Toolkit/store";
 import { useSelector } from "react-redux";
+import axios from "axios";
 
 const Page = () => {
 	const router = useRouter();
@@ -23,6 +24,21 @@ const Page = () => {
 	const dropLat = Number(params.get("droplat"));
 	const dropLon = Number(params.get("droplon"));
 	const [loading, setLoading] = useState(false);
+
+	const getNearByVehicle = async (lat:number, lon:number, vehicleType:string | null) => {
+		try {
+			const {data} = await axios.post('/api/vehicles/near-by', {
+				lat, lon, vehicleType
+			});
+			console.log(data);
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	useEffect(() => {
+		getNearByVehicle(pickupLat, pickupLon, vehicle);
+	}, [pickupLat, pickupLon, vehicle])
 
 	return (
 		<div className="min-h-screen bg-zinc-100 text-zinc-900 overflow-x-hidden">

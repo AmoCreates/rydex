@@ -59,6 +59,7 @@ export async function PUT(
 
 			vehicle.status = "approved";
 			vehicle.rejectionMsg = undefined;
+			vehicle.isActive = true;
 			await vehicle.save();
 
 			//updating partner details

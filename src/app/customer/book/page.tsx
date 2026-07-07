@@ -34,12 +34,13 @@ type place = {
 };
 
 const VEHICLES = [
-	{ id: "Bike", label: "Bike", icon: Bike, desc: "2 Wheeler" },
-	{ id: "Auto", label: "Auto", icon: Car, desc: "3 Wheeler ride" },
-	{ id: "Car", label: "Car", icon: Car, desc: "4 Wheeler ride" },
-	{ id: "Loading", label: "Loading", icon: Package, desc: "Small goods" },
-	{ id: "Truck", label: "Truck", icon: Truck, desc: "Heavy transport" },
-	{ id: "Bus", label: "Bus", icon: Bus, desc: "Passenger" },
+	{ id: "all", label: "All", icon: Bike, desc: "All vehicle in your nearby" },
+	{ id: "bike", label: "Bike", icon: Bike, desc: "2 Wheeler" },
+	{ id: "auto", label: "Auto", icon: Car, desc: "3 Wheeler ride" },
+	{ id: "car", label: "Car", icon: Car, desc: "4 Wheeler ride" },
+	{ id: "loading", label: "Loading", icon: Package, desc: "Small goods" },
+	{ id: "truck", label: "Truck", icon: Truck, desc: "Heavy transport" },
+	{ id: "bus", label: "Bus", icon: Bus, desc: "Passenger" },
 ];
 
 const Page = () => {
@@ -79,11 +80,13 @@ const Page = () => {
 				const { data } = await axios.get(
 					`https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`,
 				);
-				console.log(data)
+				console.log(data);
 				if (data.features.length) {
 					const currentLocation = `${data.features[0].properties.name}, ${data.features[0].properties.city}, ${data.features[0].properties.state}, ${data.features[0].properties.country}`;
 
-					setPickUpLongitude(data.features[0].geometry.coordinates[0]);
+					setPickUpLongitude(
+						data.features[0].geometry.coordinates[0],
+					);
 					setPickUpLatitude(data.features[0].geometry.coordinates[1]);
 					setPickUpCountry(data.features[0].properties.country);
 					setPickUp(currentLocation);
@@ -218,22 +221,55 @@ const Page = () => {
 											onClick={() =>
 												!isBusy && setVehicle(v.id)
 											}
-											className={`relative rounded-2xl border p-4  flex items-center gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"}`}
+											className={`relative rounded-2xl border p-4  flex items-center ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2"}`}
 										>
-											<div
-												className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
-											>
-												<Icon />
-											</div>
+											{v.id === "all" ? (
+												<>
+													<div
+														className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+													>
+														<Icon />
+													</div>
+													<div
+														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+													>
+														<Car />
+													</div>
+													<div
+														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+													>
+														<Truck />
+													</div>
+													<div
+														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+													>
+														<Package />
+													</div>
+													<div
+														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+													>
+														<Bus />
+													</div>
+												</>
+											) : (
+												<div
+													className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+												>
+													<Icon />
+												</div>
+											)}
+
 											<div>
-												<div className="text-sm font-semibold">
+												<div className={` ${v.id === "all" ? "text-xl" : "text-sm"} font-semibold`}>
 													{v.label}
 												</div>
-												<p
-													className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"} `}
-												>
-													{v.desc}
-												</p>
+												
+													<p
+														className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"} `}
+													>
+														{v.desc}
+													</p>
+												
 											</div>
 
 											{isActive && (

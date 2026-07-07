@@ -3,74 +3,83 @@ import User from "@/model/user.model";
 import Vehicle from "@/model/vehicle.model";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req:NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    await dbConnect()
+    await dbConnect();
 
-    const {lat, lon, vehicleType} = await req.json();
-    if(!lat || !lon) {
+    const { lat, lon, vehicleType } = await req.json();
+    const parsedLat = Number(lat);
+    const parsedLon = Number(lon);
+    const vType = vehicleType.toLowerCase();
+
+    if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) {
       return NextResponse.json(
-        {message: "coordinates not found!"},
-        {status: 400}
-      )
+        { message: "coordinates not found!" },
+        { status: 400 },
+      );
     }
 
-    if(!vehicleType) {
+    if (!vehicleType) {
       return NextResponse.json(
-        {message: "please select the vehicle type first!"},
-        {status: 400}
-      )
+        { message: "please select the vehicle type first!" },
+        { status: 400 },
+      );
     }
 
-    // To find --> must be online, status: approved, vehcile type must matched, withing range of 5km to pickup loation
     const partners = await User.find({
       role: "partner",
       partnerStatus: "approved",
       isOnline: true,
       location: {
-        $near:{
+        $near: {
           $geometry: {
-            type:"Point",
-            coordinates: [lon, lat]
+            type: "Point",
+            coordinates: [parsedLon, parsedLat],
           },
-          $maxDistance:10000
-        }
-      }
-    })
+          $maxDistance: 10000,
+        },
+      },
+    });
 
-    const partnerIds = partners.map(p => p._id);
+    const partnerIds = partners.map((p) => p._id);
 
-    if(partnerIds.length == 0) {
+    if (partnerIds.length === 0) {
       return NextResponse.json(
-        {message: "No vehcile found near-by"},
-        {status: 200}
-      )
+        { message: "No vehicle found near-by" },
+        { status: 200 },
+      );
     }
 
-    const vehicles = Vehicle.find({
-      owner: {$in:partnerIds},
-      type: vehicleType,
-      status: "approved",
-      isActive: true,
-    })
-
-    if(!vehicles) {
-      return NextResponse.json(
-        {message: "sorry, we couldn't find any vehicle"},
-        {status: 200}
-      )
+    let vehicles = [];
+    if(vType !== "all") {
+      vehicles = await Vehicle.find({
+        owner: { $in: partnerIds },
+        type: vehicleType.toLowerCase(),
+        status: "approved",
+        isActive: true,
+      }).lean();
     } else {
-      return NextResponse.json(
-        vehicles,
-        {status: 200},
-      )
+      vehicles = await Vehicle.find({
+        owner: { $in: partnerIds },
+        status: "approved",
+        isActive: true,
+      }).lean();
     }
 
+
+    if (vehicles.length === 0) {
+      return NextResponse.json(
+        { message: "sorry, we couldn't find any nearby vehicle, please try with different vehicle type" },
+        { status: 200 },
+      );
+    }
+
+    return NextResponse.json(vehicles, { status: 200 });
   } catch (err) {
     console.log(err);
     return NextResponse.json(
-        {message: "near by vehciles found error, err: ",err},
-        {status: 500}
-      )
+      { message: "near by vehicles found error", error: err },
+      { status: 500 },
+    );
   }
 }
