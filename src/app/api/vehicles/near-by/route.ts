@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     if(vType !== "all") {
       vehicles = await Vehicle.find({
         owner: { $in: partnerIds },
-        type: vehicleType.toLowerCase(),
+        type: vType,
         status: "approved",
         isActive: true,
       }).lean();
