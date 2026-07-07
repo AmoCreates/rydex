@@ -9,6 +9,7 @@ import { getSocket } from "@/lib/socket";
 import { RootState } from "@/Toolkit/store";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { IVehicle } from "@/model/vehicle.model";
 
 const Page = () => {
 	const router = useRouter();
@@ -23,22 +24,51 @@ const Page = () => {
 	const pickupLon = Number(params.get("pickuplon"));
 	const dropLat = Number(params.get("droplat"));
 	const dropLon = Number(params.get("droplon"));
+	const [vehicles, setVehicles] = useState<IVehicle[]>([]);
 	const [loading, setLoading] = useState(false);
 
-	const getNearByVehicle = async (lat:number, lon:number, vehicleType:string | null) => {
-		try {
-			const {data} = await axios.post('/api/vehicles/near-by', {
-				lat, lon, vehicleType
-			});
-			console.log(data);
-		} catch (error) {
-			console.log(error);
-		}
-	}
-
 	useEffect(() => {
-		getNearByVehicle(pickupLat, pickupLon, vehicle);
-	}, [pickupLat, pickupLon, vehicle])
+		let isActive = true;
+
+		if (
+			!Number.isFinite(pickupLat) ||
+			!Number.isFinite(pickupLon) ||
+			!vehicle
+		) {
+			return;
+		}
+
+		const fetchVehicles = async () => {
+			setLoading(true);
+			try {
+				const { data } = await axios.post("/api/vehicles/near-by", {
+					lat: pickupLat,
+					lon: pickupLon,
+					vehicleType: vehicle,
+				});
+				console.log(data);
+
+				if (isActive) {
+					setVehicles(Array.isArray(data) ? data : []);
+				}
+			} catch (error) {
+				console.log(error);
+				if (isActive) {
+					setVehicles([]);
+				}
+			} finally {
+				if (isActive) {
+					setLoading(false);
+				}
+			}
+		};
+
+		void fetchVehicles();
+
+		return () => {
+			isActive = false;
+		};
+	}, [pickupLat, pickupLon, vehicle, pickUp]);
 
 	return (
 		<div className="min-h-screen bg-zinc-100 text-zinc-900 overflow-x-hidden">
@@ -70,7 +100,6 @@ const Page = () => {
 				className="relative z-20 -mt-10 bg-white rounded-t-[28px] border-t border-zinc-200 shadow-[0_-8px_40px_rgba(0,0,0,0.08)] pt-5 pb-20 min-h-[52vh]"
 			>
 				<div className="px-5 lg:px-8 max-w-6xl mx-auto">
-
 					{/* Pickup & Drop Location  */}
 					<motion.div
 						initial={{ opacity: 0, y: 12 }}
@@ -120,6 +149,23 @@ const Page = () => {
 								size={18}
 								className="text-zinc-400 shrink-0 mt-1.5"
 							/>
+						</div>
+					</motion.div>
+
+					<motion.div
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{ delay: 0.2 }}
+						className="flex items-center justify-between mb-4"
+					>
+						<div>
+							<h2 className="text-zinc-900 text-lg font-black tracking-tight">
+								{loading
+									? "Finding Nearby Vehicle"
+									: vehicles.length > 0
+										? "Avaiable vehicles"
+										: "No nearby vehicle"}
+							</h2>
 						</div>
 					</motion.div>
 				</div>
