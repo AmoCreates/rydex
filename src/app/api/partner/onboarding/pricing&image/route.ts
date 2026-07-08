@@ -72,6 +72,7 @@ export async function POST(req: Request) {
 			baseFare: baseFare,
 			pricePerKM: pricePerKM,
 			waitingChargerPerMin: waitingChargerPerMin,
+			isActive: false,
 		};
 
 		if (imageFile && imageFile.size > 0) {

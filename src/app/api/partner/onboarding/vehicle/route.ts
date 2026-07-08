@@ -49,6 +49,7 @@ export async function POST(req: Request) {
 			vehicle.vehicleModel = vehicleModel;
 			vehicle.vehicleNumber = vehicleNumberCapitalize;
 			vehicle.status = "pending";
+			vehicle.isActive = false;
 
 			await vehicle.save();
 
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
 			type: vehicleType,
 			vehicleNumber: vehicleNumberCapitalize,
 			vehicleModel,
+			isActive: false,
 		});
 
 		if (user.partnerOnBoardingStep < 1) {
