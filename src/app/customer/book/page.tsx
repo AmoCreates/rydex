@@ -221,51 +221,51 @@ const Page = () => {
 											onClick={() =>
 												!isBusy && setVehicle(v.id)
 											}
-											className={`relative rounded-2xl border p-4  flex items-center ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2"}`}
+											className={`relative rounded-2xl border p-4  flex items-center ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2 "}`}
 										>
 											{v.id === "all" ? (
 												<>
 													<div
-														className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+														className={`w-11 h-11 border border-r rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
 													>
 														<Icon />
 													</div>
 													<div
-														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+														className={`w-11 border-r border h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
 													>
 														<Car />
 													</div>
 													<div
-														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+														className={`w-11 h-11 border-r border rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
 													>
 														<Truck />
 													</div>
 													<div
-														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+														className={`w-11 h-11 border-r border rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
 													>
 														<Package />
 													</div>
 													<div
-														className={`w-11 h-11 rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+														className={`w-11 h-11 border-r border  rounded-xl -ml-4.5 flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
 													>
 														<Bus />
 													</div>
 												</>
 											) : (
 												<div
-													className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"}`}
+													className={`w-11 h-11 rounded-xl flex items-center justify-center ${isActive ? "bg-white text-black" : "bg-black text-white"} `}
 												>
 													<Icon />
 												</div>
 											)}
 
 											<div>
-												<div className={` ${v.id === "all" ? "text-xl" : "text-sm"} font-semibold`}>
+												<div className={` ${v.id === "all" ? "text-xl" : "text-sm"} font-semibold ${v.id === "all" && "text-center"}`}>
 													{v.label}
 												</div>
 												
 													<p
-														className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"} `}
+														className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"}  ${v.id === "all" && "text-center"}`}
 													>
 														{v.desc}
 													</p>

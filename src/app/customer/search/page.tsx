@@ -5,9 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, MapPin } from "lucide-react";
 import Map from "@/components/Map";
 import { RiSendPlaneFill } from "@remixicon/react";
-import { getSocket } from "@/lib/socket";
-import { RootState } from "@/Toolkit/store";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import { IVehicle } from "@/model/vehicle.model";
 
