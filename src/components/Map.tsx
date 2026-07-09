@@ -167,9 +167,10 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 					([lon, lat]: number[]) => [lat, lon],
 				),
 			);
-			// toFixed retuns the string '+' symbol convert it to number
-			setKm(+(data.routes[0].distance / 1000).toFixed(2));
-			setDistance(km);
+			// compute new km value and set both local state and parent callback
+			const newKm = +(data.routes[0].distance / 1000).toFixed(2);
+			setKm(newKm);
+			setDistance(newKm);
 		} catch (err) {
 			console.error('error: "Failed to fetch route');
 			console.error(err);

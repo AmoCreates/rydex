@@ -21,13 +21,13 @@ import { IVehicle } from "@/model/vehicle.model";
 import VehicleCard from "@/components/VehicleCard";
 
 const VEHICE_META: any = {
-	bike: { label: "Bike", Icon: Bike },
-	auto: { label: "Auto", Icon: Car },
-	car: { label: "Car", Icon: Car },
-	loading: { label: "Loading", Icon: Package },
-	truck: { label: "Truck", Icon: Truck },
-	bus: { label: "Bus", Icon: Bus },
-	all: { label: "All", Icon: Car },
+	bike: { label: "Bike"},
+	auto: { label: "Auto"},
+	car: { label: "Car"},
+	loading: { label: "Loading"},
+	truck: { label: "Truck"},
+	bus: { label: "Bus"},
+	all: { label: "All"},
 };
 
 const Page = () => {
@@ -85,7 +85,7 @@ const Page = () => {
 	return (
 		<div className="min-h-screen bg-zinc-100 text-zinc-900 overflow-x-hidden">
 			{/* Back button */}
-			<div className="absolute top-5 left-5 z-50">
+			<div className=" top-5 left-5 fixed z-50">
 				<motion.button
 					whileTap={{ scale: 0.88 }}
 					onClick={() => router.back()}
