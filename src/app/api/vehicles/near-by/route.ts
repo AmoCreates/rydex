@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     if (partnerIds.length === 0) {
       return NextResponse.json(
-        { message: "No vehicle found near-by" },
+        [],
         { status: 200 },
       );
     }
