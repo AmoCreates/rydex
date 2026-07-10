@@ -279,13 +279,14 @@ const Page = () => {
 											drop,
 											vehicle:v.type,
 											driver: v.owner,
-											customer: name,
-											customerMobile:String(mobile),
+											name,
+											mobile:String(mobile),
 											fare:String(v.baseFare! + v.pricePerKM! * distance),
 											pickupLat: String(pickupLat),
 											pickupLon: String(pickupLon),
 											dropLat: String(dropLat),
 											dropLon: String(dropLon),
+											distance: String(distance),
 										})
 										router.push(`/customer/checkout/?${url.toString()}`)
 									}}
