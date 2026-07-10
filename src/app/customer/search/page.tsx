@@ -2,33 +2,41 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-	ArrowLeft,
-	Bike,
-	Bus,
-	Car,
-	MapPin,
-	Package,
-	RefreshCcw,
-	Search,
-	Truck,
-	Zap,
-} from "lucide-react";
+import { ArrowLeft, MapPin, RefreshCcw, Search, Zap } from "lucide-react";
 import Map from "@/components/Map";
 import { RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
-import { IVehicle } from "@/model/vehicle.model";
+import { vehicleType } from "@/model/vehicle.model";
 import VehicleCard from "@/components/VehicleCard";
 
 const VEHICE_META: any = {
-	bike: { label: "Bike"},
-	auto: { label: "Auto"},
-	car: { label: "Car"},
-	loading: { label: "Loading"},
-	truck: { label: "Truck"},
-	bus: { label: "Bus"},
-	all: { label: "All"},
+	bike: { label: "Bike" },
+	auto: { label: "Auto" },
+	car: { label: "Car" },
+	loading: { label: "Loading" },
+	truck: { label: "Truck" },
+	bus: { label: "Bus" },
+	all: { label: "All" },
 };
+
+interface IVehicle {
+	owner: string;
+	type: vehicleType;
+	vehicleModel: string;
+	vehicleNumber: string;
+	vehicleCondition?: "good" | "fair" | "poor";
+	AC?: boolean;
+	imageUrl?: string;
+	baseFare?: number;
+	pricePerKM?: number;
+	waitingChargerPerMin?: number;
+	status?: "approved" | "rejected" | "pending";
+	isActive?: boolean;
+	rejectionMsg?: string;
+	rating?: number;
+	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
+	updatedAt?: Date;
+}
 
 const Page = () => {
 	const router = useRouter();
@@ -251,17 +259,40 @@ const Page = () => {
 					</AnimatePresence>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-						{
-							vehicles.map((v, i) => (
-								<motion.div key={i}
-								initial={{opacity: 0, y:24}}
-								animate={{opacity: 1, y: 0}}
-								transition={{delay: i*0.06, duration: 0.38, ease: [0.22, 1, 0.36, 1]}}
-								>
-									<VehicleCard vehicle={v} distance={distance} />
-								</motion.div>
-							))
-						}
+						{vehicles.map((v, i) => (
+							<motion.div
+								key={i}
+								initial={{ opacity: 0, y: 24 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{
+									delay: i * 0.06,
+									duration: 0.38,
+									ease: [0.22, 1, 0.36, 1],
+								}}
+							>
+								<VehicleCard
+									vehicle={v}
+									distance={distance}
+									onBook={() => {
+										const url = new URLSearchParams({
+											pickUp,
+											drop,
+											vehicle:v.type,
+											driver: v.owner,
+											customer: name,
+											customerMobile:String(mobile),
+											fare:String(v.baseFare! + v.pricePerKM! * distance),
+											pickupLat: String(pickupLat),
+											pickupLon: String(pickupLon),
+											dropLat: String(dropLat),
+											dropLon: String(dropLon),
+										})
+										router.push(`/checkout/?${url.toString()}`)
+									}}
+
+								/>
+							</motion.div>
+						))}
 					</div>
 				</div>
 			</motion.div>

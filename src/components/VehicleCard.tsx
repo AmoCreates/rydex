@@ -1,5 +1,5 @@
 "use client";
-import { IVehicle } from "@/model/vehicle.model";
+import { vehicleType } from "@/model/vehicle.model";
 import React from "react";
 import { motion } from "motion/react";
 import {
@@ -15,7 +15,25 @@ import {
 	Truck,
 	Wind,
 } from "lucide-react";
-import { RiMoneyCnyBoxFill, RiMoneyDollarBoxLine } from "@remixicon/react";
+
+interface IVehicle {
+	owner: string;
+	type: vehicleType;
+	vehicleModel: string;
+	vehicleNumber: string;
+	vehicleCondition?: "good" | "fair" | "poor";
+	AC?: boolean;
+	imageUrl?: string;
+	baseFare?: number;
+	pricePerKM?: number;
+	waitingChargerPerMin?: number;
+	status?: "approved" | "rejected" | "pending";
+	isActive?: boolean;
+	rejectionMsg?: string;
+	rating?: number;
+	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
+	updatedAt?: Date;
+}
 
 const TYPE_CONFIG: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -29,9 +47,11 @@ const TYPE_CONFIG: any = {
 const VehicleCard = ({
 	vehicle,
 	distance,
+	onBook,
 }: {
 	vehicle: IVehicle;
 	distance: number;
+	onBook: () => void;
 }) => {
 	console.log(distance);
 	const { Icon, label } = TYPE_CONFIG[vehicle.type];
@@ -184,7 +204,10 @@ const VehicleCard = ({
 							className="flex items-center gap-1.5 bg-zinc-900 hover:bg-black text-white text-sm font-black px-6 py-3 rounded-2xl transition-colors shadow-md cursor-pointer group"
 						>
 							Book
-							<Icon size={16} className="group-hover:translate-x-2 group-focus:translate-x-10 transition-transform"/>
+							<Icon
+								size={16}
+								className="group-hover:translate-x-2 group-focus:translate-x-10 transition-transform"
+							/>
 						</motion.button>
 					</div>
 				</div>
