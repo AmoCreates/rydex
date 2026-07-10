@@ -202,6 +202,7 @@ const VehicleCard = ({
 							whileTap={{ scale: 0.92 }}
 							whileHover={{ scale: 1.04 }}
 							className="flex items-center gap-1.5 bg-zinc-900 hover:bg-black text-white text-sm font-black px-6 py-3 rounded-2xl transition-colors shadow-md cursor-pointer group"
+							onClick={onBook}
 						>
 							Book
 							<Icon

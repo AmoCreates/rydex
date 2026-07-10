@@ -287,7 +287,7 @@ const Page = () => {
 											dropLat: String(dropLat),
 											dropLon: String(dropLon),
 										})
-										router.push(`/checkout/?${url.toString()}`)
+										router.push(`/customer/checkout/?${url.toString()}`)
 									}}
 
 								/>
