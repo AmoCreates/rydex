@@ -1,14 +1,17 @@
 "use client";
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import {
+	ArrowLeft,
 	Bike,
 	Bus,
 	Car,
 	Clock4,
+	CreditCard,
 	IndianRupee,
 	MapPin,
 	Package,
+	ShieldCheck,
 	Truck,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -22,6 +25,16 @@ const VEHICE_META: any = {
 	truck: { label: "Truck", Icon: Truck },
 	bus: { label: "Bus", Icon: Bus },
 };
+
+type Status =
+	| "idle"
+	| "requested"
+	| "awaiting payment"
+	| "rejected"
+	| "expired"
+	| "cancelled"
+	| "payment"
+	| "confirmed";
 
 const Page = () => {
 	const router = useRouter();
@@ -37,10 +50,12 @@ const Page = () => {
 	const dropLat = Number(params.get("droplat"));
 	const dropLon = Number(params.get("droplon"));
 	const distance = Number(params.get("distance") || "0");
-	const fare = Number(params.get("fare"));
+	const fare = Math.round(Number(params.get("fare")));
 	const driver = params.get("driver");
 
 	const { Icon, lable } = VEHICE_META[vehicle];
+
+	const [status, setStatus] = useState<Status>("idle");
 
 	return (
 		<div className="min-h-screen bg-zinc-100 px-4 py-12">
@@ -49,8 +64,16 @@ const Page = () => {
 					initial={{ opacity: 0, y: 16 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-					className="mb-10"
+					className="mb-10 relative"
 				>
+					<motion.button
+						whileTap={{ scale: 0.88 }}
+						onClick={() => router.back()}
+						className="absolute right-0 top-5 w-11 h-11 rounded-full bg-white border border-zinc-200 shadow-md flex items-center justify-center hover:bg-zinc-50 transition-colors cursor-pointer"
+					>
+						<ArrowLeft />
+					</motion.button>
+
 					<div className="flex items-center gap-2 mb-2">
 						<div className="h-px w-8 bg-zinc-900" />
 						<span className="text-[10px] uppercase font-black tracking-[0.2em] text-zinc-400">
@@ -64,6 +87,7 @@ const Page = () => {
 						Review you ride and confirm
 					</p>
 				</motion.div>
+
 				<div className="grid lg:grid-cols-2 gap-6">
 					{/* Left side: Vehicle Details, Location(Drop, Pickup) and Pricing */}
 					<motion.div
@@ -77,6 +101,7 @@ const Page = () => {
 						className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.07)]"
 					>
 						<div className="h-1 bg-zinc-900" />
+						
 						<div className="p-8 sm:p-10">
 							{/* Selected Vehicle */}
 							<div className="flex items-center justify-between mb-8">
@@ -169,7 +194,7 @@ const Page = () => {
 						</div>
 					</motion.div>
 
-					{/* right side: Vehicle Details, Location(Drop, Pickup) and Pricing */}
+					{/* right side */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -182,44 +207,75 @@ const Page = () => {
 					>
 						<div className="h-1 bg-zinc-900" />
 
-						<div className="p-8 sm:p-10">
-							{/* Selected Vehicle */}
+						<div className="p-8 sm:p-10 flex-1 flex-col">
+							<AnimatePresence mode="wait">
+								{status === "idle" && (
+									<motion.div
+										key="idle"
+										initial={{ opacity: 0, y: 12 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -12 }}
+										transition={{ duration: 0.3 }}
+										className="flex flex-col flex-1 justify-between"
+									>
+										<div>
+											<p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 mb-1">
+												Ready to Go!
+											</p>
+											<h3 className="text-2xl font-black text-zinc-900 mb-2">
+												Comfirm Your Ride
+											</h3>
+											<div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-5 space-y-3">
+												{[
+													{
+														icon: (
+															<Clock4 size={14} />
+														),
+														text: "Driver will respond within 2 minutes",
+													},
+													{
+														icon: (
+															<ShieldCheck
+																size={14}
+															/>
+														),
+														text: "Verified and ensure drivers only",
+													},
+													{
+														icon: (
+															<CreditCard
+																size={14}
+															/>
+														),
+														text: "Pay after driver accepts",
+													},
+												].map((item, idx) => (
+													<div
+														key={idx}
+														className="flex items-center gap-3"
+													>
+														<div className="w-7 h-7 rounded-xl bg-zinc-200 flex items-center justify-center text-zinc-600 shrink-0">
+															{item.icon}
+														</div>
+														<p className="text-zinc-500 text-xs font-medium">
+															{item.text}
+														</p>
+													</div>
+												))}
+											</div>
+										</div>
 
-							<div className="mb-8">
-								<div className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 mb-1">
-									Ready to go!
-								</div>
-								<div className="text-3xl font-bold tracking-tight text-zinc-900 capitalize">
-									Confirm your ride
-								</div>
-							</div>
-
-							<div className="bg-zinc-50 border border-zinc-100 rounded-2xl overflow-hidden mb-8 gap-3 flex flex-col p-5">
-								<div className="flex gap-2 items-center">
-									<div className="bg-zinc-200 rounded-xl h-9 w-9 flex justify-center items-center">
-										<Clock4 size={15} />
-									</div>
-									<p className="text-zinc-600">
-										Driver will respond within 2 minutes
-									</p>
-								</div>
-								<div className="flex gap-2 items-center">
-									<div className="bg-zinc-200 rounded-xl h-9 w-9 flex justify-center items-center">
-										<Clock4 size={15} />
-									</div>
-									<p className="text-zinc-600">
-										Driver will respond within 2 minutes
-									</p>
-								</div>
-								<div className="flex gap-2 items-center">
-									<div className="bg-zinc-200 rounded-xl h-9 w-9 flex justify-center items-center">
-										<Clock4 size={15} />
-									</div>
-									<p className="text-zinc-600">
-										Driver will respond within 2 minutes
-									</p>
-								</div>
-							</div>
+										<motion.button
+											whileTap={{ scale: 0.97 }}
+											whileHover={{ scale: 1.02 }}
+											className="w-full h-14 mt-8 bg-zinc-900 hover:bg-black disalbed-opacity-40 disabled:pointer-events-none text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md cursor-pointer group overflow-x-hidden"
+										>
+											Request Ride{" "}
+											<Icon className="group-hover:translate-x-2 group-focus:translate-x-96 transition-transform duration-700" />
+										</motion.button>
+									</motion.div>
+								)}
+							</AnimatePresence>
 						</div>
 					</motion.div>
 				</div>

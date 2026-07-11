@@ -212,8 +212,10 @@ const Page = () => {
 									return (
 										<motion.div
 											key={i}
-											whileHover={{
-												scale: isBusy ? 1 : 1.05,
+											initial={{ opacity: 0, y: 12 }}
+											animate={{ opacity: 1, y: 0 }}
+											transition={{
+												delay: 0.07 + i * 0.05,
 											}}
 											whileTap={{
 												scale: isBusy ? 1 : 0.96,
@@ -221,7 +223,7 @@ const Page = () => {
 											onClick={() =>
 												!isBusy && setVehicle(v.id)
 											}
-											className={`relative rounded-2xl border p-4  flex items-center ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2 "}`}
+											className={`relative rounded-2xl border p-4  flex items-center ${ isBusy ? "hover:scale-100" : "hover:scale-105"} ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2 "}`}
 										>
 											{v.id === "all" ? (
 												<>
@@ -260,16 +262,17 @@ const Page = () => {
 											)}
 
 											<div>
-												<div className={` ${v.id === "all" ? "text-xl" : "text-sm"} font-semibold ${v.id === "all" && "text-center"}`}>
+												<div
+													className={` ${v.id === "all" ? "text-xl" : "text-sm"} font-semibold ${v.id === "all" && "text-center"}`}
+												>
 													{v.label}
 												</div>
-												
-													<p
-														className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"}  ${v.id === "all" && "text-center"}`}
-													>
-														{v.desc}
-													</p>
-												
+
+												<p
+													className={`text-xs ${isActive ? "text-gray-300" : "text-gray-500"}  ${v.id === "all" && "text-center"}`}
+												>
+													{v.desc}
+												</p>
 											</div>
 
 											{isActive && (
@@ -505,7 +508,7 @@ const Page = () => {
 													scale: 0.98,
 												}}
 												transition={{ duration: 0.2 }}
-												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-42 overflow-y-auto z-50"
+												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-42 overflow-y-auto z-50 cursor-pointer"
 											>
 												{pickupSuggestion.map(
 													(p, i) => {
@@ -622,7 +625,7 @@ const Page = () => {
 													scale: 0.98,
 												}}
 												transition={{ duration: 0.2 }}
-												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-40 overflow-y-auto z-50"
+												className="absolute left-0 right-0 top-full mt-1 bg-white border border-zinc-200 rounded-2xl shadow-2xl max-h-40 overflow-y-auto z-50 cursor-pointer"
 											>
 												{dropSuggestion.map((p, i) => (
 													<motion.div
