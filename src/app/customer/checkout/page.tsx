@@ -101,7 +101,7 @@ const Page = () => {
 						className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.07)]"
 					>
 						<div className="h-1 bg-zinc-900" />
-						
+
 						<div className="p-8 sm:p-10">
 							{/* Selected Vehicle */}
 							<div className="flex items-center justify-between mb-8">
@@ -276,6 +276,9 @@ const Page = () => {
 									</motion.div>
 								)}
 							</AnimatePresence>
+								<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 mt-7 flex items-center justify-center">
+									<ShieldCheck size={14}/> secure & verified payment
+								</div>
 						</div>
 					</motion.div>
 				</div>
