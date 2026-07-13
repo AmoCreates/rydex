@@ -20,6 +20,7 @@ const VEHICE_META: any = {
 };
 
 interface IVehicle {
+	_id: string;
 	owner: string;
 	type: vehicleType;
 	vehicleModel: string;
@@ -279,6 +280,7 @@ const Page = () => {
 											drop,
 											vehicle:v.type,
 											driver: v.owner,
+											vehicleId: String(v._id),
 											name,
 											mobile:String(mobile),
 											fare:String(v.baseFare! + v.pricePerKM! * distance),

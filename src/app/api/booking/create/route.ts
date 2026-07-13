@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.mode";
 import User from "@/model/user.model";
+import Vehicle from "@/model/vehicle.model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -10,14 +11,10 @@ export async function POST(req: NextRequest) {
 
 		const session = await auth();
 
-		if (
-			!session ||
-			!session.user?.email ||
-			session.user.role !== "customer"
-		) {
+		if (!session || !session.user?.email || session.user.role !== "customer") {
 			return NextResponse.json(
-				{ message: "unauthorized!, please log in to book ride" },
-				{ status: 400 },
+				{ message: "unauthorized, please log in to book ride" },
+				{ status: 401 },
 			);
 		}
 
@@ -51,9 +48,9 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		if (!pickUpLocation.coordinates || !pickUpLocation.coordinates) {
+		if (!pickUpLocation?.coordinates || !dropLocation?.coordinates) {
 			return NextResponse.json(
-				{ message: "please select select the suggested address only" },
+				{ message: "please select the suggested pickup and drop addresses only" },
 				{ status: 400 },
 			);
 		}
@@ -72,6 +69,14 @@ export async function POST(req: NextRequest) {
 					message:
 						"Sorry!, driver not found, try to select any other vehicle",
 				},
+				{ status: 400 },
+			);
+		}
+
+		const vehicle = await Vehicle.findById(vehicleId);
+		if (!vehicle) {
+			return NextResponse.json(
+				{ message: "Selected vehicle not found" },
 				{ status: 400 },
 			);
 		}
@@ -95,7 +100,7 @@ export async function POST(req: NextRequest) {
 
 		const booking = await Booking.create({
 			customer: session.user.id,
-			driver: driver,
+			driver: driver._id,
 			vehicle: vehicleId,
 			pickUpAddress,
 			dropAddress,
@@ -113,7 +118,7 @@ export async function POST(req: NextRequest) {
 			bookingStatus: "requested",
 		});
 
-		return NextResponse.json(booking, { status: 200 });
+		return NextResponse.json(booking, { status: 201 });
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(

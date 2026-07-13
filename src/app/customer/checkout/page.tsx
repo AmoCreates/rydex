@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiSendPlaneFill } from "@remixicon/react";
+import axios from "axios";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -45,17 +46,46 @@ const Page = () => {
 	const vehicle = params.get("vehicle") || "";
 	const name = params.get("name") || "";
 	const mobile = Number(params.get("mobile"));
-	const pickupLat = Number(params.get("pickuplat"));
-	const pickupLon = Number(params.get("pickuplon"));
-	const dropLat = Number(params.get("droplat"));
-	const dropLon = Number(params.get("droplon"));
+	const pickupLat = Number(params.get("pickupLat"));
+	const pickupLon = Number(params.get("pickupLon"));
+	const dropLat = Number(params.get("dropLat"));
+	const dropLon = Number(params.get("dropLon"));
 	const distance = Number(params.get("distance") || "0");
 	const fare = Math.round(Number(params.get("fare")));
-	const driver = params.get("driver");
+	const driverId = params.get("driver") || "";
+	const vehicleId = params.get("vehicleId") || "";
 
 	const { Icon, lable } = VEHICE_META[vehicle];
 
 	const [status, setStatus] = useState<Status>("idle");
+
+	const handleBookRequest = async () => {
+		try {
+			console.log(pickupLon, pickupLat, dropLat, dropLon)
+			const { data } = await axios.post("/api/booking/create", {
+				driverId,
+				vehicleId,
+				pickUpAddress:pickUp,
+				dropAddress: drop,
+				pickUpLocation: {
+					type: "Point",
+					coordinates: [pickupLon, pickupLat]
+				},
+				dropLocation: {
+					type: "Point",
+					coordinates: [dropLon, dropLat]
+				},
+				fare,
+				customerName: name,
+				customerMobile: mobile,
+				distance,
+			});
+
+			console.log(data);
+		} catch (error: any) {
+			console.log(error?.response.data.message);
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-zinc-100 px-4 py-12">
@@ -266,6 +296,7 @@ const Page = () => {
 										</div>
 
 										<motion.button
+											onClick={handleBookRequest}
 											whileTap={{ scale: 0.97 }}
 											whileHover={{ scale: 1.02 }}
 											className="w-full h-14 mt-8 bg-zinc-900 hover:bg-black disalbed-opacity-40 disabled:pointer-events-none text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md cursor-pointer group overflow-x-hidden"
@@ -276,9 +307,10 @@ const Page = () => {
 									</motion.div>
 								)}
 							</AnimatePresence>
-								<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 mt-7 flex items-center justify-center">
-									<ShieldCheck size={14}/> secure & verified payment
-								</div>
+							<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 mt-7 flex items-center justify-center">
+								<ShieldCheck size={14} /> secure & verified
+								payment
+							</div>
 						</div>
 					</motion.div>
 				</div>
