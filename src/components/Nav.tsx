@@ -7,19 +7,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/Toolkit/store";
 import { signOut, useSession } from "next-auth/react";
-import { RiHome9Fill, RiPhoneFill, RiTaxiFill } from "@remixicon/react";
-import {
-	BadgeInfo,
-	Bike,
-	Car,
-	ChevronRight,
-	LogOut,
-	Menu,
-	Truck,
-	X,
-} from "lucide-react";
+import { Bike, Car, ChevronRight, LogOut, Truck } from "lucide-react";
 
-const Nav_Items = ["Home", "Bookings", "About Us", "Contact Us"];
+const publicNav = ["Home", "Bookings", "About Us", "Contact Us"];
+const partnerNav = ["Home", "Active Ride", "Pending Request", "My Bookings"];
 
 type Props = {
 	onOpen: () => void;
@@ -33,6 +24,7 @@ const Nav = ({ onOpen }: Props) => {
 	const { data: session } = useSession();
 	const userData = session?.user;
 	const router = useRouter();
+	const Nav_Items = userData?.role !== "partner" ? publicNav : partnerNav;
 
 	const handleSignOut = async () => {
 		await signOut({ callbackUrl: "/", redirect: false });
@@ -60,30 +52,23 @@ const Nav = ({ onOpen }: Props) => {
 							className="w-auto h-auto"
 						/>
 					</Link>
-					<div className="hidden md:flex items-center gap-4 lg:gap-10">
+					<div className="flex items-center sm:justify-evenly md:gap-4 lg:gap-10">
 						{Nav_Items.map((item, index) => {
-							const href = item !== "Home" ? `/${item.toLowerCase()}` : "/";
+							const href =
+								item !== "Home"
+									? `/${item.toLowerCase()}`
+									: "/";
 							const active = pathName === href;
 							return (
 								<Link
 									key={index}
 									href={href}
-									className={`text-sm font-medium transition pl-2 ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
+									className={`text-[11px] sm:text-sm text-center font-medium transition pl-2 ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
 								>
 									{item}
 								</Link>
 							);
 						})}
-					</div>
-					<div className="md:hidden">
-						<button
-							className="px-4 py-1.5 rounded-full text-white text-sm cursor-pointer transition active:scale-95 font-semibold"
-							onClick={() => {
-								setMenuOpen(!menuOpen);
-							}}
-						>
-							{menuOpen ? <X size={20} /> : <Menu size={20} />}
-						</button>
 					</div>
 
 					<div className="flex items-center relative">
@@ -101,9 +86,18 @@ const Nav = ({ onOpen }: Props) => {
 									<AnimatePresence>
 										{profileOpen && (
 											<motion.div
-												initial={{ opacity: 0, scale: 0.95 }}
-												animate={{ opacity: 1, scale: 1 }}
-												exit={{ opacity: 0, scale: 0.95 }}
+												initial={{
+													opacity: 0,
+													scale: 0.95,
+												}}
+												animate={{
+													opacity: 1,
+													scale: 1,
+												}}
+												exit={{
+													opacity: 0,
+													scale: 0.95,
+												}}
 												className="absolute hidden md:block right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200"
 											>
 												<div className="py-2 text-center border-b border-gray-200 mb-1">
@@ -113,11 +107,16 @@ const Nav = ({ onOpen }: Props) => {
 													<p className="text-xs -mt-1 text-gray-500">
 														{userData.role}
 													</p>
-													{userData.role == "customer" && (
+													{userData.role ==
+														"customer" && (
 														<div
 															onClick={() => {
-																setProfileOpen(false);
-																router.push('/partner/onboarding/vehicle')
+																setProfileOpen(
+																	false,
+																);
+																router.push(
+																	"/partner/onboarding/vehicle",
+																);
 															}}
 															className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white text-black font-semibold cursor-pointer mt-2 gap-2 hover:bg-gray-200"
 														>
@@ -136,7 +135,10 @@ const Nav = ({ onOpen }: Props) => {
 																/>
 															</div>
 															Become a Partner
-															<ChevronRight size={16} className="ml-auto" />
+															<ChevronRight
+																size={16}
+																className="ml-auto"
+															/>
 														</div>
 													)}
 												</div>
@@ -146,14 +148,15 @@ const Nav = ({ onOpen }: Props) => {
 												>
 													Profile
 												</Link>
-												{ userData?.role === "customer" &&
+												{userData?.role ===
+													"customer" && (
 													<Link
-													href="/customer/book"
-													className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
-												>
-													Book Vehicle
-												</Link>
-												}
+														href="/customer/book"
+														className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+													>
+														Book Vehicle
+													</Link>
+												)}
 												<Link
 													href="/bookings"
 													className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
@@ -165,7 +168,10 @@ const Nav = ({ onOpen }: Props) => {
 													className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"
 													onClick={handleSignOut}
 												>
-													<LogOut size={16} className="text-black" />
+													<LogOut
+														size={16}
+														className="text-black"
+													/>
 													Logout
 												</button>
 											</motion.div>
@@ -186,46 +192,6 @@ const Nav = ({ onOpen }: Props) => {
 			</motion.div>
 
 			<AnimatePresence>
-				{menuOpen && (
-					<motion.div
-						initial={{ y: -30, opacity: 0, zIndex: 1 }}
-						animate={{ y: 0, opacity: 1, zIndex: 50 }}
-						exit={{ y: -60, opacity: 0, zIndex: 1 }}
-						className="fixed md:hidden left-1/2 -translate-x-1/2 top-20 z-50 bg-transparent backdrop-blur-xl text-white rounded-lg shadow-xl w-87.5 py-2 px-2 border border-gray-200 flex"
-					>
-						{Nav_Items.map((item, index) => {
-							const href = item !== "Home" ? `/${item.toLowerCase()}` : "/";
-							const active = pathName === href;
-							const icon =
-								item === "Home" ? (
-									<RiHome9Fill />
-								) : item === "Bookings" ? (
-									<RiTaxiFill />
-								) : item === "About Us" ? (
-									<BadgeInfo />
-								) : item === "Contact Us" ? (
-									<RiPhoneFill />
-								) : null;
-							return (
-								<Link
-									key={index}
-									href={href}
-									className={`px-4 py-2 rounded-lg  text-sm  cursor-pointer hover:bg-white/10 ${active ? "text-white bg-white/10" : "text-gray-400 hover:text-white"}`}
-								>
-									{icon && (
-										<div className="flex flex-col items-center justify-center">
-											{icon}
-											<p className="text-xs mt-1">{item}</p>
-										</div>
-									)}
-								</Link>
-							);
-						})}
-					</motion.div>
-				)}
-			</AnimatePresence>
-
-			<AnimatePresence>
 				{profileOpen && userData && (
 					<motion.div
 						initial={{ y: 400 }}
@@ -235,13 +201,19 @@ const Nav = ({ onOpen }: Props) => {
 						className="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl z-50 md:hidden"
 					>
 						<div className="py-2 text-center border-b border-gray-200 mb-1">
-							<p className="text-lg font-semibold">{userData.name}</p>
-							<p className="text-xs -mt-1 text-gray-500">{userData.role}</p>
+							<p className="text-lg font-semibold">
+								{userData.name}
+							</p>
+							<p className="text-xs -mt-1 text-gray-500">
+								{userData.role}
+							</p>
 							{userData.role !== "partner" && (
 								<div
 									onClick={() => {
 										setProfileOpen(false);
-									router.push('/partner/onboarding/vehicle')
+										router.push(
+											"/partner/onboarding/vehicle",
+										);
 									}}
 									className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-white text-black font-semibold cursor-pointer mt-2 gap-2 hover:bg-gray-200"
 								>
@@ -260,7 +232,10 @@ const Nav = ({ onOpen }: Props) => {
 										/>
 									</div>
 									Become a Partner
-									<ChevronRight size={16} className="ml-auto" />
+									<ChevronRight
+										size={16}
+										className="ml-auto"
+									/>
 								</div>
 							)}
 						</div>
