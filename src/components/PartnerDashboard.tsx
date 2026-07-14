@@ -39,7 +39,6 @@ const PartnerDashboard = () => {
 		const getData = async () => {
 			try {
 				const { data } = await axios.get("/api/partner/onboarding/vehicle");
-				console.log(data);
 				setVehicleData(data);
 			} catch (error) {
 				console.log(error);

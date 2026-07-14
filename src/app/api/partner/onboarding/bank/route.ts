@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 		await dbConnect();
 
 		const session = await auth();
-		if (!session || !session.user?.email) {
+		if (!session || !session.user?.email || session.user.role !== "partner") {
 			return Response.json({ message: "unauthorized" }, { status: 401 });
 		}
 
