@@ -11,7 +11,7 @@ type BookingStatus =
 	| "rejected"
 	| "expired";
 
-type PaymentStatus = "pending" | "paid" | "cash" | "failed";
+type PaymentStatus = "idle" | "pending" | "paid" | "cash" | "failed";
 
 export interface IBooking extends mongoose.Document {
 	customer: mongoose.Types.ObjectId;
@@ -40,6 +40,8 @@ export interface IBooking extends mongoose.Document {
 
 	bookingStatus: BookingStatus;
 	paymentStatus: PaymentStatus;
+
+	paymentDeadline: Date;
 
 	adminCommission: number;
 	partnerAmount: number;
@@ -142,9 +144,14 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 
 		paymentStatus: {
 			type: String,
-			enum: ["pending", "paid", "cash", "failed"],
+			enum: ["idle", "pending", "paid", "cash", "failed"],
 			default: "pending",
 		},
+
+
+		paymentDeadline : {
+			type: Date
+		}, 
 
 		adminCommission: {
 			type: Number,

@@ -2,13 +2,18 @@
 import { IBooking } from "@/model/booking.mode";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { motion } from "motion/react";
-import { CircleDashed, Clock4, IndianRupee, MapPin } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { CircleDashed, Clock4, IndianRupee, MapPin, X } from "lucide-react";
 import { RiSendPlaneFill } from "@remixicon/react";
+
+type ConfirmationModalType = null | "accept" | "reject";
 
 const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [confirmationModal, setConfirmationModal] =
+		useState<ConfirmationModalType>(null);
+	const [currBooking, setCurrBooking] = useState<IBooking | null>(null);
 
 	useEffect(() => {
 		const fetchPendingRequest = async () => {
@@ -19,15 +24,22 @@ const Page = () => {
 				);
 				console.log(data);
 				setBookings(data);
-			} catch (error: any) {
-				const axiosError = error;
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
 				const serverMessage = axiosError?.response?.data?.message;
 				console.log(
 					"count pending request error",
 					serverMessage ||
 						axiosError?.response?.data ||
 						axiosError?.message ||
-						axiosError,
+						error,
 				);
 			} finally {
 				setLoading(false);
@@ -36,8 +48,77 @@ const Page = () => {
 		fetchPendingRequest();
 	}, []);
 
+	const handleAccept = async (id: string) => {
+		try {
+			const res = await axios.post(
+				`/api/partner/bookings/${id}/accept`,
+			);
+			if(res.status === 200) {
+				console.log("ride accepted")
+			}
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				"count pending request error",
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+		} finally {
+			setConfirmationModal(null);
+		}
+	};
+
+	const handleReject = async (id: string) => {
+		try {
+			const res = await axios.post(
+				`/api/partner/bookings/${id}/reject`,
+			);
+			if(res.status === 200) {
+				console.log("ride rejected")
+			}
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				"count pending request error",
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+		} finally {
+			setConfirmationModal(null);
+		}
+	};
+
+	function handleConfirm(id: string) {
+		if (confirmationModal === "accept") {
+			handleAccept(id);
+		} else if (confirmationModal === "reject") {
+			handleReject(id);
+		} else return;
+	}
+
 	return (
 		<div className="min-h-screen bg-[#f4f5f7]">
+			{/* Header */}
 			<div className="bg-white border-b border-gray-200">
 				<div className="max-w-6xl mx-auto px-6 py-16">
 					<h1 className="text-4xl font-semibold text-gray-900">
@@ -139,10 +220,26 @@ const Page = () => {
 										</div>
 
 										<div className="flex gap-4 w-full lg:w-auto">
-											<button className="px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-100 transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer">
+											<button
+												onClick={() => {
+													setConfirmationModal(
+														"reject",
+													);
+													setCurrBooking(b);
+												}}
+												className="px-6 py-3 rounded-xl border border-gray-300 bg-white text-gray-700 text-sm font-semibold hover:bg-gray-100 transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
+											>
 												Reject Ride
 											</button>
-											<button className="flex items-center justify-center flex-1 lg:flex-none px-8 py-3 rounded-xl bg-black text-white text-sm font-semibold shadow-md hover:bg-gray-900 hover:shadow-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer">
+											<button
+												onClick={() => {
+													setConfirmationModal(
+														"accept",
+													);
+													setCurrBooking(b);
+												}}
+												className="flex items-center justify-center flex-1 lg:flex-none px-8 py-3 rounded-xl bg-black text-white text-sm font-semibold shadow-md hover:bg-gray-900 hover:shadow-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:pointer-events-none cursor-pointer"
+											>
 												Accept Ride
 											</button>
 										</div>
@@ -153,6 +250,167 @@ const Page = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Confirmation Modal */}
+			<AnimatePresence>
+				{confirmationModal && (
+					<>
+						{/* Backdrop */}
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ duration: 0.2 }}
+							className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+						/>
+
+						{/* Modal */}
+						<motion.div
+							initial={{ opacity: 0, scale: 0.95, y: 20 }}
+							animate={{ opacity: 1, scale: 1, y: 0 }}
+							exit={{ opacity: 0, scale: 0.95, y: 20 }}
+							transition={{
+								duration: 0.3,
+								type: "tween",
+								ease: "easeInOut",
+							}}
+							className="fixed inset-0 flex items-center justify-center z-50 p-4"
+						>
+							<div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm md:max-w-lg overflow-hidden">
+								{/* Modal Header */}
+								<div
+									className={`px-6 py-4 border-b border-gray-200 ${
+										confirmationModal === "accept"
+											? "bg-linear-to-r from-black to-gray-800"
+											: "bg-linear-to-r from-red-50 to-red-100"
+									}`}
+								>
+									<div className="flex items-center justify-between">
+										<h2
+											className={`text-lg font-semibold ${
+												confirmationModal === "accept"
+													? "text-white"
+													: "text-red-900"
+											}`}
+										>
+											{confirmationModal === "accept"
+												? "Accept Ride"
+												: "Reject Ride"}
+										</h2>
+										<button
+											onClick={() =>
+												setConfirmationModal(null)
+											}
+											className={`p-1 rounded-lg cursor-pointer transition-colors ${
+												confirmationModal === "accept"
+													? "hover:bg-white/20 text-white"
+													: "hover:bg-red-200 text-red-900"
+											}`}
+										>
+											<X size={20} />
+										</button>
+									</div>
+								</div>
+
+								{/* Modal Body */}
+								<div className="px-6 py-6">
+									<>
+										<p className="text-gray-600 text-sm mb-6">
+											Are you sure you want to{" "}
+											<span className="font-semibold">
+												{confirmationModal === "accept"
+													? "accept"
+													: "reject"}
+											</span>{" "}
+											this ride request?
+										</p>
+
+										{/* Booking Summary */}
+										<div className="bg-gray-50 rounded-lg p-4 space-y-3 mb-6">
+											<div className="flex gap-2">
+												<MapPin
+													size={16}
+													className="text-gray-500 shrink-0 mt-0.5"
+												/>
+												<div className="min-w-0">
+													<p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+														From
+													</p>
+													<p className="text-sm font-medium text-gray-900 wrap-break-word">
+														{
+															currBooking?.pickUpAddress
+														}
+													</p>
+												</div>
+											</div>
+
+											<div className="flex gap-2">
+												<RiSendPlaneFill
+													size={16}
+													className="text-gray-500 shrink-0 mt-0.5"
+												/>
+												<div className="min-w-0">
+													<p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+														To
+													</p>
+													<p className="text-sm font-medium text-gray-900 wrap-break-word">
+														{
+															currBooking?.dropAddress
+														}
+													</p>
+												</div>
+											</div>
+
+											<div className="flex gap-2 pt-2 border-t border-gray-200">
+												<IndianRupee
+													size={16}
+													className="text-gray-500 shrink-0 mt-0.5"
+												/>
+												<div>
+													<p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+														Fare
+													</p>
+													<p className="text-sm font-bold text-gray-900">
+														₹{currBooking?.fare}
+													</p>
+												</div>
+											</div>
+										</div>
+									</>
+								</div>
+
+								{/* Modal Footer */}
+								<div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex gap-3">
+									<button
+										onClick={() =>
+											setConfirmationModal(null)
+										}
+										className="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium cursor-pointer text-sm hover:bg-gray-100 transition-colors active:scale-[0.98]"
+									>
+										Cancel
+									</button>
+									<button
+										onClick={() =>
+											handleConfirm(
+												currBooking!._id.toString(),
+											)
+										}
+										className={`flex-1 px-4 py-2.5 rounded-lg cursor-pointer text-white font-medium text-sm transition-all active:scale-[0.98] ${
+											confirmationModal === "accept"
+												? "bg-black hover:bg-gray-900 shadow-md"
+												: "bg-red-600 hover:bg-red-700 shadow-md"
+										}`}
+									>
+										{confirmationModal === "accept"
+											? "Confirm Accept"
+											: "Confirm Reject"}
+									</button>
+								</div>
+							</div>
+						</motion.div>
+					</>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };
