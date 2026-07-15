@@ -13,7 +13,7 @@ type BookingStatus =
 
 type PaymentStatus = "pending" | "paid" | "cash" | "failed";
 
-interface IBooking extends mongoose.Document {
+export interface IBooking extends mongoose.Document {
 	customer: mongoose.Types.ObjectId;
 	driver: mongoose.Types.ObjectId;
 	vehicle: mongoose.Types.ObjectId;

@@ -10,7 +10,6 @@ import { signOut, useSession } from "next-auth/react";
 import { Bike, Car, ChevronRight, LogOut, Truck } from "lucide-react";
 import { RiArrowRightSLine } from "@remixicon/react";
 import axios from "axios";
-import { span } from "motion/react-client";
 
 // const publicNav = ["Home", "Bookings", "About Us", "Contact Us"];
 // const partnerNav = ["Home", "Active Ride", "Pending Request", "My Bookings"];
@@ -22,9 +21,9 @@ const publicNav = [
 ];
 
 const partnerNav = [
-	{ label: "Active Ride", route: "/partner/active-ride" },
-	{ label: "Pending Request", route: "/partner/pending-requests" },
-	{ label: "My Bookings", route: "/partner/bookings" },
+	{ label: "Active Ride", route: "/partner/bookings/active-ride" },
+	{ label: "Pending Request", route: "/partner/bookings/pending-requests" },
+	{ label: "My Bookings", route: "/partner/bookings/mybookings" },
 ];
 
 const customerMenu = [
