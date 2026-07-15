@@ -66,13 +66,13 @@ const Page = () => {
 				setData({
 					type,
 					AC,
-					vehicleCondition : vehicleCondition ?? "good",
+					vehicleCondition: vehicleCondition ?? "good",
 					baseFare,
 					pricePerKM,
 					waitingChargerPerMin,
 				});
 				setImagePreview(imageUrl);
-				setImageFile(imageUrl)
+				setImageFile(imageUrl);
 			} catch (error) {
 				console.log(error);
 			} finally {
@@ -119,8 +119,8 @@ const Page = () => {
 				"/api/partner/onboarding/pricing&image",
 				formData,
 			);
-			if(res.status == 200) {
-				router.push('/');
+			if (res.status == 200) {
+				router.push("/");
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -176,8 +176,16 @@ const Page = () => {
 										<p className="text-sm font-bold text-red-800">
 											Something went wrong
 										</p>
-										{imgErr && <p className="text-sm text-red-700">{imgErr}</p>}
-										{resErr && <p className="text-sm text-red-700">{resErr}</p>}
+										{imgErr && (
+											<p className="text-sm text-red-700">
+												{imgErr}
+											</p>
+										)}
+										{resErr && (
+											<p className="text-sm text-red-700">
+												{resErr}
+											</p>
+										)}
 									</div>
 								</div>
 							</div>
@@ -221,7 +229,9 @@ const Page = () => {
 								)}
 							</div>
 							{imgErr && !resErr && (
-								<p className="text-sm text-red-600 mt-2 ml-1">{imgErr}</p>
+								<p className="text-sm text-red-600 mt-2 ml-1">
+									{imgErr}
+								</p>
 							)}
 							<input
 								type="file"
@@ -230,6 +240,10 @@ const Page = () => {
 								accept="image/*"
 								className="hidden"
 							/>
+							<p className="-mt-2 text-xs text-center text-zinc-400">
+								Recommended to remove image background
+								before upload
+							</p>
 						</div>
 
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -256,7 +270,9 @@ const Page = () => {
 									} `}
 									disabled={data.type == "bike"}
 								>
-									<span className="font-bold">Air Conditioning</span>
+									<span className="font-bold">
+										Air Conditioning
+									</span>
 									<div
 										className={`w-12 h-6 rounded-full relative ${data.AC ? "bg-white/20" : "bg-gray-200"}`}
 									>
@@ -342,7 +358,10 @@ const Page = () => {
 												onChange={(e) =>
 													setData({
 														...data,
-														[item.key]: Number(e.target.value) || 0,
+														[item.key]:
+															Number(
+																e.target.value,
+															) || 0,
 													})
 												}
 												className="w-full bg-transparent font-black text-xl outline-none placeholder:text-gray-200"

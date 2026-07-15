@@ -48,7 +48,7 @@ const Nav = ({ onOpen }: Props) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [pendingRequestCount, setPendingRequestCount] = useState(0);
-	const [myBookingsCount, setMyBookingsCount] = useState(1);
+	const [myBookingsCount, setMyBookingsCount] = useState(0);
 	const [isActiveRide, setIsActiveRide] = useState(false);
 	const { data: session } = useSession();
 	const userData = session?.user;

@@ -3,8 +3,16 @@ import { IBooking } from "@/model/booking.mode";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { CircleDashed, Clock4, IndianRupee, MapPin, X } from "lucide-react";
+import {
+	ArrowLeft,
+	CircleDashed,
+	Clock4,
+	IndianRupee,
+	MapPin,
+	X,
+} from "lucide-react";
 import { RiSendPlaneFill } from "@remixicon/react";
+import { useRouter } from "next/navigation";
 
 type ConfirmationModalType = null | "accept" | "reject";
 
@@ -14,6 +22,7 @@ const Page = () => {
 	const [confirmationModal, setConfirmationModal] =
 		useState<ConfirmationModalType>(null);
 	const [currBooking, setCurrBooking] = useState<IBooking | null>(null);
+	const router = useRouter();
 
 	useEffect(() => {
 		const fetchPendingRequest = async () => {
@@ -50,11 +59,9 @@ const Page = () => {
 
 	const handleAccept = async (id: string) => {
 		try {
-			const res = await axios.post(
-				`/api/partner/bookings/${id}/accept`,
-			);
-			if(res.status === 200) {
-				console.log("ride accepted")
+			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
+			if (res.status === 200) {
+				console.log("ride accepted");
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -80,11 +87,9 @@ const Page = () => {
 
 	const handleReject = async (id: string) => {
 		try {
-			const res = await axios.post(
-				`/api/partner/bookings/${id}/reject`,
-			);
-			if(res.status === 200) {
-				console.log("ride rejected")
+			const res = await axios.post(`/api/partner/bookings/${id}/reject`);
+			if (res.status === 200) {
+				console.log("ride rejected");
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -128,6 +133,15 @@ const Page = () => {
 						Manage incoming ride request and respond in real time.
 					</p>
 				</div>
+				
+				{/* Back Button */}
+				<motion.button
+					whileTap={{ scale: 0.88 }}
+					onClick={() => router.back()}
+					className="absolute left-5 top-5 w-11 h-11 rounded-full bg-white border border-zinc-200 shadow-md flex items-center justify-center hover:bg-zinc-50 transition-colors cursor-pointer"
+				>
+					<ArrowLeft />
+				</motion.button>
 			</div>
 
 			<div className="max-w-6xl mx-auto px-6 py-12">
