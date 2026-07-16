@@ -19,7 +19,6 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
-import { IBooking } from "@/model/booking.mode";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
