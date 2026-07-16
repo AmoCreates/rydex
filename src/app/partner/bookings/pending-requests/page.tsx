@@ -19,6 +19,7 @@ type ConfirmationModalType = null | "accept" | "reject";
 const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [loading, setLoading] = useState(false);
+	const [confirm, setConfirm] = useState(false)
 	const [confirmationModal, setConfirmationModal] =
 		useState<ConfirmationModalType>(null);
 	const [currBooking, setCurrBooking] = useState<IBooking | null>(null);
@@ -59,6 +60,7 @@ const Page = () => {
 
 	const handleAccept = async (id: string) => {
 		try {
+			setConfirm(true);
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
 				console.log("ride accepted");
@@ -81,12 +83,14 @@ const Page = () => {
 					error,
 			);
 		} finally {
+			setConfirm(false);
 			setConfirmationModal(null);
 		}
 	};
 
 	const handleReject = async (id: string) => {
 		try {
+			setConfirm(true);
 			const res = await axios.post(`/api/partner/bookings/${id}/reject`);
 			if (res.status === 200) {
 				console.log("ride rejected");
@@ -109,6 +113,7 @@ const Page = () => {
 					error,
 			);
 		} finally {
+			setConfirm(false);
 			setConfirmationModal(null);
 		}
 	};
@@ -416,8 +421,8 @@ const Page = () => {
 										}`}
 									>
 										{confirmationModal === "accept"
-											? "Confirm Accept"
-											: "Confirm Reject"}
+											? confirm ? "Accepting..." : "Accept Ride"
+											: confirm ? "Rejecting..." : "Confirm Reject"}
 									</button>
 								</div>
 							</div>

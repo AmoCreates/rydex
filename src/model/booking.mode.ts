@@ -3,10 +3,11 @@ import mongoose from "mongoose";
 type BookingStatus =
 	| "idle"
 	| "requested"
-	| "awaiting payment"
-	| "confirmed"
+	| "awaiting pickup"
 	| "started"
 	| "completed"
+	| "awaiting payment"
+	| "confirmed"
 	| "cancelled"
 	| "rejected"
 	| "expired";
@@ -131,10 +132,11 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 			enum: [
 				"idle",
 				"requested",
-				"awaiting payment",
-				"confirmed",
+				"awaiting pickup",
 				"started",
 				"completed",
+				"awaiting payment",
+				"confirmed",
 				"cancelled",
 				"rejected",
 				"expired",

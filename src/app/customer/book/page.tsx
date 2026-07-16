@@ -17,6 +17,8 @@ import {
 import { useRouter } from "next/navigation";
 import { RiSendPlaneFill, RiUserLine } from "@remixicon/react";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Toolkit/store";
 
 const stepVariants = {
 	hidden: { opacity: 0, y: 16 },
@@ -44,8 +46,9 @@ const VEHICLES = [
 ];
 
 const Page = () => {
+	const { userData } = useSelector((state: RootState) => state.user);
 	const [vehicle, setVehicle] = useState("");
-	const [name, setName] = useState("");
+	const [name, setName] = useState(userData?.name ? `${userData.name}` : "");
 	const [mobile, setMobile] = useState("");
 	const [pickUp, setPickUp] = useState("");
 	const [drop, setDrop] = useState("");
@@ -223,7 +226,7 @@ const Page = () => {
 											onClick={() =>
 												!isBusy && setVehicle(v.id)
 											}
-											className={`relative rounded-2xl border p-4  flex items-center ${ isBusy ? "hover:scale-100" : "hover:scale-105"} ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2 "}`}
+											className={`relative rounded-2xl border p-4  flex items-center ${isBusy ? "hover:scale-100" : "hover:scale-105"} ${v.id} gap-2 transition ${isBusy ? "cursor-not-allowed opacity-70" : "cursor-pointer"} ${isActive ? "bg-black text-white border-black" : "border-gray-200 hover:border-black"} ${v.id === "all" && "col-span-2 "}`}
 										>
 											{v.id === "all" ? (
 												<>

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
       );
     }
 
-    booking.bookingStatus = "awaiting payment";
+    booking.bookingStatus = "awaiting pickup";
 		booking.paymentStatus = "pending"
     booking.paymentDeadline= new Date(Date.now() + 5*60*1000)
     booking.save();

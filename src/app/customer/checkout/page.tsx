@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
 	ArrowLeft,
@@ -55,7 +55,7 @@ const Page = () => {
 	const driverId = params.get("driver") || "";
 	const vehicleId = params.get("vehicleId") || "";
 
-	const { Icon, lable } = VEHICE_META[vehicle];
+	const { Icon, label } = VEHICE_META[vehicle];
 
 	const [status, setStatus] = useState<Status>("idle");
 
@@ -86,6 +86,19 @@ const Page = () => {
 			console.log(error?.response.data.message);
 		}
 	};
+
+	useEffect(() => {
+		const activeBooking = async () => {
+			try {
+				const {data}= await axios.get("/api/booking/active-booking");
+				console.log(data);
+			} catch (error:unknown) {
+				console.log(error);
+			}
+		}
+
+		activeBooking();
+	})
 
 	return (
 		<div className="min-h-screen bg-zinc-100 px-4 py-12">
