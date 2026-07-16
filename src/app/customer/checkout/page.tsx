@@ -9,14 +9,17 @@ import {
 	Clock4,
 	CreditCard,
 	IndianRupee,
+	Loader2,
 	MapPin,
 	Package,
 	ShieldCheck,
 	Truck,
+	XCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
+import { IBooking } from "@/model/booking.mode";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -30,12 +33,14 @@ const VEHICE_META: any = {
 type Status =
 	| "idle"
 	| "requested"
+	| "awaiting pickup"
+	| "started"
+	| "completed"
 	| "awaiting payment"
-	| "rejected"
-	| "expired"
+	| "confirmed"
 	| "cancelled"
-	| "payment"
-	| "confirmed";
+	| "rejected"
+	| "expired";
 
 const Page = () => {
 	const router = useRouter();
@@ -58,22 +63,24 @@ const Page = () => {
 	const { Icon, label } = VEHICE_META[vehicle];
 
 	const [status, setStatus] = useState<Status>("idle");
+	const [loading, setLoading] = useState(false);
+	const [currBookingId, setCurrBookingId] = useState<string | null>(null);
 
 	const handleBookRequest = async () => {
 		try {
-			console.log(pickupLon, pickupLat, dropLat, dropLon)
-			const { data } = await axios.post("/api/booking/create", {
+			setLoading(true);
+			const res = await axios.post("/api/booking/create", {
 				driverId,
 				vehicleId,
-				pickUpAddress:pickUp,
+				pickUpAddress: pickUp,
 				dropAddress: drop,
 				pickUpLocation: {
 					type: "Point",
-					coordinates: [pickupLon, pickupLat]
+					coordinates: [pickupLon, pickupLat],
 				},
 				dropLocation: {
 					type: "Point",
-					coordinates: [dropLon, dropLat]
+					coordinates: [dropLon, dropLat],
 				},
 				fare,
 				customerName: name,
@@ -81,34 +88,59 @@ const Page = () => {
 				distance,
 			});
 
-			console.log(data);
+			if (res.status === 201) {
+				setCurrBookingId(res.data._id.toString());
+				setStatus("requested");
+			}
 		} catch (error: any) {
 			console.log(error?.response.data.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleCancelRequest = async () => {
+		try {
+			setLoading(true);
+			const res = await axios.post(
+				`/api/booking/${currBookingId}/cancel-ride`,
+			);
+
+			if (res.status === 200) {
+				setStatus("idle");
+			}
+		} catch (error: any) {
+			console.log(error?.response.data.message);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	useEffect(() => {
 		const activeBooking = async () => {
 			try {
-				const {data}= await axios.get("/api/booking/active-booking");
-				console.log(data);
-			} catch (error:unknown) {
+				const { data } = await axios.get("/api/booking/active-booking");
+				setCurrBookingId(data[0]._id.toString());
+				setStatus(data[0].bookingStatus);
+			} catch (error: unknown) {
 				console.log(error);
 			}
-		}
+		};
 
 		activeBooking();
-	})
+	}, []);
 
 	return (
 		<div className="min-h-screen bg-zinc-100 px-4 py-12">
 			<div className="relative max-w-6xl mx-auto z-10">
+				{/* Header */}
 				<motion.div
 					initial={{ opacity: 0, y: 16 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
 					className="mb-10 relative"
 				>
+					{/* Back Button */}
 					<motion.button
 						whileTap={{ scale: 0.88 }}
 						onClick={() => router.back()}
@@ -131,6 +163,7 @@ const Page = () => {
 					</p>
 				</motion.div>
 
+				{/* Check out cards */}
 				<div className="grid lg:grid-cols-2 gap-6">
 					{/* Left side: Vehicle Details, Location(Drop, Pickup) and Pricing */}
 					<motion.div
@@ -237,7 +270,7 @@ const Page = () => {
 						</div>
 					</motion.div>
 
-					{/* right side */}
+					{/* Right side: Dynamic: change dynamically according to current status */}
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -250,7 +283,7 @@ const Page = () => {
 					>
 						<div className="h-1 bg-zinc-900" />
 
-						<div className="p-8 sm:p-10 flex-1 flex-col">
+						<div className="p-8 sm:p-10 flex flex-1 flex-col">
 							<AnimatePresence mode="wait">
 								{status === "idle" && (
 									<motion.div
@@ -317,13 +350,69 @@ const Page = () => {
 											Request Ride{" "}
 											<Icon className="group-hover:translate-x-2 group-focus:translate-x-96 transition-transform duration-700" />
 										</motion.button>
+										<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 mt-7 flex items-center justify-center">
+											<ShieldCheck size={14} /> secure &
+											verified payment
+										</div>
 									</motion.div>
 								)}
+
+								{status === "requested" && (
+									<motion.div
+										key="requested"
+										initial={{ opacity: 0, scale: 0.96 }}
+										animate={{ opacity: 1, scale: 1 }}
+										exit={{
+											opacity: 0,
+											y: -4,
+											scale: 0.96,
+										}}
+										transition={{ duration: 0.35 }}
+										className="flex flex-col flex-1 items-center justify-center gap-6 text-center"
+									>
+										{/* Pulse Loading: Finding Driver */}
+										<div className="relative">
+											<motion.div
+												animate={{
+													scale: [1, 1.5, 1],
+													opacity: [0.3, 0, 0.3],
+												}}
+												transition={{
+													duration: 2,
+													repeat: Infinity,
+												}}
+												className="absolute inset-0 rounded-full bg-zinc-900"
+											/>
+											<div className="relative w-20 h-20 rounded-full bg-zinc-100 border-2 border-zinc-200 flex items-center justify-center">
+												<Loader2
+													size={28}
+													className="text-zinc-900 animate-spin"
+												/>
+											</div>
+										</div>
+										<div>
+											<h3 className="text-xl font-black text-zinc-900 mb-1">
+												Finding Your Driver
+											</h3>
+											<p className="text-zinc-400 text-sm font-medium">
+												Waiting for driver to accept...
+											</p>
+										</div>
+
+										<motion.button
+											onClick={handleCancelRequest}
+											whileTap={{ scale: 0.95 }}
+											className="flex items-center gap-2 text-xs font-bold text-zinc-400  hover:text-zinc-900 transition-colors border border-zinc-200 hover:border-zinc-400 px-4 py-2.5 rounded-xl cursor-pointer"
+										>
+											<XCircle size={13} /> Cancel Request
+										</motion.button>
+									</motion.div>
+								)}
+
+								{status === "awaiting pickup" && (
+									<div>awaiting pickup</div>
+								)}
 							</AnimatePresence>
-							<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 mt-7 flex items-center justify-center">
-								<ShieldCheck size={14} /> secure & verified
-								payment
-							</div>
 						</div>
 					</motion.div>
 				</div>

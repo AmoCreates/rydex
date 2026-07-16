@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
 		const customerBooking = await Booking.findOne({
 			customer: session.user.id,
 			bookingStatus: {
-				$in: ["requested", "awaiting payment", "confirmed", "started"],
+				$in: ["requested", "awaiting pickup", "awaiting payment", "confirmed", "started"],
 			},
 		});
 
@@ -98,25 +98,59 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const booking = await Booking.create({
+		// Check if there's an idle or cancelled booking to update
+		const existingBooking = await Booking.findOne({
 			customer: session.user.id,
-			driver: driver._id,
-			vehicle: vehicleId,
-			pickUpAddress,
-			dropAddress,
-
-			pickUpLocation,
-			dropLocation,
-
-			distance,
-			fare,
-
-			customerMobile,
-			customerName,
-			driverMobile: driver.mobile,
-
-			bookingStatus: "requested",
+			bookingStatus: {
+				$in: ["idle", "cancelled"],
+			},
 		});
+
+		let booking;
+
+		if (existingBooking) {
+			// Update existing booking
+			booking = await Booking.findByIdAndUpdate(
+				existingBooking._id,
+				{
+					driver: driver._id,
+					vehicle: vehicleId,
+					pickUpAddress,
+					dropAddress,
+					pickUpLocation,
+					dropLocation,
+					distance,
+					fare,
+					customerMobile,
+					customerName,
+					driverMobile: driver.mobile,
+					bookingStatus: "requested",
+					paymentStatus: "pending",
+				},
+				{ new: true }
+			);
+		} else {
+			// Create new booking if no idle/cancelled booking exists
+			booking = await Booking.create({
+				customer: session.user.id,
+				driver: driver._id,
+				vehicle: vehicleId,
+				pickUpAddress,
+				dropAddress,
+
+				pickUpLocation,
+				dropLocation,
+
+				distance,
+				fare,
+
+				customerMobile,
+				customerName,
+				driverMobile: driver.mobile,
+
+				bookingStatus: "requested",
+			});
+		}
 
 		return NextResponse.json(booking, { status: 201 });
 	} catch (error) {
