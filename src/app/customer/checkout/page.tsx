@@ -485,7 +485,7 @@ const Page = () => {
 										<div className="flex flex-col space-y-3">
 											{[
 												{id: "cash", Icon: Banknote, title: "Cash", sub: "Pay driver in cash"},
-												{id: "online", Icon: Wallet, title: "Online Payment", sub: "UPI, Card, Netbanking"}
+												{id: "online", Icon: Wallet, title: "Online Payment", sub: "UPI · Card · Netbanking"}
 											].map((p, i) => {
 												const active = payMode === p.id;
 												return (
@@ -498,7 +498,7 @@ const Page = () => {
 														<div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${active ? "bg-white/10" : "bg-zinc-200"}`}><p.Icon size={18} className={active ? "text-white" : "text-zinc-600"}/></div>
 														<div className="flex-1 min-w-0">
 															<p className={`text-sm font-bold ${active ? "text-white" : "text-zinc-900"}`}>{p.title}</p>
-															<p className={`text-xs font-medium ${active ? "text-zinc-400" : "text-zinc-900"}`}>{p.sub}</p>
+															<p className="text-xs font-medium text-zinc-400">{p.sub}</p>
 														</div>
 														<AnimatePresence>
 															{active && (
