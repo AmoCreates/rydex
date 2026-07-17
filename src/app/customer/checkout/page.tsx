@@ -3,9 +3,11 @@ import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
 	ArrowLeft,
+	Banknote,
 	Bike,
 	Bus,
 	Car,
+	CheckCircle,
 	Clock4,
 	CreditCard,
 	IndianRupee,
@@ -14,10 +16,11 @@ import {
 	Package,
 	ShieldCheck,
 	Truck,
+	Wallet,
 	XCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RiSendPlaneFill } from "@remixicon/react";
+import { RiArrowRightSLine, RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
 
 const VEHICE_META: any = {
@@ -64,6 +67,7 @@ const Page = () => {
 	const [status, setStatus] = useState<Status>("idle");
 	const [loading, setLoading] = useState(false);
 	const [currBookingId, setCurrBookingId] = useState<string | null>(null);
+	const [payMode, setPayMode] = useState<"cash" | "online">("cash");
 
 	const handleBookRequest = async () => {
 		try {
@@ -128,6 +132,16 @@ const Page = () => {
 
 		activeBooking();
 	}, []);
+
+	useEffect(() => {
+		if (status !== "awaiting pickup") return;
+		const t = setTimeout(() => {
+			setStatus("awaiting payment");
+		}, 1200);
+		return () => {
+			clearTimeout(t);
+		};
+	}, [status]);
 
 	return (
 		<div className="min-h-screen bg-zinc-100 px-4 py-12">
@@ -349,10 +363,6 @@ const Page = () => {
 											Request Ride{" "}
 											<Icon className="group-hover:translate-x-2 group-focus:translate-x-96 transition-transform duration-700" />
 										</motion.button>
-										<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 mt-7 flex items-center justify-center">
-											<ShieldCheck size={14} /> secure &
-											verified payment
-										</div>
 									</motion.div>
 								)}
 
@@ -409,9 +419,122 @@ const Page = () => {
 								)}
 
 								{status === "awaiting pickup" && (
-									<div>awaiting pickup</div>
+									<motion.div
+										key="awaiting pickup"
+										initial={{ opacity: 0, scale: 0.94 }}
+										animate={{ opacity: 1, scale: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.35 }}
+										className="flex flex-col flex-1 items-center justify-center gap-5 text-center"
+									>
+										<motion.div
+											initial={{ scale: 0 }}
+											animate={{ scale: 1 }}
+											transition={{
+												type: "spring",
+												stiffness: 260,
+												damping: 16,
+											}}
+											className="w-20 h-20 rounded-full bg-zinc-100 border-2 border-zinc-200 flex items-center justify-center"
+										>
+											<CheckCircle
+												size={35}
+												className="text-zinc-900"
+											/>
+										</motion.div>
+
+										<div>
+											<h3 className="text-xl font-black text-zinc-900 mb-1">
+												Driver Accepted
+											</h3>
+											<p className="text-zinc-400 text-sm font-medium">
+												Connecting & Redirecting to
+												map...
+											</p>
+										</div>
+
+										<div className="w-48 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+											<motion.div
+												initial={{ width: 0 }}
+												animate={{ width: "100%" }}
+												transition={{ duration: 1 }}
+												className="h-full bg-zinc-900 rounded-full"
+											/>
+										</div>
+									</motion.div>
+								)}
+
+								{status === "awaiting payment" && (
+									<motion.div
+										key="awaiting payment"
+										initial={{ opacity: 0, y: 12 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.3 }}
+										className="flex flex-col flex-1 gap-6"
+									>
+										<div>
+											<p className="text-[10px] font-black uppercase tracking-[0.18em] text-zinc-400 mb-1">
+												Almost There
+											</p>
+											<h3 className="text-2xl font-black text-zinc-900">
+												Select Payment Method
+											</h3>
+										</div>
+
+										<div className="flex flex-col space-y-3">
+											{[
+												{id: "cash", Icon: Banknote, title: "Cash", sub: "Pay driver in cash"},
+												{id: "online", Icon: Wallet, title: "Online Payment", sub: "UPI, Card, Netbanking"}
+											].map((p, i) => {
+												const active = payMode === p.id;
+												return (
+													<motion.div
+														key={p.id}
+														whileTap={{scale: 0.97}}
+														onClick={() => setPayMode(p.id as "cash" | "online")}
+														className={` w-full flex cursor-pointer items-center gap-4 p-4 rounded-2xl border-2 text-left transtiion-all duration-200 ${active ? "bg-zinc-900 border-zinc-900" : "bg-zinc-50 border-zinc-200"} hover:border-zinc-400`}
+													>
+														<div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${active ? "bg-white/10" : "bg-zinc-200"}`}><p.Icon size={18} className={active ? "text-white" : "text-zinc-600"}/></div>
+														<div className="flex-1 min-w-0">
+															<p className={`text-sm font-bold ${active ? "text-white" : "text-zinc-900"}`}>{p.title}</p>
+															<p className={`text-xs font-medium ${active ? "text-zinc-400" : "text-zinc-900"}`}>{p.sub}</p>
+														</div>
+														<AnimatePresence>
+															{active && (
+																<motion.div
+																initial={{scale: 0}} 
+																animate={{scale: 1}} 
+																exit={{scale: 0}}
+																>
+																	<CheckCircle size={15} className="text-white shrink-0"/>
+																</motion.div>
+															)}
+														</AnimatePresence>
+													</motion.div>
+												);
+											})}
+										</div>
+
+										<motion.button
+										whileTap={{scale: 0.97}}
+										whileHover={payMode ? {scale: 1.02} : {}}
+										disabled={!payMode}
+										className="w-full h-14 bg-zinc-900 hover:bg-black disabled:opacity-30 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer transition-colors shadow-md mt-auto"
+										>
+											{
+												payMode === "cash" ? <Banknote size={16}/> : <Wallet size={16}/>
+											}
+											Proceed to Payment <RiArrowRightSLine/>
+										</motion.button>
+									</motion.div>
 								)}
 							</AnimatePresence>
+
+							<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 flex items-center justify-center mt-7 border-zinc-100">
+								<ShieldCheck size={14} /> secure & verified
+								booking
+							</div>
 						</div>
 					</motion.div>
 				</div>
