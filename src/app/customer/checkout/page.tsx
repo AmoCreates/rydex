@@ -119,6 +119,32 @@ const Page = () => {
 		}
 	};
 
+	const loadRazorPayScript = () => {
+		return new Promise((resolve) => {
+			if (typeof window === "undefined") {
+				resolve(false);
+			}
+
+			if ((window as any).Razorpay) {
+				resolve(true);
+			}
+
+			const script = document.createElement("script");
+			script.src = "https://checkout.razorpay.com/v1/checkout.js";
+			script.onload = () => resolve(true);
+			script.onerror = () => resolve(false);
+			document.body.appendChild(script);
+		});
+	};
+
+	const handleCheckout = async () => {
+		try {
+			const { data } = await axios.post("/api/payment/create");
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	useEffect(() => {
 		const activeBooking = async () => {
 			try {
@@ -484,30 +510,76 @@ const Page = () => {
 
 										<div className="flex flex-col space-y-3">
 											{[
-												{id: "cash", Icon: Banknote, title: "Cash", sub: "Pay driver in cash"},
-												{id: "online", Icon: Wallet, title: "Online Payment", sub: "UPI · Card · Netbanking"}
+												{
+													id: "cash",
+													Icon: Banknote,
+													title: "Cash",
+													sub: "Pay driver in cash",
+												},
+												{
+													id: "online",
+													Icon: Wallet,
+													title: "Online Payment",
+													sub: "UPI · Card · Netbanking",
+												},
 											].map((p, i) => {
 												const active = payMode === p.id;
 												return (
 													<motion.div
 														key={p.id}
-														whileTap={{scale: 0.97}}
-														onClick={() => setPayMode(p.id as "cash" | "online")}
+														whileTap={{
+															scale: 0.97,
+														}}
+														onClick={() =>
+															setPayMode(
+																p.id as
+																	| "cash"
+																	| "online",
+															)
+														}
 														className={` w-full flex cursor-pointer items-center gap-4 p-4 rounded-2xl border-2 text-left transtiion-all duration-200 ${active ? "bg-zinc-900 border-zinc-900" : "bg-zinc-50 border-zinc-200"} hover:border-zinc-400`}
 													>
-														<div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${active ? "bg-white/10" : "bg-zinc-200"}`}><p.Icon size={18} className={active ? "text-white" : "text-zinc-600"}/></div>
+														<div
+															className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${active ? "bg-white/10" : "bg-zinc-200"}`}
+														>
+															<p.Icon
+																size={18}
+																className={
+																	active
+																		? "text-white"
+																		: "text-zinc-600"
+																}
+															/>
+														</div>
 														<div className="flex-1 min-w-0">
-															<p className={`text-sm font-bold ${active ? "text-white" : "text-zinc-900"}`}>{p.title}</p>
-															<p className="text-xs font-medium text-zinc-400">{p.sub}</p>
+															<p
+																className={`text-sm font-bold ${active ? "text-white" : "text-zinc-900"}`}
+															>
+																{p.title}
+															</p>
+															<p className="text-xs font-medium text-zinc-400">
+																{p.sub}
+															</p>
 														</div>
 														<AnimatePresence>
 															{active && (
 																<motion.div
-																initial={{scale: 0}} 
-																animate={{scale: 1}} 
-																exit={{scale: 0}}
+																	initial={{
+																		scale: 0,
+																	}}
+																	animate={{
+																		scale: 1,
+																	}}
+																	exit={{
+																		scale: 0,
+																	}}
 																>
-																	<CheckCircle size={15} className="text-white shrink-0"/>
+																	<CheckCircle
+																		size={
+																			15
+																		}
+																		className="text-white shrink-0"
+																	/>
 																</motion.div>
 															)}
 														</AnimatePresence>
@@ -517,15 +589,20 @@ const Page = () => {
 										</div>
 
 										<motion.button
-										whileTap={{scale: 0.97}}
-										whileHover={payMode ? {scale: 1.02} : {}}
-										disabled={!payMode}
-										className="w-full h-14 bg-zinc-900 hover:bg-black disabled:opacity-30 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer transition-colors shadow-md mt-auto"
-										>
-											{
-												payMode === "cash" ? <Banknote size={16}/> : <Wallet size={16}/>
+											whileTap={{ scale: 0.97 }}
+											whileHover={
+												payMode ? { scale: 1.02 } : {}
 											}
-											Proceed to Payment <RiArrowRightSLine/>
+											disabled={!payMode}
+											className="w-full h-14 bg-zinc-900 hover:bg-black disabled:opacity-30 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer transition-colors shadow-md mt-auto"
+										>
+											{payMode === "cash" ? (
+												<Banknote size={16} />
+											) : (
+												<Wallet size={16} />
+											)}
+											Proceed to Payment{" "}
+											<RiArrowRightSLine />
 										</motion.button>
 									</motion.div>
 								)}

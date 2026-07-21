@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 			currency: "INR",
 			receipt: bookingId.toString(),
 		};
-		const order = await razorpay.orders.create(options);
+		const order = await razorpay!.orders.create(options);
 
 		return NextResponse.json(
 			{ success: true, orderId: order.id, amount: order.amount },
