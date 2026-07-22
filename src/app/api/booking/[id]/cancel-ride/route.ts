@@ -54,7 +54,7 @@ export async function POST(
 		} else {
 			booking.bookingStatus = "cancelled";
 		}
-		booking.save();
+		await booking.save();
 
 		return NextResponse.json(
 			{ message: "booking cancelled" },

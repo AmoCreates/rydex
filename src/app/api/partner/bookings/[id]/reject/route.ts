@@ -47,7 +47,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 
     booking.bookingStatus = "rejected";
     booking.paymentStatus = "idle";
-    booking.save();
+    await booking.save();
 
     return NextResponse.json(
       {success: true},

@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 		const order = await razorpay!.orders.create(options);
 
 		return NextResponse.json(
-			{ success: true, orderId: order.id, amount: order.amount },
+			{ success: true, orderId: order.id, amount: order.amount, currency: order.currency },
 			{ status: 200 },
 		);
 	} catch (error) {

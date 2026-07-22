@@ -22,6 +22,8 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { RiArrowRightSLine, RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Toolkit/store";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -68,6 +70,7 @@ const Page = () => {
 	const [loading, setLoading] = useState(false);
 	const [currBookingId, setCurrBookingId] = useState<string | null>(null);
 	const [payMode, setPayMode] = useState<"cash" | "online">("cash");
+	const { userData } = useSelector((state: RootState) => state.user);
 
 	const handleBookRequest = async () => {
 		try {
@@ -137,9 +140,77 @@ const Page = () => {
 		});
 	};
 
-	const handleCheckout = async () => {
+	const handleCofirmPayment = async () => {
+		if (!currBookingId || !payMode || payMode === "cash") return;
+
 		try {
-			const { data } = await axios.post("/api/payment/create");
+			if (payMode == "online") {
+				const razorpayLoaded = await loadRazorPayScript();
+				if (!razorpayLoaded) {
+					alert("razorypay script load faild");
+				}
+			}
+
+			const { data } = await axios.post("/api/payment/create", {
+				bookingId: currBookingId,
+				amount: fare,
+			});
+
+			if (!data.success || !data.orderId) {
+				alert(
+					"Failed to create payment order - " + (data.message || ""),
+				);
+				return;
+			}
+			console.log(data);
+
+			const paymentObject = new (window as any).Razorpay({
+				key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+				amount: data.amount,
+				currency: data.currency,
+				name: "Rydex - Smart Vehicle Booking Platform",
+				description:
+					"Making the payment means your ride has been successfully completed.",
+				order_id: data.orderId,
+				method: {
+					upi: true,
+					card: true,
+					netbanking: true,
+					wallet: true,
+				},
+				prefill: {
+					name: userData?.name || "anonymous",
+					email: userData?.email || "anonymous@anonymous.come",
+					contact: userData?.mobile || "0000000000",
+				},
+				theme: { color: "#4F46E5" },
+
+				handler: async function (response: any) {
+					try {
+						const {data} = await axios.post(
+							"/api/payment/verify",
+							{
+								bookingId: currBookingId,
+								razorpay_order_id: response.razorpay_order_id,
+								razorpay_payment_id: response.razorpay_payment_id,
+								razorpay_signature: response.razorpay_signature,
+							},
+						);
+
+						if (data.success) {
+							alert(
+								`🎉 Payment Successful!\nThanks for choosing Rydex`,
+							);
+						} else {
+							alert("Payment verification failed");
+						}
+					} catch (err) {
+						console.error(err);
+						alert("Payment verification failed");
+					}
+				},
+			});
+			paymentObject.open();
 		} catch (error) {
 			console.log(error);
 		}
@@ -522,7 +593,7 @@ const Page = () => {
 													title: "Online Payment",
 													sub: "UPI · Card · Netbanking",
 												},
-											].map((p, i) => {
+											].map((p) => {
 												const active = payMode === p.id;
 												return (
 													<motion.div
@@ -589,6 +660,7 @@ const Page = () => {
 										</div>
 
 										<motion.button
+											onClick={handleCofirmPayment}
 											whileTap={{ scale: 0.97 }}
 											whileHover={
 												payMode ? { scale: 1.02 } : {}
