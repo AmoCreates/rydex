@@ -34,9 +34,9 @@ const customerMenu = [
 
 const partnerMenu = [
 	{ label: "Profile", route: "/partner/profile" },
-	{ label: "Active Ride", route: "/partner/active-ride" },
-	{ label: "Pending Request", route: "/partner/pending-requests" },
-	{ label: "My Bookings", route: "/partner/bookings" },
+	{ label: "Active Ride", route: "/partner/bookings/active-ride" },
+	{ label: "Pending Request", route: "/partner/bookings/pending-requests" },
+	{ label: "My Bookings", route: "/partner/bookings/mybookings" },
 ];
 
 type Props = {

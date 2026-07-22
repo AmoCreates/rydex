@@ -140,7 +140,7 @@ const Page = () => {
 		});
 	};
 
-	const handleCofirmPayment = async () => {
+	const handleOnlinePayment = async () => {
 		if (!currBookingId || !payMode || payMode === "cash") return;
 
 		try {
@@ -215,6 +215,16 @@ const Page = () => {
 			console.log(error);
 		}
 	};
+
+	const handleCashPayment = async () => {
+		if (!currBookingId || !payMode || payMode !== "cash") return;
+		try {
+			const {data} = await axios.post(`/api/payment/${currBookingId}/cash-request`)
+			console.log(data);
+		} catch (error:any) {
+			console.log(error.response.data.message);
+		}
+	}
 
 	useEffect(() => {
 		const activeBooking = async () => {
@@ -660,7 +670,7 @@ const Page = () => {
 										</div>
 
 										<motion.button
-											onClick={handleCofirmPayment}
+											onClick={payMode === "online" ? handleOnlinePayment : handleCashPayment}
 											whileTap={{ scale: 0.97 }}
 											whileHover={
 												payMode ? { scale: 1.02 } : {}

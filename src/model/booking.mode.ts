@@ -12,7 +12,7 @@ type BookingStatus =
 	| "rejected"
 	| "expired";
 
-type PaymentStatus = "idle" | "pending" | "paid" | "cash" | "failed";
+type PaymentStatus = "idle" | "pending" | "paid" | "failed";
 
 export interface IBooking extends mongoose.Document {
 	customer: mongoose.Types.ObjectId;
@@ -42,6 +42,8 @@ export interface IBooking extends mongoose.Document {
 	bookingStatus: BookingStatus;
 	paymentStatus: PaymentStatus;
 
+	paymentMode: "cash" | "online";
+	isCashReceived?: boolean;
 	paymentDeadline: Date;
 
 	adminCommission: number;
@@ -146,10 +148,20 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 
 		paymentStatus: {
 			type: String,
-			enum: ["idle", "pending", "paid", "cash", "failed"],
+			enum: ["idle", "pending", "paid", "failed"],
 			default: "pending",
 		},
 
+		paymentMode: {
+			type: String,
+			enum: ["cash" , "online"],
+			default: "cash"
+		},
+
+		isCashReceived: {
+			type: Boolean,
+			default: false,
+		},
 
 		paymentDeadline : {
 			type: Date
