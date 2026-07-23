@@ -7,13 +7,11 @@ import {
 	ArrowRight,
 	Bike,
 	Check,
-	CheckCircle2,
 	Clock,
 	HandCoins,
 	IndianRupee,
 	Lock,
 	Phone,
-	User,
 	UserRound,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -96,8 +94,11 @@ const PartnerDashboard = () => {
 	};
 
 	useEffect(() => {
+		function updateStep() {
+			setCurrentStep(userData!.partnerOnBoardingStep! + 1 || 0);
+		}
 		if (userData) {
-			setCurrentStep(userData.partnerOnBoardingStep! + 1 || 0);
+			updateStep();
 		}
 	}, [userData]);
 
