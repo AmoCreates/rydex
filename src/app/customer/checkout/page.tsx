@@ -250,6 +250,16 @@ const Page = () => {
 		};
 	}, [status]);
 
+	useEffect(() => {
+		if (status !== "completed") return;
+		const t = setTimeout(() => {
+			setStatus("awaiting payment");
+		}, 1200);
+		return () => {
+			clearTimeout(t);
+		};
+	}, [status]);
+
 	return (
 		<div className="min-h-screen bg-zinc-100 px-4 py-12">
 			<div className="relative max-w-6xl mx-auto z-10">

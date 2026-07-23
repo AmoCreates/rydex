@@ -53,7 +53,6 @@ const VehicleCard = ({
 	distance: number;
 	onBook: () => void;
 }) => {
-	console.log(distance);
 	const { Icon, label } = TYPE_CONFIG[vehicle.type];
 	let estPrice: number = 0;
 	if (vehicle.baseFare && vehicle.pricePerKM && distance) {

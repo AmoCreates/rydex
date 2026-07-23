@@ -83,7 +83,6 @@ const Page = () => {
 					reason: rejectionReason,
 				},
 			);
-
 			console.log(res);
 
 			setAdminCheck(null);
