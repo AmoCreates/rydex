@@ -1,5 +1,5 @@
 import { getSocket } from "@/lib/socket";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const GeoUpdater = ({ userId }: { userId: string }) => {
 	const socketRef = useRef<any>(null);

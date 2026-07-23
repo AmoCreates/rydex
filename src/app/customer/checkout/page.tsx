@@ -8,6 +8,7 @@ import {
 	Bus,
 	Car,
 	CheckCircle,
+	CircleDashed,
 	Clock4,
 	CreditCard,
 	IndianRupee,
@@ -64,7 +65,7 @@ const Page = () => {
 	const driverId = params.get("driver") || "";
 	const vehicleId = params.get("vehicleId") || "";
 
-	const { Icon, label } = VEHICE_META[vehicle];
+	const { Icon } = VEHICE_META[vehicle];
 
 	const [status, setStatus] = useState<Status>("idle");
 	const [loading, setLoading] = useState(false);
@@ -142,7 +143,7 @@ const Page = () => {
 
 	const handleOnlinePayment = async () => {
 		if (!currBookingId || !payMode || payMode === "cash") return;
-
+		setLoading(true);
 		try {
 			if (payMode == "online") {
 				const razorpayLoaded = await loadRazorPayScript();
@@ -187,12 +188,13 @@ const Page = () => {
 
 				handler: async function (response: any) {
 					try {
-						const {data} = await axios.post(
+						const { data } = await axios.post(
 							"/api/payment/verify",
 							{
 								bookingId: currBookingId,
 								razorpay_order_id: response.razorpay_order_id,
-								razorpay_payment_id: response.razorpay_payment_id,
+								razorpay_payment_id:
+									response.razorpay_payment_id,
 								razorpay_signature: response.razorpay_signature,
 							},
 						);
@@ -213,18 +215,22 @@ const Page = () => {
 			paymentObject.open();
 		} catch (error) {
 			console.log(error);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	const handleCashPayment = async () => {
 		if (!currBookingId || !payMode || payMode !== "cash") return;
 		try {
-			const {data} = await axios.post(`/api/payment/${currBookingId}/cash-request`)
+			const { data } = await axios.post(
+				`/api/payment/${currBookingId}/cash-request`,
+			);
 			console.log(data);
-		} catch (error:any) {
+		} catch (error: any) {
 			console.log(error.response.data.message);
 		}
-	}
+	};
 
 	useEffect(() => {
 		const activeBooking = async () => {
@@ -680,7 +686,11 @@ const Page = () => {
 										</div>
 
 										<motion.button
-											onClick={payMode === "online" ? handleOnlinePayment : handleCashPayment}
+											onClick={
+												payMode === "online"
+													? handleOnlinePayment
+													: handleCashPayment
+											}
 											whileTap={{ scale: 0.97 }}
 											whileHover={
 												payMode ? { scale: 1.02 } : {}
@@ -688,12 +698,23 @@ const Page = () => {
 											disabled={!payMode}
 											className="w-full h-14 bg-zinc-900 hover:bg-black disabled:opacity-30 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer transition-colors shadow-md mt-auto"
 										>
-											{payMode === "cash" ? (
+											{loading ? (
+												<>
+													<CircleDashed className="w-5 h-5 text-white animate-spin" />
+													<span>Paying...</span>
+												</>
+											) : payMode === "cash" ? (
+												<>
 												<Banknote size={16} />
+												Pay in Cash
+												</>
 											) : (
-												<Wallet size={16} />
+												<>
+												<Wallet size={16} /> 
+												Proceed to Payment
+												</>
 											)}
-											Proceed to Payment{" "}
+											
 											<RiArrowRightSLine />
 										</motion.button>
 									</motion.div>
