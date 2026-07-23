@@ -38,22 +38,22 @@ export async function POST(
 
 		const allowedStatuses = ["awaiting payment"];
 
-		if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
-			return NextResponse.json(
-				{
-					message:
-						"Sorry, we can't allowed you to pay before ride completed",
-				},
-				{ status: 400 },
-			);
-		}
+		// if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
+		// 	return NextResponse.json(
+		// 		{
+		// 			message:
+		// 				"Sorry, we can't allowed you to pay before ride completed",
+		// 		},
+		// 		{ status: 400 },
+		// 	);
+		// }
 
-		booking.paymentStatus = "pending"
-		booking.paymentMode = "cash"
+		booking.paymentStatus = "pending";
+		booking.paymentMode = "cash";
 		await booking.save();
 
 		return NextResponse.json(
-			{message: "waiting for partner confirmation"},
+			{ message: "waiting for partner confirmation" },
 			{ status: 200 },
 		);
 	} catch (error) {
@@ -66,3 +66,4 @@ export async function POST(
 		);
 	}
 }
+
