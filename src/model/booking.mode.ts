@@ -43,7 +43,6 @@ export interface IBooking extends mongoose.Document {
 	paymentStatus: PaymentStatus;
 
 	paymentMode: "cash" | "online";
-	isCashReceived?: boolean;
 	paymentDeadline: Date;
 
 	adminCommission: number;
@@ -156,11 +155,6 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 			type: String,
 			enum: ["cash" , "online"],
 			default: "cash"
-		},
-
-		isCashReceived: {
-			type: Boolean,
-			default: false,
 		},
 
 		paymentDeadline : {

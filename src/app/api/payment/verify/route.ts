@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
 		booking.paymentStatus = "paid";
 		booking.adminCommission = adminCommission;
 		booking.partnerAmount = partnerAmount;
+		booking.paymentMode = "online";
 		await booking.save();
 
 		return NextResponse.json(

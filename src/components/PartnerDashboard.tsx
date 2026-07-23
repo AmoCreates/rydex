@@ -82,6 +82,19 @@ const PartnerDashboard = () => {
 		cashReuqest();
 	}, []);
 
+	const handleCashPayment = async () => {
+		if (!cashRequested) return;
+		try {
+			const { data } = await axios.post("/api/payment/cash");
+			console.log(data);
+			if (data.success) {
+				setCashRequested(false);
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	useEffect(() => {
 		if (userData) {
 			setCurrentStep(userData.partnerOnBoardingStep! + 1 || 0);
@@ -237,6 +250,7 @@ const PartnerDashboard = () => {
 					)}
 			</div>
 
+			{/* Cash confirmation popup */}
 			<AnimatePresence>
 				{cashRequested && (
 					<div className="fixed inset-0 z-100 flex items-center justify-center p-4">
@@ -253,12 +267,12 @@ const PartnerDashboard = () => {
 							className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6"
 						>
 							<div className=" p-2 text-zinc-600 flex text-sm justify-between font-semibold -mt-2 bg-zinc-300 rounded-xl">
-								<h1 className="flex items-centr gap-2">
+								<h1 className="flex items-center gap-2">
 									<UserRound size={16} />
 									Customer -{" "}
 									{cashRequestedBooking?.customerName}
 								</h1>
-								<h1 className="flex items-centr gap-2">
+								<h1 className="flex items-center gap-2">
 									<Phone size={16} /> Mobile -{" "}
 									{cashRequestedBooking?.customerMobile}
 								</h1>
@@ -276,7 +290,9 @@ const PartnerDashboard = () => {
 										</h3>
 										<div className="flex items-center">
 											<IndianRupee size={15} />
-											<p className="text-2xl font-black">{cashRequestedBooking?.fare}</p>
+											<p className="text-2xl font-black">
+												{cashRequestedBooking?.fare}
+											</p>
 										</div>
 									</div>
 									<p className="text-sm text-gray-500">
@@ -291,6 +307,7 @@ const PartnerDashboard = () => {
 									Not Paid!
 								</button>
 								<button
+									onClick={handleCashPayment}
 									className={`flex-1 py-3 rounded-xl font-semibold text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-black
 									}`}
 								>
