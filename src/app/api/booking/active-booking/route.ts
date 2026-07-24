@@ -20,7 +20,7 @@ export async function GET() {
 			);
 		}
 
-		const customer = await User.findOne({ email: session.user.email });
+		const customer = await User.findById(session.user.id);
 		if (!customer) {
 			return NextResponse.json(
 				{ message: "user not found" },

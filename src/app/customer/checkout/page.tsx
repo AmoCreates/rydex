@@ -21,7 +21,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RiArrowRightSLine, RiSendPlaneFill } from "@remixicon/react";
+import { RiArrowRightSLine, RiRoadMapFill, RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
@@ -203,7 +203,7 @@ const Page = () => {
 							alert(
 								`🎉 Payment Successful!\nThanks for choosing Rydex`,
 							);
-							setStatus("confirmed")
+							setStatus("confirmed");
 						} else {
 							alert("Payment verification failed");
 						}
@@ -228,8 +228,8 @@ const Page = () => {
 				`/api/payment/${currBookingId}/cash-request`,
 			);
 			console.log(data);
-			if(data.success) {
-				alert(data.message)
+			if (data.success) {
+				alert(data.message);
 			}
 		} catch (error: any) {
 			console.log(error.response.data.message);
@@ -249,16 +249,6 @@ const Page = () => {
 
 		activeBooking();
 	}, []);
-
-	useEffect(() => {
-		if (status !== "awaiting pickup") return;
-		const t = setTimeout(() => {
-			setStatus("awaiting payment");
-		}, 1200);
-		return () => {
-			clearTimeout(t);
-		};
-	}, [status]);
 
 	useEffect(() => {
 		if (status !== "completed") return;
@@ -538,9 +528,10 @@ const Page = () => {
 										<motion.button
 											onClick={handleCancelRequest}
 											whileTap={{ scale: 0.95 }}
-											className="flex items-center gap-2 text-xs font-bold text-zinc-400  hover:text-zinc-900 transition-colors border border-zinc-200 hover:border-zinc-400 px-4 py-2.5 rounded-xl cursor-pointer"
+											className="flex items-center gap-2 text-xs font-bold text-zinc-400  hover:text-zinc-900 transition-colors border border-zinc-200 hover:border-zinc-400 px-4 py-2.5 rounded-xl cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-none"
+											disabled={loading}
 										>
-											<XCircle size={13} /> Cancel Request
+											<XCircle size={13} /> {loading ? "Canceling your request..." : "Cancel"}
 										</motion.button>
 									</motion.div>
 								)}
@@ -575,8 +566,7 @@ const Page = () => {
 												Driver Accepted
 											</h3>
 											<p className="text-zinc-400 text-sm font-medium">
-												Connecting & Redirecting to
-												map...
+												Rider is on the way
 											</p>
 										</div>
 
@@ -588,6 +578,21 @@ const Page = () => {
 												className="h-full bg-zinc-900 rounded-full"
 											/>
 										</div>
+
+										<motion.button
+											onClick={() =>
+												router.push(
+													`/ride/${currBookingId}`,
+												)
+											}
+											initial={{ opacity: 0, y: 8 }}
+											animate={{ opacity: 1, y: 0 }}
+											whileTap={{ scale: 0.97 }}
+											whileHover={{ scale: 1.03 }}
+											className="flex items-center gap-2.5 bg-zinc-900 hover:bg-black text-white font-black text-sm px-8 py-4 rounded-2xl transition-colors shadow-md cursor-pointer"
+										>
+											Track Your Ride < RiRoadMapFill size={15} />
+										</motion.button>
 									</motion.div>
 								)}
 
@@ -750,27 +755,43 @@ const Page = () => {
 													className="text-zinc-900"
 												/>
 											</div>
-											{[0, 1].map(i => (
-												<motion.div key={i} 
-												initial={{scale: 1, opacity: 0.5}}
-												animate={{scale: 2.2 + i*0.6, opacity: 0}}
-												transition={{duration: 0.9, delay: 0.2 + i * 0.15}}
-												className="absolute inset-0 rounded-full border-2 border-zinc-900"
+											{[0, 1].map((i) => (
+												<motion.div
+													key={i}
+													initial={{
+														scale: 1,
+														opacity: 0.5,
+													}}
+													animate={{
+														scale: 2.2 + i * 0.6,
+														opacity: 0,
+													}}
+													transition={{
+														duration: 0.9,
+														delay: 0.2 + i * 0.15,
+													}}
+													className="absolute inset-0 rounded-full border-2 border-zinc-900"
 												/>
 											))}
 										</motion.div>
 
 										<div>
 											<motion.h3
-											initial={{opacity: 0, y:8}}
-											animate={{opacity: 1, y: 0}}
-											transition={{delay: 0.3}}
-											className="text-2xl font-black text-zinc-900 mb-1">
+												initial={{ opacity: 0, y: 8 }}
+												animate={{ opacity: 1, y: 0 }}
+												transition={{ delay: 0.3 }}
+												className="text-2xl font-black text-zinc-900 mb-1"
+											>
 												Ride Completed!
 											</motion.h3>
 											<motion.div className="text-zinc-400 text-sm font-medium">
-												<p>Your ride has been successfully completed.</p>
-												<p className="text-center">Thankyou for choosing Rydex</p>
+												<p>
+													Your ride has been
+													successfully completed.
+												</p>
+												<p className="text-center">
+													Thankyou for choosing Rydex
+												</p>
 											</motion.div>
 										</div>
 

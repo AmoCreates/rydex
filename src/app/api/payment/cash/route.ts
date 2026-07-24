@@ -7,7 +7,6 @@ import { NextResponse } from "next/server";
 export async function POST() {
 	try {
 		await dbConnect();
-
 		const session = await auth();
 		if (!session || !session.user?.email) {
 			return NextResponse.json(
@@ -15,7 +14,6 @@ export async function POST() {
 				{ status: 401 },
 			);
 		}
-
 		const partner = await User.findById(session.user.id);
 		if (!partner) {
 			return NextResponse.json({
@@ -25,9 +23,14 @@ export async function POST() {
 
 		const booking = await Booking.findOne({
 			driver: partner._id,
+			bookingStatus: "awaiting payment",
+			paymentMode: "cash",
+			paymentStatus: "pending"
 		});
 
+
 		if (
+			!booking ||
 			booking.length == 0 ||
 			booking.bookingStatus !== "awaiting payment" ||
 			booking.paymentMode !== "cash" ||
@@ -90,8 +93,11 @@ export async function GET() {
 
 		const booking = await Booking.findOne({
 			driver: partner._id,
+			bookingStatus: "awaiting payment",
+			paymentMode: "cash",
+			paymentStatus: "pending"
 		});
-
+		console.log(booking)
 		if (
 			booking.length !== 0 &&
 			booking.bookingStatus === "awaiting payment" &&

@@ -9,6 +9,8 @@ import {
 	Clock4,
 	IndianRupee,
 	MapPin,
+	Phone,
+	UserRound,
 	X,
 } from "lucide-react";
 import { RiSendPlaneFill } from "@remixicon/react";
@@ -19,7 +21,7 @@ type ConfirmationModalType = null | "accept" | "reject";
 const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [loading, setLoading] = useState(false);
-	const [confirm, setConfirm] = useState(false)
+	const [confirm, setConfirm] = useState(false);
 	const [confirmationModal, setConfirmationModal] =
 		useState<ConfirmationModalType>(null);
 	const [currBooking, setCurrBooking] = useState<IBooking | null>(null);
@@ -64,6 +66,7 @@ const Page = () => {
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
 				console.log("ride accepted");
+				window.location.reload();
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -94,6 +97,7 @@ const Page = () => {
 			const res = await axios.post(`/api/partner/bookings/${id}/reject`);
 			if (res.status === 200) {
 				console.log("ride rejected");
+				window.location.reload();
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -138,7 +142,7 @@ const Page = () => {
 						Manage incoming ride request and respond in real time.
 					</p>
 				</div>
-				
+
 				{/* Back Button */}
 				<motion.button
 					whileTap={{ scale: 0.88 }}
@@ -175,6 +179,40 @@ const Page = () => {
 								<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
 									{/* Left: Pickup & Drop Address & Time*/}
 									<div className="flex-1 space-y-6">
+
+										{/* Customer Name and Mobile */}
+										<div className="flex flex-wrap gap-5 px-5 bg-gray-100 p-2 rounded-2xl">
+											{/* Customer Mobile */}
+											<div className="flex gap-4">
+												<div className="bg-blue-100 p-3 rounded-lg flex items-center justify-center">
+													<Phone size={18} />
+												</div>
+												<div>
+													<p className="text-xs uppercase text-gray-400 mb-1">
+														Customer Mobile
+													</p>
+													<p className="text-gray-900 font-medium">
+														{b.customerMobile}
+													</p>
+												</div>
+											</div>
+
+											{/* Customer Name */}
+											<div className="flex gap-4">
+												<div className="bg-blue-100 p-3 rounded-lg flex items-center justify-center">
+													<UserRound size={18} />
+												</div>
+												<div>
+													<p className="text-xs uppercase text-gray-400 mb-1">
+														Customer Name
+													</p>
+													<p className="text-gray-900 font-medium">
+														{b.customerName}
+													</p>
+												</div>
+											</div>
+
+										</div>
 										{/* Pickup Address */}
 										<div className="flex gap-4">
 											<div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center">
@@ -421,8 +459,12 @@ const Page = () => {
 										}`}
 									>
 										{confirmationModal === "accept"
-											? confirm ? "Accepting..." : "Accept Ride"
-											: confirm ? "Rejecting..." : "Confirm Reject"}
+											? confirm
+												? "Accepting..."
+												: "Accept Ride"
+											: confirm
+												? "Rejecting..."
+												: "Confirm Reject"}
 									</button>
 								</div>
 							</div>

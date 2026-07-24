@@ -115,7 +115,7 @@ const PartnerDashboard = () => {
 				</div>
 
 				{/*Progress Bar*/}
-				<div className="bg-white rounded-3xl border border-gray-400 shadow-[0_25px_70px_rgba(0,0,0,0.15)] p-5 sm:p-8 overflow-x-auto relative">
+				<div className="bg-white rounded-3xl border border-gray-400 shadow-[0_25px_70px_rgba(0,0,0,0.15)] p-5 sm:p-8 overflow-x-auto relative [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:mx-2 [&::-webkit-scrollbar-thumb]:bg-gray-900 [&::-webkit-scrollbar-thumb]:rounded-full ">
 					<div className="absolute -left-1 md:left-0 right-0 px-6 sm:px-8 top-13 md:top-15">
 						<div className=" flex items-center w-full min-w-3xl h-1 bg-gray-200 rounded-full overflow-hidden">
 							<motion.div

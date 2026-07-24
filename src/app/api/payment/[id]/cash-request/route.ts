@@ -53,7 +53,7 @@ export async function POST(
 		await booking.save();
 
 		return NextResponse.json(
-			{ message: "waiting for partner confirmation" },
+			{ success: true, message: "waiting for partner confirmation" },
 			{ status: 200 },
 		);
 	} catch (error) {

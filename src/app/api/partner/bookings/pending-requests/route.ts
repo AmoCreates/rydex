@@ -37,7 +37,7 @@ export async function GET() {
 		console.log(error);
 		return NextResponse.json(
 			{ message: "find bookings error" },
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
