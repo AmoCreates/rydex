@@ -66,7 +66,7 @@ const Page = () => {
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
 				console.log("ride accepted");
-				window.location.reload();
+				router.push('/partner/booking/active-ride')
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
