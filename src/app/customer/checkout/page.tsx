@@ -203,6 +203,7 @@ const Page = () => {
 							alert(
 								`🎉 Payment Successful!\nThanks for choosing Rydex`,
 							);
+							setStatus("confirmed")
 						} else {
 							alert("Payment verification failed");
 						}
@@ -227,6 +228,9 @@ const Page = () => {
 				`/api/payment/${currBookingId}/cash-request`,
 			);
 			console.log(data);
+			if(data.success) {
+				alert(data.message)
+			}
 		} catch (error: any) {
 			console.log(error.response.data.message);
 		}
@@ -705,18 +709,79 @@ const Page = () => {
 												</>
 											) : payMode === "cash" ? (
 												<>
-												<Banknote size={16} />
-												Pay in Cash
+													<Banknote size={16} />
+													Pay in Cash
 												</>
 											) : (
 												<>
-												<Wallet size={16} /> 
-												Proceed to Payment
+													<Wallet size={16} />
+													Proceed to Payment
 												</>
 											)}
-											
+
 											<RiArrowRightSLine />
 										</motion.button>
+									</motion.div>
+								)}
+
+								{status === "confirmed" && (
+									<motion.div
+										key="confirmed"
+										initial={{ opacity: 0, scale: 0.94 }}
+										animate={{ opacity: 1, scale: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.35 }}
+										className="flex flex-col flex-1 items-center justify-center gap-5 text-center"
+									>
+										<motion.div
+											initial={{ scale: 0, rotate: -20 }}
+											animate={{ scale: 1, rotate: 0 }}
+											transition={{
+												type: "spring",
+												stiffness: 260,
+												damping: 16,
+												delay: 0.1,
+											}}
+											className="relative"
+										>
+											<div className="w-20 h-20 rounded-full bg-zinc-100 border-2 border-zinc-200 flex items-center justify-center">
+												<CheckCircle
+													size={35}
+													className="text-zinc-900"
+												/>
+											</div>
+											{[0, 1].map(i => (
+												<motion.div key={i} 
+												initial={{scale: 1, opacity: 0.5}}
+												animate={{scale: 2.2 + i*0.6, opacity: 0}}
+												transition={{duration: 0.9, delay: 0.2 + i * 0.15}}
+												className="absolute inset-0 rounded-full border-2 border-zinc-900"
+												/>
+											))}
+										</motion.div>
+
+										<div>
+											<motion.h3
+											initial={{opacity: 0, y:8}}
+											animate={{opacity: 1, y: 0}}
+											transition={{delay: 0.3}}
+											className="text-2xl font-black text-zinc-900 mb-1">
+												Ride Completed!
+											</motion.h3>
+											<motion.div className="text-zinc-400 text-sm font-medium">
+												<p>Your ride has been successfully completed.</p>
+												<p className="text-center">Thankyou for choosing Rydex</p>
+											</motion.div>
+										</div>
+
+										<div className="w-48 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+											<motion.div
+												initial={{ width: 0 }}
+												animate={{ width: "100%" }}
+												transition={{ duration: 1 }}
+												className="h-full bg-zinc-900 rounded-full"
+											/>
+										</div>
 									</motion.div>
 								)}
 							</AnimatePresence>
