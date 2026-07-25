@@ -61,12 +61,12 @@ const Nav = ({ onOpen }: Props) => {
 	};
 
 	useEffect(() => {
-		const fetchCount = async () => {
+		const fetchPendingCount = async () => {
 			try {
 				const { data } = await axios.get(
-					"/api/partner/bookings/pending-requests-count",
+					"/api/partner/bookings/pending-requests",
 				);
-				setPendingRequestCount(data);
+				setPendingRequestCount(data.length || 0);
 			} catch (error: any) {
 				const axiosError = error;
 				const serverMessage = axiosError?.response?.data?.message;
@@ -78,8 +78,28 @@ const Nav = ({ onOpen }: Props) => {
 				);
 			}
 		};
+
+		const fetchActiveCount = async () => {
+			try {
+				const { data } = await axios.get(
+					"/api/partner/bookings/active-ride",
+				);
+				setIsActiveRide(data.success);
+			} catch (error: any) {
+				const axiosError = error;
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					"count pending request error",
+					axiosError?.response?.data ||
+						axiosError?.message ||
+						axiosError,
+				);
+			}
+		};
+
 		if (userData?.role === "partner") {
-			fetchCount();
+			fetchPendingCount();
+			fetchActiveCount();
 		} 
 	}, [userData?.role]);
 

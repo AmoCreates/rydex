@@ -66,7 +66,7 @@ const Page = () => {
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
 				console.log("ride accepted");
-				router.push('/partner/booking/active-ride')
+				router.push('/partner/bookings/active-ride')
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -182,20 +182,6 @@ const Page = () => {
 
 										{/* Customer Name and Mobile */}
 										<div className="flex flex-wrap gap-5 px-5 bg-gray-100 p-2 rounded-2xl">
-											{/* Customer Mobile */}
-											<div className="flex gap-4">
-												<div className="bg-blue-100 p-3 rounded-lg flex items-center justify-center">
-													<Phone size={18} />
-												</div>
-												<div>
-													<p className="text-xs uppercase text-gray-400 mb-1">
-														Customer Mobile
-													</p>
-													<p className="text-gray-900 font-medium">
-														{b.customerMobile}
-													</p>
-												</div>
-											</div>
 
 											{/* Customer Name */}
 											<div className="flex gap-4">
@@ -212,7 +198,22 @@ const Page = () => {
 												</div>
 											</div>
 
+											{/* Customer Mobile */}
+											<div className="flex gap-4">
+												<div className="bg-blue-100 p-3 rounded-lg flex items-center justify-center">
+													<Phone size={18} />
+												</div>
+												<div>
+													<p className="text-xs uppercase text-gray-400 mb-1">
+														Customer Mobile
+													</p>
+													<p className="text-gray-900 font-medium">
+														{b.customerMobile}
+													</p>
+												</div>
+											</div>
 										</div>
+										
 										{/* Pickup Address */}
 										<div className="flex gap-4">
 											<div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center">

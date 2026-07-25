@@ -31,7 +31,6 @@ export async function POST() {
 
 		if (
 			!booking ||
-			booking.length == 0 ||
 			booking.bookingStatus !== "awaiting payment" ||
 			booking.paymentMode !== "cash" ||
 			booking.paymentStatus !== "pending"
@@ -97,13 +96,14 @@ export async function GET() {
 			paymentMode: "cash",
 			paymentStatus: "pending"
 		});
-		console.log(booking)
+
 		if (
-			booking.length !== 0 &&
+			booking &&
 			booking.bookingStatus === "awaiting payment" &&
 			booking.paymentMode === "cash" &&
 			booking.paymentStatus === "pending"
 		) {
+	
 			return NextResponse.json(
 				{ success: true, booking },
 				{ status: 200 },
@@ -114,7 +114,7 @@ export async function GET() {
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ success: false, message: "cash request fetch failed" },
+			{ success: false, message: "fetching cash request failed" },
 			{ status: 500 },
 		);
 	}

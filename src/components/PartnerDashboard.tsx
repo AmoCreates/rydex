@@ -73,8 +73,8 @@ const PartnerDashboard = () => {
 					setCashRequested(true);
 					setCashRequestedBooking(data.booking);
 				}
-			} catch (error) {
-				console.log(error);
+			} catch (error: any) {
+				console.log(error.response.data.message);
 			}
 		};
 		cashReuqest();
