@@ -28,30 +28,22 @@ export async function GET() {
 			);
 		}
 
-		const booking = await Booking.findOne({
+		const bookings = await Booking.find({
 			driver: partner._id,
-			bookingStatus: {
-				$in: [
-					"awaiting pickup",
-					"started",
-					"completed",
-					"awaiting payment",
-				],
-			},
-		});
+		}).populate("customer driver vehicle").sort({createdAt: -1})
 
-		if (!booking || booking.length == 0) {
+		if (!bookings || bookings.length == 0) {
 			return NextResponse.json(
 				{ success: false, message: "no active booking found" },
 				{ status: 200 },
 			);
 		}
 
-		return NextResponse.json({ success: true, booking }, { status: 200 });
+		return NextResponse.json({ success: true, bookings }, { status: 200 });
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ message: "find partner's acitve booking error" },
+			{ message: "partner bookings find error" },
 			{ status: 500 },
 		);
 	}
