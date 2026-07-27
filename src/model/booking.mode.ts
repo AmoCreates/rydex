@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-type BookingStatus =
+export type BookingStatus =
 	| "idle"
 	| "requested"
 	| "awaiting pickup"
@@ -12,7 +12,7 @@ type BookingStatus =
 	| "rejected"
 	| "expired";
 
-type PaymentStatus = "idle" | "pending" | "paid" | "failed";
+export type PaymentStatus = "idle" | "pending" | "paid" | "failed";
 
 export interface IBooking extends mongoose.Document {
 	customer: mongoose.Types.ObjectId;
