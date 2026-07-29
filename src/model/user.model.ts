@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { number } from "motion";
 
 type VideoKycStatus =
 	| "not required"
