@@ -3,8 +3,13 @@ import axios from "axios";
 import {
 	Bike,
 	Bus,
+	Calendar,
 	Car,
+	Check,
 	CircleDashed,
+	Clock4,
+	IndianRupee,
+	MapPin,
 	Package,
 	Phone,
 	Truck,
@@ -15,6 +20,7 @@ import { motion } from "motion/react";
 import { IUser } from "@/model/user.model";
 import { IVehicle } from "@/model/vehicle.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
+import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
 
 export interface IBooking {
 	customer: IUser;
@@ -149,6 +155,18 @@ const Page = () => {
 					(b) => b.bookingStatus === selectStatus.toLowerCase(),
 				);
 
+	const formatDate = (dateString: string) => {
+		const date = new Date(dateString);
+		return date
+			.toLocaleDateString("en-US", {
+				day: "numeric",
+				month: "short",
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+			.replace(",", "");
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<header className="bg-white border-b border-gray-200">
@@ -228,7 +246,8 @@ const Page = () => {
 										animate={{ opacity: 1 }}
 										transition={{ delay: i * 0.05 }}
 									>
-										<div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden my-2">
+										<div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden mb-4">
+											{/* CUSTOMER DATA */}
 											<div className="flex items-center gap-3 p-4 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-50">
 												<div className="w-12 h-12 rounded-full overflow-hidden bg-blue-200 shrink-0 border-2 border-white shadow-sm flex items-center justify-center">
 													<User className="w-6 h-6 text-blue-600" />
@@ -254,16 +273,93 @@ const Page = () => {
 												</div>
 											</div>
 
+											{/* VEHICLE DATA */}
 											<div className="px-4 pt-3">
 												<div className="bg-gray-50 rounded-lg p-2 flex items-center gap-2">
 													{getIcon(b.vehicle.type)}
 													<div className="text-xs text-gray-600">
-														{b.vehicle.vehicleModel} • {b.vehicle.vehicleNumber || "Not assigned"}
+														{b.vehicle.vehicleModel}{" "}
+														•{" "}
+														{b.vehicle
+															.vehicleNumber ||
+															"Not assigned"}
 													</div>
 												</div>
 											</div>
 
-											
+											{/* PICKUP & DROP  */}
+											<div className="p-4 space-y-3">
+												{/* PICKUP */}
+												<div className="flex items-start gap-3">
+													<div className="shrink-0 w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+														<MapPin className="w-3 h-3 text-green-600" />
+													</div>
+													<div className="flex-1">
+														<span className="text-xs font-medium text-green-600 uppercase tracking-wider">
+															PICK UP
+														</span>
+														<p className="text-sm text-gray-700 mt-0.5 leading-relaxed">
+															{b.pickUpAddress}
+														</p>
+													</div>
+												</div>
+
+												{/* DROP */}
+												<div className="flex items-start gap-3">
+													<div className="shrink-0 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+														<RiSendPlaneFill className="w-3 h-3 text-red-600" />
+													</div>
+													<div className="flex-1">
+														<span className="text-xs font-medium text-red-600 uppercase tracking-wider">
+															DROP
+														</span>
+														<p className="text-sm text-gray-700 mt-0.5 leading-relaxed">
+															{b.dropAddress}
+														</p>
+													</div>
+												</div>
+											</div>
+
+											{/* PRICE AND TIMING */}
+											<div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-t border-gray-200">
+												{/* TIMING */}
+												<div className="flex items-center gap-2 text-sm text-gray-600">
+													<Calendar className="w-4 h-4 text-gray-400" />
+													<span>
+														{formatDate(
+															b.createdAt!.toString()!,
+														)}
+													</span>
+												</div>
+
+												{/* PRICING */}
+												<div className="flex items-center gap-1 font-semibold text-gray-900">
+													<IndianRupee className="w-4 h-4" />
+													{b.fare}
+												</div>
+											</div>
+
+											{/* PAYMENT-STATUS */}
+											<div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 capitalize">
+												<div className="flex items-center gap-2">
+													<span className="text-xs text-gray-500">
+														Payment
+													</span>
+													<span
+														className={`text-xs px-2 py-1 rounded-full ${b.paymentStatus === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"} flex items-center gap-1`}
+													>
+														{b.paymentStatus ===
+														"paid" ? (
+															<RiCheckDoubleLine
+																size={12}
+															/>
+														) : (
+															<Clock4 size={12} />
+														)}
+														{b.paymentStatus}
+													</span>
+												</div>
+											</div>
 										</div>
 									</motion.div>
 								</div>
