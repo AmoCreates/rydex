@@ -1,5 +1,5 @@
 "use client";
-import { IBooking } from "@/model/booking.mode";
+import { IBooking } from "@/model/booking.model";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";

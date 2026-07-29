@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { IUser } from "@/model/user.model";
 import { IVehicle } from "@/model/vehicle.model";
-import { BookingStatus, PaymentStatus } from "@/model/booking.mode";
+import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 
 export interface IBooking {
 	customer: IUser;

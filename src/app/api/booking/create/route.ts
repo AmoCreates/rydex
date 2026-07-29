@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
-import Booking from "@/model/booking.mode";
+import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
 import Vehicle from "@/model/vehicle.model";
 import { NextRequest, NextResponse } from "next/server";

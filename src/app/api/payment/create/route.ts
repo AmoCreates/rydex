@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import razorpay from "@/lib/razorpay";
-import Booking from "@/model/booking.mode";
+import Booking from "@/model/booking.model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {

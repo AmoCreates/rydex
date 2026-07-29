@@ -20,7 +20,7 @@ import StatusCard from "./StatusCard";
 import ActionCard from "./ActionCard";
 import axios from "axios";
 import { IVehicle } from "@/model/vehicle.model";
-import { IBooking } from "@/model/booking.mode";
+import { IBooking } from "@/model/booking.model";
 
 type Step = {
 	id: number;

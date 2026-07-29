@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import Booking from "@/model/booking.mode";
+import Booking from "@/model/booking.model";
 
 export async function POST(req: NextRequest) {
 	try {
