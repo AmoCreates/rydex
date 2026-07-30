@@ -13,7 +13,6 @@ import {
 	Package,
 	Phone,
 	Truck,
-	User,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";

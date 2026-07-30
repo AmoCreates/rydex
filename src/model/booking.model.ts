@@ -48,7 +48,7 @@ export interface IBooking extends mongoose.Document {
 	adminCommission: number;
 	partnerAmount: number;
 
-	pikcUpOtp: string;
+	pickUpOtp: string;
 	pickUpOtpExpires: Date;
 	dropOtp: string;
 	dropOtpExpires: Date;
@@ -171,7 +171,7 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 			default: 0,
 		},
 
-		pikcUpOtp: String,
+		pickUpOtp: String,
 		dropOtp: String,
 
 		pickUpOtpExpires: Date,

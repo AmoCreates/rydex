@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const mongodbUrl = process.env.MONGODB_URL;
+const mongodbUrl = process.env.MONGODB_URI;
 if (!mongodbUrl) {
 	throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
 }
@@ -26,6 +26,7 @@ const dbConnect = async () => {
 		cached.conn = await cached.promise;
 		return cached.conn;
 	} catch (error) {
+		cached.promise = null;
 		throw error;
 	}
 
