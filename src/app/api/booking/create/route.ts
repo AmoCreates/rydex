@@ -3,6 +3,7 @@ import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
 import Vehicle from "@/model/vehicle.model";
+import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -151,6 +152,12 @@ export async function POST(req: NextRequest) {
 				bookingStatus: "requested",
 			});
 		}
+
+		await axios.post(`${process.env.NEXT_PUBLIC_SOCKET_URL}/emit`, {
+			event:"new-booking",
+			userId:driverId,
+			data:booking
+		})
 
 		return NextResponse.json(booking, { status: 201 });
 	} catch (error) {

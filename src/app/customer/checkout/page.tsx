@@ -453,7 +453,7 @@ const Page = () => {
 																size={14}
 															/>
 														),
-														text: "Pay after driver accepts",
+														text: "Pay after ride completed",
 													},
 												].map((item, idx) => (
 													<div

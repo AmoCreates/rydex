@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
+import { getSocket } from "@/lib/socket";
 
 type ConfirmationModalType = null | "accept" | "reject";
 
@@ -59,6 +60,17 @@ const Page = () => {
 		};
 		fetchPendingRequest();
 	}, []);
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on('new-booking', (data) => {
+			console.log("socket data",data);
+			setBookings((prev) => [...prev, data]);
+		})
+		return () => {
+			socket?.off('new-booking')
+		}
+	})
 
 	const handleAccept = async (id: string) => {
 		try {
