@@ -5,7 +5,7 @@ import {
 	Bus,
 	Calendar,
 	Car,
-	Check,
+	ChevronRightIcon,
 	CircleDashed,
 	Clock4,
 	IndianRupee,
@@ -21,6 +21,7 @@ import { IUser } from "@/model/user.model";
 import { IVehicle } from "@/model/vehicle.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
+import { useRouter } from "next/navigation";
 
 export interface IBooking {
 	customer: IUser;
@@ -70,25 +71,25 @@ const getStatusStyles = (status: string) => {
 
 	switch (normalizedStatus) {
 		case "requested":
-			return "bg-amber-100 text-amber-700 border-amber-200";
+			return "bg-amber-100 border-amber-200";
 		case "awaiting pickup":
-			return "bg-sky-100 text-sky-700 border-sky-200";
+			return "bg-sky-100 border-sky-200";
 		case "started":
-			return "bg-blue-100 text-blue-700 border-blue-200";
+			return "bg-blue-100 border-blue-200";
 		case "completed":
-			return "bg-emerald-100 text-emerald-700 border-emerald-200";
+			return "bg-emerald-100 border-emerald-200";
 		case "awaiting payment":
-			return "bg-violet-100 text-violet-700 border-violet-200";
+			return "bg-violet-100 border-violet-200";
 		case "confirmed":
-			return "bg-green-100 text-green-700 border-green-200";
+			return "bg-green-100 border-green-200";
 		case "cancelled":
-			return "bg-rose-100 text-rose-700 border-rose-200";
+			return "bg-rose-100 border-rose-200";
 		case "rejected":
-			return "bg-red-100 text-red-700 border-red-200";
+			return "bg-red-100 border-red-200";
 		case "expired":
-			return "bg-gray-100 text-gray-700 border-gray-200";
+			return "bg-gray-100 border-gray-200";
 		default:
-			return "bg-slate-100 text-slate-700 border-slate-200";
+			return "bg-slate-100 border-slate-200";
 	}
 };
 
@@ -122,6 +123,7 @@ const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [selectStatus, setSelectStatus] = useState("All");
 	const [loading, setLoading] = useState(false);
+	const router = useRouter();
 
 	useEffect(() => {
 		const getActiveRides = async () => {
@@ -248,9 +250,9 @@ const Page = () => {
 									>
 										<div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden mb-4">
 											{/* CUSTOMER DATA */}
-											<div className="flex items-center gap-3 p-4 bg-linear-to-r from-blue-50 to-indigo-50 border-b border-gray-50">
-												<div className="w-12 h-12 rounded-full overflow-hidden bg-blue-200 shrink-0 border-2 border-white shadow-sm flex items-center justify-center">
-													<User className="w-6 h-6 text-blue-600" />
+											<div className="flex items-center gap-3 p-4 bg-linear-to-r from-gray-500 to-gray-900">
+												<div className="w-12 h-12 rounded-full overflow-hidden bg-black shrink-0 border-2 border-white shadow-sm flex items-center justify-center">
+													<User className="w-6 h-6 text-white" />
 												</div>
 												<div className="flex-1">
 													<div className="flex items-center justify-between">
@@ -266,7 +268,7 @@ const Page = () => {
 															)}
 														</span>
 													</div>
-													<div className="flex items-center  gap-1 mt-1 text-xs text-gray-600">
+													<div className="flex items-center  gap-1 mt-1 text-xs text-white">
 														<Phone className="w-3 h-3" />
 														{b.customerMobile}
 													</div>
@@ -339,7 +341,7 @@ const Page = () => {
 												</div>
 											</div>
 
-											{/* PAYMENT-STATUS */}
+											{/* PAYMENT-STATUS & VIEW DETAILS */}
 											<div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 capitalize">
 												<div className="flex items-center gap-2">
 													<span className="text-xs text-gray-500">
@@ -359,6 +361,21 @@ const Page = () => {
 														{b.paymentStatus}
 													</span>
 												</div>
+
+												{b.bookingStatus !==
+													"completed" && (
+													<div className="flex items-center gap-2">
+														<button
+														onClick={() => router.push('/partner/bookings/active-ride')}
+														className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer ">
+															<span>
+																View Details
+															</span>
+															<ChevronRightIcon className="w-4 h-4" />
+														</button>
+													</div>
+												)}
+
 											</div>
 										</div>
 									</motion.div>
