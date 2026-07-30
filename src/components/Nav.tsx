@@ -26,8 +26,8 @@ const partnerNav = [
 	{ label: "My Bookings", route: "/partner/bookings/mybookings" },
 ];
 
-const customerMenu = [
-	{ label: "Profile", route: "/customer/profile" },
+const customerNav = [
+	{ label: "Home", route: "/" },
 	{ label: "Book Vehicle", route: "/customer/book" },
 	{ label: "My Bookings", route: "/customer/bookings" },
 ];
@@ -37,6 +37,12 @@ const partnerMenu = [
 	{ label: "Active Ride", route: "/partner/bookings/active-ride" },
 	{ label: "Pending Request", route: "/partner/bookings/pending-requests" },
 	{ label: "My Bookings", route: "/partner/bookings/mybookings" },
+];
+
+const customerMenu = [
+	{ label: "Profile", route: "/customer/profile" },
+	{ label: "Book Vehicle", route: "/customer/book" },
+	{ label: "My Bookings", route: "/customer/bookings" },
 ];
 
 type Props = {
@@ -100,7 +106,7 @@ const Nav = ({ onOpen }: Props) => {
 		if (userData?.role === "partner") {
 			fetchPendingCount();
 			fetchActiveCount();
-		} 
+		}
 	}, [userData?.role]);
 
 	return (
@@ -125,9 +131,9 @@ const Nav = ({ onOpen }: Props) => {
 						/>
 					</Link>
 					<div className="flex items-center gap-2 md:gap-4 lg:gap-10">
-						{userData?.role !== "partner" ? (
+						{userData?.role === "customer" ? (
 							<>
-								{publicNav.map((item, index) => {
+								{customerNav.map((item, index) => {
 									const href = item.route;
 									const active = pathName === href;
 									return (
@@ -141,7 +147,7 @@ const Nav = ({ onOpen }: Props) => {
 									);
 								})}
 							</>
-						) : (
+						) : userData?.role === "partner" ? (
 							<>
 								{partnerNav.map((item, index) => {
 									const href = item.route;
@@ -169,6 +175,22 @@ const Nav = ({ onOpen }: Props) => {
 													className={`${isActiveRide ? "absolute" : "hidden"} -top-1.5 -right-2 w-4 h-4 bg-green-500 text-[9px] rounded-full flex items-center justify-center font-bold`}
 												/>
 											)}
+										</Link>
+									);
+								})}
+							</>
+						) : (
+							<>
+								{publicNav.map((item, index) => {
+									const href = item.route;
+									const active = pathName === href;
+									return (
+										<Link
+											key={index}
+											href={href}
+											className={`text-[11px] sm:text-sm text-center font-medium transition pl-2 ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
+										>
+											{item.label}
 										</Link>
 									);
 								})}
