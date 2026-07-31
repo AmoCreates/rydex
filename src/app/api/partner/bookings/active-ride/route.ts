@@ -35,7 +35,6 @@ export async function GET() {
 					"awaiting pickup",
 					"started",
 					"completed",
-					"awaiting payment",
 				],
 			},
 		});
