@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
+import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
@@ -55,6 +56,12 @@ export async function POST(
 			booking.bookingStatus = "cancelled";
 		}
 		await booking.save();
+
+		await axios.post(`${process.env.NEXT_PUBLIC_SOCKET_URL}/emit`, {
+			event:"cancel-booking",
+			userId:booking.driver,
+			data:booking._id
+		})
 
 		return NextResponse.json(
 			{ message: "booking cancelled" },

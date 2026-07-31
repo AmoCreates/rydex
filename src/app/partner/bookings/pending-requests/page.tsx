@@ -72,6 +72,19 @@ const Page = () => {
 		}
 	})
 
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on('cancel-booking', (data) => {
+			console.log("socket data",data);
+			setBookings((prevBookings) =>
+					prevBookings.filter((b) => b._id.toString() !== data)
+				);
+		})
+		return () => {
+			socket?.off('cancel-booking')
+		}
+	})
+
 	const handleAccept = async (id: string) => {
 		try {
 			setConfirm(true);
