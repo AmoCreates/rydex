@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
+import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest, context:{params:Promise<{id:string}>}) {
@@ -50,11 +51,16 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
     booking.paymentDeadline= new Date(Date.now() + 5*60*1000)
     await booking.save();
 
+		await axios.post(`${process.env.NEXT_PUBLIC_SOCKET_URL}/emit`, {
+			event:"accept-booking",
+			userId:booking.customer,
+			data:booking.bookingStatus
+		})
+
     return NextResponse.json(
       {success: true},
       {status: 200}
     )
-
 
 	} catch (error) {
 		console.log("accept booking error: err", error);

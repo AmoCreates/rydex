@@ -2,9 +2,13 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
+import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest, context:{params:Promise<{id:string}>}) {
+export async function POST(
+	req: NextRequest,
+	context: { params: Promise<{ id: string }> },
+) {
 	try {
 		await dbConnect();
 
@@ -21,11 +25,11 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 		}
 
 		const id = (await context.params).id;
-		if(!id) {
+		if (!id) {
 			return NextResponse.json(
-				{message: "missing id!, can't find any booking"},
-				{status: 400},
-			)
+				{ message: "missing id!, can't find any booking" },
+				{ status: 400 },
+			);
 		}
 
 		const partner = await User.findOne({ email: session.user.email });
@@ -36,25 +40,29 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 			);
 		}
 
-    const booking = await Booking.findById(id)
+		const booking = await Booking.findById(id);
 
-    if (!booking || booking.bookingStatus !== "requested") {
-      return NextResponse.json(
-        { message: "invalid request!, customer may cancel the request or may else driver accept before you" },
-        { status: 401 }
-      );
-    }
+		if (!booking || booking.bookingStatus !== "requested") {
+			return NextResponse.json(
+				{
+					message:
+						"invalid request!, customer may cancel the request or may else driver accept before you",
+				},
+				{ status: 401 },
+			);
+		}
 
-    booking.bookingStatus = "rejected";
-    booking.paymentStatus = "idle";
-    await booking.save();
+		booking.bookingStatus = "rejected";
+		booking.paymentStatus = "idle";
+		await booking.save();
 
-    return NextResponse.json(
-      {success: true},
-      {status: 200}
-    )
+		await axios.post(`${process.env.NEXT_PUBLIC_SOCKET_URL}/emit`, {
+			event: "reject-booking",
+			userId: booking.customer,
+			data: booking.bookingStatus,
+		});
 
-
+		return NextResponse.json({ success: true }, { status: 200 });
 	} catch (error) {
 		console.log("reject booking error: err", error);
 		return NextResponse.json(

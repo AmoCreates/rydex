@@ -21,10 +21,15 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RiArrowRightSLine, RiRoadMapFill, RiSendPlaneFill } from "@remixicon/react";
+import {
+	RiArrowRightSLine,
+	RiRoadMapFill,
+	RiSendPlaneFill,
+} from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
+import { getSocket } from "@/lib/socket";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -235,6 +240,28 @@ const Page = () => {
 			console.log(error.response.data.message);
 		}
 	};
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on("accept-booking", (data) => {
+			console.log("socket data", data);
+			setStatus(data);
+		});
+		return () => {
+			socket?.off("accept-booking");
+		};
+	});
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on("reject-booking", (data) => {
+			console.log("socket data", data);
+			setStatus(data);
+		});
+		return () => {
+			socket?.off("reject-booking");
+		};
+	});
 
 	useEffect(() => {
 		const activeBooking = async () => {
@@ -531,7 +558,10 @@ const Page = () => {
 											className="flex items-center gap-2 text-xs font-bold text-zinc-400  hover:text-zinc-900 transition-colors border border-zinc-200 hover:border-zinc-400 px-4 py-2.5 rounded-xl cursor-pointer disabled:cursor-not-allowed disabled:pointer-events-none"
 											disabled={loading}
 										>
-											<XCircle size={13} /> {loading ? "Canceling your request..." : "Cancel"}
+											<XCircle size={13} />{" "}
+											{loading
+												? "Canceling your request..."
+												: "Cancel"}
 										</motion.button>
 									</motion.div>
 								)}
@@ -591,7 +621,8 @@ const Page = () => {
 											whileHover={{ scale: 1.03 }}
 											className="flex items-center gap-2.5 bg-zinc-900 hover:bg-black text-white font-black text-sm px-8 py-4 rounded-2xl transition-colors shadow-md cursor-pointer"
 										>
-											Track Your Ride < RiRoadMapFill size={15} />
+											Track Your Ride{" "}
+											<RiRoadMapFill size={15} />
 										</motion.button>
 									</motion.div>
 								)}

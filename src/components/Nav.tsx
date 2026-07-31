@@ -10,6 +10,7 @@ import { signOut, useSession } from "next-auth/react";
 import { Bike, Car, ChevronRight, LogOut, Truck } from "lucide-react";
 import { RiArrowRightSLine } from "@remixicon/react";
 import axios from "axios";
+import { getSocket } from "@/lib/socket";
 
 // const publicNav = ["Home", "Bookings", "About Us", "Contact Us"];
 // const partnerNav = ["Home", "Active Ride", "Pending Request", "My Bookings"];
@@ -108,6 +109,17 @@ const Nav = ({ onOpen }: Props) => {
 			fetchActiveCount();
 		}
 	}, [userData?.role]);
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on("new-booking", (data) => {
+			console.log("socket data", data);
+			setPendingRequestCount((prev) => prev+1);
+		});
+		return () => {
+			socket?.off("new-booking");
+		};
+	});
 
 	return (
 		<>
