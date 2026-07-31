@@ -836,6 +836,66 @@ const Page = () => {
 										</div>
 									</motion.div>
 								)}
+
+								{status === "rejected" && (
+									<motion.div
+										key="rejected"
+										initial={{ opacity: 0, scale: 0.94 }}
+										animate={{ opacity: 1, scale: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ duration: 0.35 }}
+										className="flex flex-col flex-1 items-center justify-center gap-6 text-center"
+									>
+										{/* Icon Container with Warning Ring */}
+										<motion.div
+											initial={{ scale: 0 }}
+											animate={{ scale: 1 }}
+											transition={{
+												type: "spring",
+												stiffness: 260,
+												damping: 16,
+											}}
+											className="w-20 h-20 rounded-full bg-zinc-100 border-2 border-zinc-200 flex items-center justify-center text-zinc-900"
+										>
+											<XCircle
+												size={36}
+												className="text-zinc-900"
+											/>
+										</motion.div>
+
+										{/* Message Section */}
+										<div>
+											<h3 className="text-xl font-black text-zinc-900 mb-1">
+												Booking Declined
+											</h3>
+											<p className="text-zinc-400 text-sm font-medium max-w-xs mx-auto">
+												The driver was unable to accept
+												your request at this time.
+											</p>
+										</div>
+
+										{/* Action Buttons */}
+										<div className="flex flex-col sm:flex-row items-center gap-3 w-full mt-2">
+											<motion.button
+												onClick={handleBookRequest}
+												whileTap={{ scale: 0.97 }}
+												whileHover={{ scale: 1.02 }}
+												className="w-full sm:flex-1 h-12 bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center gap-2 transition-colors shadow-md cursor-pointer"
+											>
+												Try Again
+											</motion.button>
+
+											<motion.button
+												onClick={() => router.back()}
+												whileTap={{ scale: 0.97 }}
+												whileHover={{ scale: 1.02 }}
+												className="w-full sm:flex-1 h-12 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-black text-xs uppercase tracking-wider rounded-2xl flex items-center justify-center transition-colors cursor-pointer"
+											>
+												Another Driver
+											</motion.button>
+										</div>
+									</motion.div>
+								)}
 							</AnimatePresence>
 
 							<div className="text-[9px] uppercase font-semibold tracking-[0.18em] text-zinc-400 gap-2 flex items-center justify-center mt-7 border-zinc-100">

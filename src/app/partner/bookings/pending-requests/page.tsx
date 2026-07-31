@@ -78,6 +78,9 @@ const Page = () => {
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
 				console.log("ride accepted");
+				setBookings((prevBookings) =>
+					prevBookings.filter((b) => b._id.toString() !== id)
+				);
 				router.push('/partner/bookings/active-ride')
 			}
 		} catch (error: unknown) {
@@ -109,7 +112,9 @@ const Page = () => {
 			const res = await axios.post(`/api/partner/bookings/${id}/reject`);
 			if (res.status === 200) {
 				console.log("ride rejected");
-				window.location.reload();
+				setBookings((prevBookings) =>
+					prevBookings.filter((b) => b._id.toString() !== id)
+				);
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
