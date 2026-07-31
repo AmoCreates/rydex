@@ -362,20 +362,28 @@ const Page = () => {
 													</span>
 												</div>
 
-												{b.bookingStatus !==
-													"completed" && (
-													<div className="flex items-center gap-2">
-														<button
-														onClick={() => router.push('/partner/bookings/active-ride')}
-														className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer ">
-															<span>
-																View Details
-															</span>
-															<ChevronRightIcon className="w-4 h-4" />
-														</button>
-													</div>
-												)}
-
+												{(b.bookingStatus ===
+													"awaiting pickup" ||
+													b.bookingStatus ===
+														"started" ||
+													b.bookingStatus ===
+														"completed") && (
+														<div className="flex items-center gap-2">
+															<button
+																onClick={() =>
+																	router.push(
+																		"/partner/bookings/active-ride",
+																	)
+																}
+																className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer"
+															>
+																<span>
+																	View Details
+																</span>
+																<ChevronRightIcon className="w-4 h-4" />
+															</button>
+														</div>
+													)}
 											</div>
 										</div>
 									</motion.div>
