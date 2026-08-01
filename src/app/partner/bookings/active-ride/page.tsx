@@ -1,4 +1,5 @@
 "use client";
+import LiveRideMap from "@/components/LiveRideMap";
 import { IBooking } from "@/model/booking.model";
 import axios from "axios";
 import { CircleDashed } from "lucide-react";
@@ -21,14 +22,8 @@ const Page = () => {
 				console.log(data.booking);
 				if (data.success) {
 					setBooking(data.booking);
-					setPickUpPos([
-						data.pickUpLocation.coordinates[1],
-						data.pickUpLocation.coordinates[0],
-					]);
-					setDropPos([
-						data.dropLocation.coordinates[1],
-						data.dropLocation.coordinates[0],
-					]);
+					setPickUpPos(data.booking.pickUpLocation.coordinates.toReversed());
+					setDropPos(data.booking.dropLocation.coordinates.toReversed());
 				}
 			} catch (error) {
 				if (axios.isAxiosError(error)) {
@@ -44,6 +39,7 @@ const Page = () => {
 		getActiveRides();
 	}, []);
 
+	// Fetching Driver's Live Location
 	useEffect(() => {
 		const getCurrentLocation = async () => {
 			if (!navigator.geolocation) {
@@ -66,13 +62,12 @@ const Page = () => {
 					timeout: 10000,
 				},
 			);
-      return () => {
-        navigator.geolocation.clearWatch(watcher);
-      };
+			return () => {
+				navigator.geolocation.clearWatch(watcher);
+			};
 		};
 
-    getCurrentLocation();
-
+		getCurrentLocation();
 	}, []);
 
 	if (loading) {
@@ -90,7 +85,13 @@ const Page = () => {
 
 	return (
 		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-col overflow-hidden">
-			<div className="realtive flex-1 h-full z-0"></div>
+			<div className="realtive flex-1 h-full z-0">
+				<LiveRideMap
+					driverLocation={driverPos}
+					pickUpLocation={pickUpPos}
+					dropLocation={dropPos}
+				/>
+			</div>
 		</div>
 	);
 };
