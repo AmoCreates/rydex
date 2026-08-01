@@ -1,6 +1,6 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
-import { BookingStatus, IBooking } from "@/model/booking.model";
+import { IBooking } from "@/model/booking.model";
 import axios from "axios";
 import { CircleDashed } from "lucide-react";
 import React, { useEffect, useState } from "react";
