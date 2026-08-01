@@ -1,6 +1,6 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
-import { IBooking } from "@/model/booking.model";
+import { BookingStatus, IBooking } from "@/model/booking.model";
 import axios from "axios";
 import { CircleDashed } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -90,6 +90,7 @@ const Page = () => {
 					driverLocation={driverPos}
 					pickUpLocation={pickUpPos}
 					dropLocation={dropPos}
+					status={booking?.bookingStatus}
 				/>
 			</div>
 		</div>
