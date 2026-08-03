@@ -1,6 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
+import {
+	MapContainer,
+	Marker,
+	Polyline,
+	TileLayer,
+	useMap,
+} from "react-leaflet";
 
 let L: typeof import("leaflet");
 
@@ -9,6 +15,12 @@ type Props = {
 	pickUpLocation: [number, number] | null;
 	dropLocation: [number, number] | null;
 	status: string | undefined;
+	onStats?: (data: {
+		dstToPickUp: number;
+		dstToDrop: number;
+		estPickUpTime: number;
+		estDropTime: number;
+	}) => void;
 };
 
 // Map Recenter Helper Component
@@ -27,14 +39,13 @@ const LiveRideMap = ({
 	pickUpLocation,
 	dropLocation,
 	status,
+	onStats,
 }: Props) => {
 	const [leaflet, setLeaflet] = useState<typeof import("leaflet") | null>(null);
-	
-	// Separate states for dashed segment (Driver -> Pickup) and main route segment
+
 	const [driverToPickupRoute, setDriverToPickupRoute] = useState<[number, number][]>([]);
 	const [mainRoute, setMainRoute] = useState<[number, number][]>([]);
 
-	// Dynamically import Leaflet on client side
 	useEffect(() => {
 		import("leaflet").then((leafletModule) => {
 			L = leafletModule;
@@ -46,70 +57,103 @@ const LiveRideMap = ({
 	const isCompleted = formattedStatus === "completed";
 
 	const mapCenter: [number, number] | null = isCompleted
-		? dropLocation ?? driverLocation ?? pickUpLocation
-		: driverLocation ?? pickUpLocation ?? dropLocation;
+		? (dropLocation ?? driverLocation ?? pickUpLocation)
+		: (driverLocation ?? pickUpLocation ?? dropLocation);
 
 	useEffect(() => {
-		if (formattedStatus === "confirmed" || formattedStatus === "completed") {
-			setDriverToPickupRoute([]);
-			setMainRoute([]);
+		if (
+			formattedStatus === "confirmed" ||
+			formattedStatus === "completed"
+		) {
+			Promise.resolve().then(() => {
+				setDriverToPickupRoute([]);
+				setMainRoute([]);
+				onStats?.({
+					dstToPickUp: 0,
+					dstToDrop: 0,
+					estPickUpTime: 0,
+					estDropTime: 0,
+				});
+			});
 			return;
 		}
 
-		// Helper function to fetch OSRM route coordinates
+		// Helper function to fetch OSRM route, distance, and duration
 		const fetchOSRMRoute = async (points: [number, number][]) => {
-			if (points.length < 2) return [];
-			const coordinatesString = points.map(([lat, lng]) => `${lng},${lat}`).join(";");
+			if (points.length < 2) {
+				return { coords: [], distance: 0, duration: 0 };
+			}
+			const coordinatesString = points
+				.map(([lat, lng]) => `${lng},${lat}`)
+				.join(";");
 			try {
 				const response = await fetch(
-					`https://router.project-osrm.org/route/v1/driving/${coordinatesString}?overview=full&geometries=geojson`
+					`https://router.project-osrm.org/route/v1/driving/${coordinatesString}?overview=full&geometries=geojson`,
 				);
 				const data = await response.json();
 				if (data.routes && data.routes.length > 0) {
-					return data.routes[0].geometry.coordinates.map(
-						(coord: [number, number]) => [coord[1], coord[0]] as [number, number]
+					const route = data.routes[0];
+					const coords = route.geometry.coordinates.map(
+						(coord: [number, number]) =>
+							[coord[1], coord[0]] as [number, number],
 					);
+					// distance is in meters, duration is in seconds
+					return {
+						coords,
+						distance: route.distance, 
+						duration: route.duration, 
+					};
 				}
 			} catch (error) {
 				console.error("Error fetching road directions:", error);
 			}
-			return points;
+			return { coords: points, distance: 0, duration: 0 };
 		};
 
 		const loadRoutes = async () => {
+			let pickupData = { coords: [] as [number, number][], distance: 0, duration: 0 };
+			let dropData = { coords: [] as [number, number][], distance: 0, duration: 0 };
+
 			if (formattedStatus === "awaiting pickup") {
-				// 1. Dashed Route: Driver -> Pickup
 				if (driverLocation && pickUpLocation) {
-					const dashedCoords = await fetchOSRMRoute([driverLocation, pickUpLocation]);
-					setDriverToPickupRoute(dashedCoords);
+					pickupData = await fetchOSRMRoute([driverLocation, pickUpLocation]);
+					setDriverToPickupRoute(pickupData.coords);
 				} else {
 					setDriverToPickupRoute([]);
 				}
 
-				// 2. Solid Route: Pickup -> Drop
 				if (pickUpLocation && dropLocation) {
-					const solidCoords = await fetchOSRMRoute([pickUpLocation, dropLocation]);
-					setMainRoute(solidCoords);
+					dropData = await fetchOSRMRoute([pickUpLocation, dropLocation]);
+					setMainRoute(dropData.coords);
 				} else {
 					setMainRoute([]);
 				}
 			} else if (formattedStatus === "started") {
-				// Ride started: No dashed line; Solid Route from Driver (or Pickup) -> Drop
 				setDriverToPickupRoute([]);
 				const startPoint = driverLocation ?? pickUpLocation;
 				if (startPoint && dropLocation) {
-					const solidCoords = await fetchOSRMRoute([startPoint, dropLocation]);
-					setMainRoute(solidCoords);
+					dropData = await fetchOSRMRoute([startPoint, dropLocation]);
+					setMainRoute(dropData.coords);
 				} else {
 					setMainRoute([]);
 				}
 			} else {
 				setDriverToPickupRoute([]);
 				const waypoints = [driverLocation, pickUpLocation, dropLocation].filter(
-					(loc): loc is [number, number] => loc !== null
+					(loc): loc is [number, number] => loc !== null,
 				);
-				const coords = await fetchOSRMRoute(waypoints);
-				setMainRoute(coords);
+				dropData = await fetchOSRMRoute(waypoints);
+				setMainRoute(dropData.coords);
+			}
+
+			// Send calculated stats back to parent
+			if (onStats) {
+				onStats({
+					dstToPickUp: pickupData.distance, // in meters
+					dstToDrop: dropData.distance,     // in meters
+					estPickUpTime: pickupData.duration, // in seconds
+					estDropTime: dropData.duration,   // in seconds
+				});
 			}
 		};
 
@@ -126,28 +170,78 @@ const LiveRideMap = ({
 
 	const pickUpIcon = new leaflet.DivIcon({
 		html: `
-      <div style="display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25)); pointer-events: none;">
-        <div style="background: #000000; color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;">PICKUP</div>
-        <div style="width: 2px; height: 12px; background: #000000;"></div>
-        <div style="width: 8px; height: 8px; background: #000000; border-radius: 50%;"></div>
-      </div>
-    `,
+			<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22));
+				pointer-events: none;
+			">
+				<div style="
+					background: #0a0a0a;
+					color: #fff;
+					padding: 5px 14px;
+					border-radius: 100px;
+					font-size: 10px;
+					font-weight: 800;
+					letter-spacing: 0.14em;
+					text-transform: uppercase;
+					white-space: nowrap;
+					font-family: -apple-system, system-ui, sans-serif;
+					box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+				">PICKUP</div>
+				<div style="width: 2px; height: 10px; background: #0a0a0a; opacity: 0.4"></div>
+				<div style="
+					width: 13px;
+					height: 13px;
+					background: #0a0a0a;
+					border-radius: 50%;
+					border: 3px solid #fff;
+					box-shadow: 0 0 2px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.3);
+				"></div>
+			</div>
+		`,
 		className: "",
-		iconSize: [80, 50],
-		iconAnchor: [40, 50],
+		iconSize: [120, 60],
+		iconAnchor: [60, 60],
 	});
 
 	const dropIcon = new leaflet.DivIcon({
 		html: `
-      <div style="display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)); pointer-events: none;">
-        <div style="background: #ffffff; color: #000000; border: 1.5px solid #000000; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;">DROP</div>
-        <div style="width: 2px; height: 12px; background: #000000;"></div>
-        <div style="width: 8px; height: 8px; background: #ffffff; border: 2px solid #000000; border-radius: 50%;"></div>
-      </div>
-    `,
+			<div style="
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22));
+				pointer-events: none;
+			">
+				<div style="
+					background: #0a0a0a;
+					color: #fff;
+					padding: 5px 14px;
+					border-radius: 100px;
+					font-size: 10px;
+					font-weight: 800;
+					letter-spacing: 0.14em;
+					text-transform: uppercase;
+					white-space: nowrap;
+					font-family: -apple-system, system-ui, sans-serif;
+					box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+				">DROP</div>
+				<div style="width: 2px; height: 10px; background: #0a0a0a; opacity: 0.4"></div>
+				<div style="
+					width: 13px;
+					height: 13px;
+					background: #0a0a0a;
+					border-radius: 50%;
+					border: 3px solid #fff;
+					box-shadow: 0 0 2px rgba(0, 0, 0, 0.15), 0 3px 10px rgba(0, 0, 0, 0.3);
+				"></div>
+			</div>
+		`,
 		className: "",
-		iconSize: [80, 50],
-		iconAnchor: [40, 50],
+		iconSize: [120, 60],
+		iconAnchor: [60, 60],
 	});
 
 	const driverIcon = new leaflet.DivIcon({
@@ -200,7 +294,6 @@ const LiveRideMap = ({
 
 				<MapRecenter center={mapCenter} />
 
-				{/* 1. Dashed Polyline (Driver -> Pickup) */}
 				{driverToPickupRoute.length >= 2 && (
 					<Polyline
 						positions={driverToPickupRoute}
@@ -214,7 +307,6 @@ const LiveRideMap = ({
 					/>
 				)}
 
-				{/* 2. Solid Polyline (Main Route) */}
 				{mainRoute.length >= 2 && (
 					<Polyline
 						positions={mainRoute}
@@ -227,13 +319,14 @@ const LiveRideMap = ({
 					/>
 				)}
 
-				{/* Markers */}
 				{!isCompleted && driverLocation && (
 					<Marker position={driverLocation} icon={driverIcon} />
 				)}
-				{!isCompleted && pickUpLocation && formattedStatus !== "started" && (
-					<Marker position={pickUpLocation} icon={pickUpIcon} />
-				)}
+				{!isCompleted &&
+					pickUpLocation &&
+					formattedStatus !== "started" && (
+						<Marker position={pickUpLocation} icon={pickUpIcon} />
+					)}
 				{!isCompleted && dropLocation && (
 					<Marker position={dropLocation} icon={dropIcon} />
 				)}

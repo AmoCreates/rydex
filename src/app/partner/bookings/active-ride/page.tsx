@@ -85,6 +85,10 @@ const Page = () => {
 	const [driverPos, setDriverPos] = useState<[number, number] | null>(null);
 	const [pickUpPos, setPickUpPos] = useState<[number, number] | null>(null);
 	const [dropPos, setDropPos] = useState<[number, number] | null>(null);
+	const [dstToPickUp, setDstToPickUp] = useState(0);
+	const [dstToDrop, setDstToDrop] = useState(0);
+	const [estPickUpTime, setEstPickUpTime] = useState(0);
+	const [estDropTime, setEstDropTime] = useState(0);
 
 	useEffect(() => {
 		const getActiveRides = async () => {
@@ -164,13 +168,19 @@ const Page = () => {
 	const cfg = getStatus(booking?.bookingStatus ?? "confirmed");
 
 	return (
-		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-col overflow-hidden">
+		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
 			<div className="realtive flex-1 h-full z-0">
 				<LiveRideMap
 					driverLocation={driverPos}
 					pickUpLocation={pickUpPos}
 					dropLocation={dropPos}
 					status={booking?.bookingStatus}
+					onStats={({dstToPickUp, dstToDrop, estPickUpTime, estDropTime}) => {
+						setDstToPickUp(dstToPickUp)
+						setDstToDrop(dstToDrop)
+						setEstPickUpTime(estPickUpTime)
+						setEstDropTime(estDropTime)
+					}}
 				/>
 
 				<motion.div
@@ -189,6 +199,23 @@ const Page = () => {
 					</div>
 				</motion.div>
 			</div>
+
+			<motion.div
+				initial={{ x: 60, opacity: 0 }}
+				animate={{ x: 0, opacity: 1 }}
+				transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+				className="hidden lg:flex w-[420px] xl:w-[460px] bg-white border-l border-zinc-100 flex-col"
+			>
+				<div className="bg-zinc-950 px-6 py-5 shrink-0">
+					<p className="text-zinc-500 text-[10px] tracking-[0.2em] uppercase font-semibold mb-1">
+						Driver Panel
+					</p>
+					<div className="flex items-center justify-between">
+						<h1></h1>
+						<div></div>
+					</div>
+				</div>
+			</motion.div>
 		</div>
 	);
 };
