@@ -149,16 +149,16 @@ const LiveRideMap = ({
 			// Send calculated stats back to parent
 			if (onStats) {
 				onStats({
-					dstToPickUp: pickupData.distance, // in meters
-					dstToDrop: dropData.distance,     // in meters
-					estPickUpTime: pickupData.duration, // in seconds
-					estDropTime: dropData.duration,   // in seconds
+					dstToPickUp: (pickupData.distance ?? 0)/1000, // in km
+					dstToDrop: (dropData.distance ?? 0)/1000,     // in km
+					estPickUpTime: (pickupData.duration ?? 0)/60, // in min
+					estDropTime: (dropData.duration ?? 0)/60,   // in min
 				});
 			}
 		};
 
 		loadRoutes();
-	}, [driverLocation, pickUpLocation, dropLocation, status, formattedStatus]);
+	}, [driverLocation, pickUpLocation, dropLocation, status, formattedStatus, onStats]);
 
 	if (!leaflet) {
 		return (

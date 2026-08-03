@@ -2,11 +2,12 @@
 import LiveRideMap from "@/components/LiveRideMap";
 import { IBooking } from "@/model/booking.model";
 import axios from "axios";
-import { CircleDashed } from "lucide-react";
+import { CircleDashed, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import PanleContent from "@/components/PanleContent";
 
-const getStatus = (status: string | undefined) => {
+const getStatusStyle = (status: string | undefined) => {
 	const normalizedStatus = status?.toLowerCase() || "";
 
 	switch (normalizedStatus) {
@@ -81,6 +82,7 @@ const getStatus = (status: string | undefined) => {
 
 const Page = () => {
 	const [booking, setBooking] = useState<IBooking | null>(null);
+	const [status, setStatus] = useState("awaiting pickup");
 	const [loading, setLoading] = useState(false);
 	const [driverPos, setDriverPos] = useState<[number, number] | null>(null);
 	const [pickUpPos, setPickUpPos] = useState<[number, number] | null>(null);
@@ -100,6 +102,7 @@ const Page = () => {
 				console.log(data.booking);
 				if (data.success) {
 					setBooking(data.booking);
+					setStatus(data.booking.bookingStatus);
 					setPickUpPos(
 						data.booking.pickUpLocation.coordinates.toReversed(),
 					);
@@ -165,7 +168,13 @@ const Page = () => {
 		);
 	}
 
-	const cfg = getStatus(booking?.bookingStatus ?? "confirmed");
+	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
+	const isActive = ["awaiting pickup", "started"].includes(status);
+	const displayTime =
+	status === "awaiting pickup" ? estPickUpTime : estDropTime;
+	const displayDistance =
+	status === "awaiting pickup" ? dstToPickUp : dstToDrop;
+	const panelProps = {isActive, displayDistance, displayTime, cfg, status, booking };
 
 	return (
 		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
@@ -174,12 +183,17 @@ const Page = () => {
 					driverLocation={driverPos}
 					pickUpLocation={pickUpPos}
 					dropLocation={dropPos}
-					status={booking?.bookingStatus}
-					onStats={({dstToPickUp, dstToDrop, estPickUpTime, estDropTime}) => {
-						setDstToPickUp(dstToPickUp)
-						setDstToDrop(dstToDrop)
-						setEstPickUpTime(estPickUpTime)
-						setEstDropTime(estDropTime)
+					status={status}
+					onStats={({
+						dstToPickUp,
+						dstToDrop,
+						estPickUpTime,
+						estDropTime,
+					}) => {
+						setDstToPickUp(dstToPickUp);
+						setDstToDrop(dstToDrop);
+						setEstPickUpTime(estPickUpTime);
+						setEstDropTime(estDropTime);
 					}}
 				/>
 
@@ -204,15 +218,26 @@ const Page = () => {
 				initial={{ x: 60, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}
 				transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-				className="hidden lg:flex w-[420px] xl:w-[460px] bg-white border-l border-zinc-100 flex-col"
+				className="hidden lg:flex w-[420px] lg:w-[460px] xl:w-[560px] bg-white border-l border-zinc-100 flex-col"
 			>
 				<div className="bg-zinc-950 px-6 py-5 shrink-0">
 					<p className="text-zinc-500 text-[10px] tracking-[0.2em] uppercase font-semibold mb-1">
 						Driver Panel
 					</p>
 					<div className="flex items-center justify-between">
-						<h1></h1>
-						<div></div>
+						<h1 className="text-white text-xl font-bold">
+							Active Ride
+						</h1>
+						{isActive && <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full">
+						<Zap size={12} className="text-amber-400"/>
+						<span className="text-white text-xs font-semibold">{Math.round(displayTime)} min</span>
+						</div>}
+					</div>
+				</div>
+
+				<div className="flex-1 flex-col overflow-hidden">
+					<div className="flex-1 overflow-y-auto scrollbar-hide">
+						<PanleContent {...panelProps}/>
 					</div>
 				</div>
 			</motion.div>
