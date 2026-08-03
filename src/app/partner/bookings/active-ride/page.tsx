@@ -1,11 +1,55 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
-import { IBooking } from "@/model/booking.model";
 import axios from "axios";
 import { CircleDashed, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
+import { IUser } from "@/model/user.model";
+import { PaymentStatus } from "@/model/booking.model";
+
+export interface IBooking {
+	customer: IUser;
+	driver: IUser;
+	vehicle: string;
+
+	pickUpAddress: string;
+	dropAddress: string;
+
+	pickUpLocation: {
+		type: "Point";
+		coordinates: [number, number];
+	};
+	dropLocation: {
+		type: "Point";
+		coordinates: [number, number];
+	};
+
+	distance: number;
+
+	fare: number;
+
+	customerMobile: string;
+	customerName: string;
+	driverMobile: string;
+
+	bookingStatus: BookingStatus;
+	paymentStatus: PaymentStatus;
+
+	paymentMode: "cash" | "online";
+	paymentDeadline: Date;
+
+	adminCommission: number;
+	partnerAmount: number;
+
+	pikcUpOtp: string;
+	pickUpOtpExpires: Date;
+	dropOtp: string;
+	dropOtpExpires: Date;
+
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 const getStatusStyle = (status: string | undefined) => {
 	const normalizedStatus = status?.toLowerCase() || "";
@@ -78,6 +122,13 @@ const getStatusStyle = (status: string | undefined) => {
 				dot: "bg-slate-400",
 			};
 	}
+};
+
+const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
+	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
+	pending: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
+	paid: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
+	failed: { label: "Failed", cls: "bg-red-100 text-red-700" },
 };
 
 const Page = () => {
@@ -171,10 +222,17 @@ const Page = () => {
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
 	const isActive = ["awaiting pickup", "started"].includes(status);
 	const displayTime =
-	status === "awaiting pickup" ? estPickUpTime : estDropTime;
+		status === "awaiting pickup" ? estPickUpTime : estDropTime;
 	const displayDistance =
-	status === "awaiting pickup" ? dstToPickUp : dstToDrop;
-	const panelProps = {isActive, displayDistance, displayTime, cfg, status, booking };
+		status === "awaiting pickup" ? dstToPickUp : dstToDrop;
+	const panelProps = {
+		isActive,
+		displayDistance,
+		displayTime,
+		cfg,
+		status,
+		booking,
+	};
 
 	return (
 		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
@@ -228,16 +286,20 @@ const Page = () => {
 						<h1 className="text-white text-xl font-bold">
 							Active Ride
 						</h1>
-						{isActive && <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full">
-						<Zap size={12} className="text-amber-400"/>
-						<span className="text-white text-xs font-semibold">{Math.round(displayTime)} min</span>
-						</div>}
+						{isActive && (
+							<div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-full">
+								<Zap size={12} className="text-amber-400" />
+								<span className="text-white text-xs font-semibold">
+									{Math.round(displayTime)} min
+								</span>
+							</div>
+						)}
 					</div>
 				</div>
 
 				<div className="flex-1 flex-col overflow-hidden">
 					<div className="flex-1 overflow-y-auto scrollbar-hide">
-						<PanleContent {...panelProps}/>
+						<PanleContent {...panelProps} />
 					</div>
 				</div>
 			</motion.div>
