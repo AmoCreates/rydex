@@ -2,6 +2,7 @@
 import { Clock4, IndianRupee, User2 } from "lucide-react";
 import React from "react";
 import { motion } from "motion/react";
+
 const PanleContent = ({
 	isActive,
 	displayDistance,
@@ -9,6 +10,7 @@ const PanleContent = ({
 	cfg,
 	status,
 	booking,
+	paymentStatus
 }: any) => {
 	console.log(booking);
 	return (
@@ -79,7 +81,7 @@ const PanleContent = ({
 
 							{booking.paymentMode && (
 								<div className="flex items-center gap-2 mt-1.5">
-									
+									<span className={`${paymentStatus.cls ?? "bg-zinc-700 text-zinc-300"} rounded-full text-[10px] px-2 py-0.5 font-semibold`}>{paymentStatus.label}</span>
 								</div>
 							)}
 						</div>

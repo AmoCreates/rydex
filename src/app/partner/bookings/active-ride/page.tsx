@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
-import { PaymentStatus } from "@/model/booking.model";
+import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 
 export interface IBooking {
 	customer: IUser;
@@ -221,6 +221,7 @@ const Page = () => {
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
 	const isActive = ["awaiting pickup", "started"].includes(status);
+	const paymentStatus = PAYMENT_BADGE[booking?.paymentStatus ?? "pending"];
 	const displayTime =
 		status === "awaiting pickup" ? estPickUpTime : estDropTime;
 	const displayDistance =
@@ -232,6 +233,7 @@ const Page = () => {
 		cfg,
 		status,
 		booking,
+		paymentStatus
 	};
 
 	return (
@@ -276,7 +278,7 @@ const Page = () => {
 				initial={{ x: 60, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}
 				transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-				className="hidden lg:flex w-[420px] lg:w-[460px] xl:w-[560px] bg-white border-l border-zinc-100 flex-col"
+				className="hidden lg:flex w-[420px] lg:w-[460px] xl:w-[500px] bg-white border-l border-zinc-100 flex-col"
 			>
 				<div className="bg-zinc-950 px-6 py-5 shrink-0">
 					<p className="text-zinc-500 text-[10px] tracking-[0.2em] uppercase font-semibold mb-1">
