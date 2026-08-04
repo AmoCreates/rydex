@@ -1,7 +1,10 @@
 "use client";
-import { Clock4, IndianRupee, User2 } from "lucide-react";
-import React from "react";
-import { motion } from "motion/react";
+import { Clock4, IndianRupee, MessageCircle, Phone, User2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import RideChat from "./RideChat";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Toolkit/store";
 
 const PanleContent = ({
 	isActive,
@@ -10,9 +13,24 @@ const PanleContent = ({
 	cfg,
 	status,
 	booking,
-	paymentStatus
+	paymentStatus,
 }: any) => {
+	const canChat = status === "awaiting pickup";
+	const [chatOpen, setChatOpen] = useState(false);
+	const { userData } = useSelector((state: RootState) => state.user);
 	console.log(booking);
+
+	const [currRole, setCurrRole] = useState("");
+	useEffect(() => {
+		(() => {
+			if (userData) {
+				const role =
+					userData?.role === "partner" ? "driver" : "customer";
+				setCurrRole(role);
+			}
+		})();
+	}, [userData, userData?._id, userData?.role, currRole]);
+
 	return (
 		<div className="flex flex-col pt-5 pb-4 gap-3">
 			{isActive && (
@@ -66,7 +84,7 @@ const PanleContent = ({
 						<div className="flex-1 min-w-0">
 							<div className="flex items-center justify-between gap-2">
 								<p className="text-white font-bold text-base truncate">
-									{booking.customer.name || "customer"}
+									{booking.customerName || "customer"}
 								</p>
 								<div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full shrink-0">
 									<IndianRupee
@@ -81,13 +99,64 @@ const PanleContent = ({
 
 							{booking.paymentMode && (
 								<div className="flex items-center gap-2 mt-1.5">
-									<span className={`${paymentStatus.cls ?? "bg-zinc-700 text-zinc-300"} rounded-full text-[10px] px-2 py-0.5 font-semibold`}>{paymentStatus.label}</span>
+									<span
+										className={`${paymentStatus.cls ?? "bg-zinc-700 text-zinc-300"} rounded-full text-[10px] px-2 py-0.5 font-semibold`}
+									>
+										{paymentStatus.label}
+									</span>
 								</div>
 							)}
 						</div>
 					</div>
+					{isActive && (
+						<div className="flex gap-2 mt-2">
+							{booking?.customerMobile && (
+								<a
+									href={`tel:${booking?.customerMobile}`}
+									className={`flex items-center justify-center gap-2 bg-zinc-100 hover:bg-zinc-200 active:scale-[0.97] transition-all text-zinc-900 py-3 rounded-xl text-sm font-semibold ${canChat ? "flex-1" : "w-full"}`}
+								>
+									<Phone size={15} /> Call
+								</a>
+							)}
+
+							{canChat && (
+								<button
+									className={`flex-1 flex items-center justify-center gap-2 active:scale-[0.97] transition-all py-3 rounded-xl cursor-pointer text-sm font-semibold ${chatOpen ? "bg-zinc-200 text-zinc-900" : "bg-zinc-900 hover:bg-zinc-800 text-white"}`}
+									onClick={() => setChatOpen(!chatOpen)}
+								>
+									<MessageCircle size={15} />
+									{chatOpen ? "Close chat" : "Message"}
+								</button>
+							)}
+						</div>
+					)}
 				</motion.div>
 			)}
+
+			<AnimatePresence>
+				{chatOpen && canChat && (
+					<motion.div
+						key="chat"
+						initial={{ opacity: 0, height: 0 }}
+						animate={{ opacity: 1, height: "auto" }}
+						exit={{ opacity: 0, height: 0 }}
+						transition={{
+							duration: 0.32,
+							ease: [0.22, 1, 0.36, 1],
+						}}
+						className="mx-5 lg:mx-6 overflow-hidden"
+					>
+						<div className="rounded-2xl overflow-hidden border border-zinc-100 h-[460px]">
+							<RideChat
+								currentRole={currRole}
+								bookingId={booking?._id}
+								driverName={booking?.driver.name}
+								customerName={booking?.customerName}
+							/>
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };
