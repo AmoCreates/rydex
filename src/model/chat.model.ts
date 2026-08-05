@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const chatSchema = new mongoose.Schema({
   bookingId: {
-    type: mongoose.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Booking",
     required: true,
   },
@@ -19,5 +19,6 @@ const chatSchema = new mongoose.Schema({
 
 }, {timestamps: true});
 
-const Chat = mongoose?.models.chat || mongoose.model("Chat", chatSchema);
+chatSchema.index({ bookingId: 1, createdAt: -1 });
+const Chat = mongoose?.models?.Chat || mongoose.model("Chat", chatSchema);
 export default Chat;

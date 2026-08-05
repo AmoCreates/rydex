@@ -18,9 +18,8 @@ const PanleContent = ({
 	const canChat = status === "awaiting pickup";
 	const [chatOpen, setChatOpen] = useState(false);
 	const { userData } = useSelector((state: RootState) => state.user);
-	console.log(booking);
-
 	const [currRole, setCurrRole] = useState("");
+	
 	useEffect(() => {
 		(() => {
 			if (userData) {
@@ -153,7 +152,7 @@ const PanleContent = ({
 								driverName={booking?.driver.name}
 								customerName={booking?.customerName}
 							/>
-						</div>
+						</div>	
 					</motion.div>
 				)}
 			</AnimatePresence>

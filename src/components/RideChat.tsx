@@ -1,4 +1,6 @@
-import React from "react";
+'use client'
+import axios from "axios";
+import React, { useState } from "react";
 
 type Props = {
 	currentRole: string;
@@ -13,6 +15,23 @@ const RideChat = ({
 	driverName,
 	customerName,
 }: Props) => {
+
+	const [messages, setMessages] = useState<string[]>([])
+	const [chatSuggestions, setChatSuggestions] = useState<string[]>([])
+
+	const getSuggestions = async () => {
+		try {
+			const res = await axios.post('/api/chat/ai-suggestions', {bookingId: bookingId});
+			console.log(res);
+			if(res.status === 200) {
+				console.log(res.data.suggestions)
+				setChatSuggestions(res.data.suggestions)
+			}
+		} catch (error:any) {
+			console.log(error.response.data.message);
+		}
+	};
+
 	const otherName = currentRole === "driver" ? customerName : driverName;
 	const myName = currentRole === "driver" ? driverName : customerName;
 	return (
@@ -25,11 +44,19 @@ const RideChat = ({
 					<span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-emerald-400" />
 				</div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-zinc-900 leading-none">{otherName}</p>
-          <p className="text-[11px] text-emerald-500 font-semibold mt-0.5">Active Now</p>
-        </div>
+				<div className="flex-1 min-w-0">
+					<p className="text-sm font-bold text-zinc-900 leading-none">
+						{otherName}
+					</p>
+					<p className="text-[11px] text-emerald-500 font-semibold mt-0.5">
+						Active Now
+					</p>
+				</div>
 			</div>
+			<button className="bg-black text-white m-3 rounded-2xl p-2 font-semibold"
+			onClick={getSuggestions}>
+				Click to get suggestions
+			</button>
 		</div>
 	);
 };
