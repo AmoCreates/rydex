@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const chat = await Chat.find({ bookingId }).sort({createdAt: -1});
+		const chat = await Chat.find({ bookingId }).sort({ createdAt: 1 });
 
 		return NextResponse.json(chat, { status: 200 });
 	} catch (error) {
