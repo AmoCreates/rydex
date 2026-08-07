@@ -42,13 +42,11 @@ export async function POST(req: NextRequest) {
 
 		// Fetch last 10 messages (newest first)
 		const conversion = await Chat.find({ bookingId })
-			.sort({ createdAt: -1 })
 			.limit(10);
 
 		// Format chat history (oldest -> newest)
 		const formattedHistory = conversion
 			.slice()
-			.reverse()
 			.map((chat) => `${chat.sender}: ${chat.msg}`)
 			.join("\n");
 
