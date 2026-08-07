@@ -366,7 +366,7 @@ const Page = () => {
 														<button
 															onClick={() =>
 																router.push(
-																	"/customer/bookings/active-ride",
+																	"/customer/active-ride",
 																)
 															}
 															className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer "

@@ -28,7 +28,7 @@ export async function GET() {
 			);
 		}
 
-		const booking = await Booking.find({
+		const booking = await Booking.findOne({
 			customer: customer._id,
 			bookingStatus: {
 				$in: [
@@ -39,7 +39,7 @@ export async function GET() {
 					"awaiting payment",
 				],
 			},
-		});
+		}).populate("customer driver vehicle");
 
 		if (!booking || booking.length == 0) {
 			return NextResponse.json(
@@ -48,7 +48,7 @@ export async function GET() {
 			);
 		}
 
-		return NextResponse.json(booking, { status: 200 });
+		return NextResponse.json({ success: true, booking }, { status: 200 });
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(

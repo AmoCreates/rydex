@@ -78,7 +78,7 @@ const RideChat = ({
 			<div className="shrink-0 flex items-center gap-3 px-4 py-3 bg-white border-b border-zinc-100">
 				<div className="relative shrink-0">
 					<div className="w-9 h-9 rounded-full bg-zinc-950 flex items-center justify-center text-white text-xs font-bold">
-						{otherName.charAt(0).toUpperCase()}
+						{otherName?.charAt(0).toUpperCase()}
 					</div>
 					<span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-emerald-400" />
 				</div>
