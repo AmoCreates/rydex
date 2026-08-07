@@ -1,11 +1,41 @@
 "use client";
-import { Clock4, IndianRupee, MessageCircle, Phone, User2 } from "lucide-react";
+import {
+	Bike,
+	Bus,
+	Car,
+	Clock4,
+	IndianRupee,
+	MessageCircle,
+	Package,
+	Phone,
+	Truck,
+	User2,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import RideChat from "./RideChat";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import axios from "axios";
+
+const getIcon = (vehicleType?: string) => {
+	switch (vehicleType?.toLocaleLowerCase()) {
+		case "bike":
+			return <Bike size={20} className="text-white" />;
+		case "auto":
+			return <Car size={20} className="text-white" />;
+		case "car":
+			return <Car size={20} className="text-white" />;
+		case "truck":
+			return <Truck size={20} className="text-white" />;
+		case "bus":
+			return <Bus size={20} className="text-white" />;
+		case "loading":
+			return <Package size={20} className="text-white" />;
+		default:
+			return <Car size={20} className="text-white" />;
+	}
+};
 
 type message = {
 	bookingId: string;
@@ -23,7 +53,7 @@ const PanleContent = ({
 	status,
 	booking,
 	paymentStatus,
-	currRole
+	currRole,
 }: any) => {
 	const canChat = status === "awaiting pickup";
 	const [chatOpen, setChatOpen] = useState(false);
@@ -47,7 +77,9 @@ const PanleContent = ({
 				setChatSuggestions(res.data.suggestions || []);
 			}
 		} catch (error: any) {
-			console.log(error.response?.data?.message || error.message || error);
+			console.log(
+				error.response?.data?.message || error.message || error,
+			);
 			setSuggestionErr(
 				"Sorry!, unable to generate suggestions right now.",
 			);
@@ -59,7 +91,10 @@ const PanleContent = ({
 	const handleSendMessage = async (messageText: string) => {
 		if (!booking?._id || !messageText.trim()) return;
 
-		const senderRole = (currRole || (userData?.role === "partner" ? "driver" : "customer")) as message["sender"];
+		const senderRole = (currRole ||
+			(userData?.role === "partner"
+				? "driver"
+				: "customer")) as message["sender"];
 		const optimisticMessage: message = {
 			bookingId: booking._id,
 			sender: senderRole,
@@ -85,7 +120,11 @@ const PanleContent = ({
 	};
 
 	useEffect(() => {
-		getSuggestions();
+		const controlGetSuggestion = async () => {
+			// getSuggestions();
+		};
+
+		controlGetSuggestion();
 	}, [booking?._id]);
 
 	useEffect(() => {
@@ -241,6 +280,71 @@ const PanleContent = ({
 					</motion.div>
 				)}
 			</AnimatePresence>
+
+			{booking?.vehicle && (
+				<div className="mx-5 lg:mx-6">
+					<div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-4 flex items-center gap-3">
+						<div className="w-11 h-11 rounded-xl bg-zinc-900 flex items-center justify-center shrink-0">
+							{getIcon(booking?.vehicle?.type)}
+						</div>
+						<div className="flex-1 min-w-0">
+							<p className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
+								Your Vehicle
+							</p>
+							<p className="text-sm font-bold text-zinc-900 truncate">
+								{booking.vehicle.vehicleModel ?? "vehicle"}
+							</p>
+						</div>
+						<div className="shrink-0 bg-zinc-900 px-3 py-1.5 rounded-lg">
+							<p className="text-white text-xs font-black tracking-widest font-mono">
+								{booking.vehicle.vehicleNumber}
+							</p>
+						</div>
+					</div>
+				</div>
+			)}
+
+			<div className="mx-5 lg:mx-6">
+				<div className="bg-zinc-50 border border-zinc-100 rounded-2xl overflow-hidden">
+					<div className="flex gap-3 p-4 border-b border-zinc-100">
+						<div className="flex flex-col items-center shrink-0 pt-1">
+							<div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shadow-sm" />
+							<div
+								className="w-px bg-zinc-200 mt-1"
+								style={{ height: 20 }}
+							/>
+						</div>
+
+						<div className="flex-1 min-w-0">
+							<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+								Pick Up
+							</p>
+							<p className="text-sm text-zinc-800 leading-snug">
+								{booking?.pickUpAddress}
+							</p>
+						</div>
+					</div>
+
+					<div className="flex gap-3 p-4 border-b border-zinc-100">
+						<div className="flex flex-col items-center shrink-0 pt-1">
+							<div className="w-3 h-3 rounded-full bg-zinc-900 border-2 border-white shadow-sm" />
+							<div
+								className="w-px bg-zinc-200 mt-1"
+								style={{ height: 20 }}
+							/>
+						</div>
+
+						<div className="flex-1 min-w-0">
+							<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+								Drop
+							</p>
+							<p className="text-sm text-zinc-800 leading-snug">
+								{booking?.dropAddress}
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };

@@ -37,7 +37,7 @@ export async function GET() {
 					"completed",
 				],
 			},
-		}).populate("customer driver")
+		}).populate("customer driver vehicle")
 
 		if (!booking || booking.length == 0) {
 			return NextResponse.json(

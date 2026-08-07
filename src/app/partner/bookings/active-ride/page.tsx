@@ -1,7 +1,7 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
 import axios from "axios";
-import { CircleDashed, Zap } from "lucide-react";
+import { ChevronUp, CircleDashed, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
@@ -142,6 +142,7 @@ const Page = () => {
 	const [dstToDrop, setDstToDrop] = useState(0);
 	const [estPickUpTime, setEstPickUpTime] = useState(0);
 	const [estDropTime, setEstDropTime] = useState(0);
+	const [expanded, setExpanded] = useState(false);
 
 	useEffect(() => {
 		const getActiveRides = async () => {
@@ -234,7 +235,7 @@ const Page = () => {
 		status,
 		booking,
 		paymentStatus,
-		currRole: "driver"
+		currRole: "driver",
 	};
 
 	return (
@@ -301,11 +302,74 @@ const Page = () => {
 				</div>
 
 				<div className="flex-1 flex-col overflow-hidden">
-					<div className="flex-1 overflow-y-auto scrollbar-hide">
+					<div className="flex-1 overflow-y-auto">
 						<PanleContent {...panelProps} />
 					</div>
 				</div>
 			</motion.div>
+
+			<div className="lg:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-none">
+				<motion.div
+					className="bg-white rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden flex flex-col"
+					animate={{ height: expanded ? "82vh" : 142 }}
+					transition={{ type: "spring", stiffness: 320, damping: 38 }}
+				>
+					<div
+						className="shrink-0 cursor-pointer select-none"
+						onClick={() => setExpanded(!expanded)}
+					>
+						<div className="pt-3 pb-1">
+							<div
+								className={`w-10 h-1 ${expanded ? "bg-black" : "bg-zinc-200"} rounded-full mx-auto`}
+							/>
+						</div>
+					</div>
+
+					<div className="px-5 py-3 flex items-center justify-between">
+						<div className="flex items-center gap-3">
+							<span
+								className={`w-2.5 h-2.5 rounded-full shrink-0 ${cfg.dot}`}
+							/>
+							<div>
+								<p className="text-sm font-bold text-zinc-900 leading-tight">
+									{cfg.label}
+								</p>
+								<p className="text-xs text-zinc-400 leading-tight">
+									{cfg.sublabel}
+								</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-3">
+							{isActive && (
+								<div className="text-right">
+									<p className="text-2xl font-black text-zinc-900 leading-none">
+										{Math.round(displayTime)}
+									</p>
+									<p className="text-[10px] text-zinc-400 uppercase tracking-wider">
+										min
+									</p>
+								</div>
+							)}
+							<motion.div
+								onClick={() => setExpanded(!expanded)}
+								animate={{ rotate: expanded ? 180 : 0 }}
+								transition={{ duration: 0.28 }}
+								className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center"
+							>
+								<ChevronUp
+									size={16}
+									className="text-zinc-600"
+								/>
+							</motion.div>
+						</div>
+					</div>
+					<div className="h-px bg-zinc-100 mx-5"/>
+
+					<div className="flex-1 overflow-y-auto min-h-0">
+						<PanleContent {...panelProps} />
+					</div>
+				</motion.div>
+			</div>
 		</div>
 	);
 };
