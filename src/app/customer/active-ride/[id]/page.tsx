@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
+import { useParams } from "next/navigation";
 
 export interface IBooking {
 	customer: IUser;
@@ -143,13 +144,14 @@ const Page = () => {
 	const [estPickUpTime, setEstPickUpTime] = useState(0);
 	const [estDropTime, setEstDropTime] = useState(0);
 	const [expanded, setExpanded] = useState(false);
+	const {id} = useParams()
 
 	useEffect(() => {
 		const getActiveRides = async () => {
 			try {
 				setLoading(true);
-				const { data } = await axios.get(
-					"/api/bookings/active-ride",
+				const { data } = await axios.post(
+					"/api/bookings/active-ride", {bookingId: id}
 				);
 				console.log(data)
 				if (data.success) {
@@ -284,7 +286,7 @@ const Page = () => {
 			>
 				<div className="bg-zinc-950 px-6 py-5 shrink-0">
 					<p className="text-zinc-500 text-[10px] tracking-[0.2em] uppercase font-semibold mb-1">
-						Driver Panel
+						Customer Panel
 					</p>
 					<div className="flex items-center justify-between">
 						<h1 className="text-white text-xl font-bold">

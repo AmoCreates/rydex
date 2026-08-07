@@ -2,9 +2,9 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function POST(req: NextRequest) {
 	try {
 		await dbConnect();
 
@@ -28,18 +28,16 @@ export async function GET() {
 			);
 		}
 
-		const booking = await Booking.findOne({
-			customer: customer._id,
-			bookingStatus: {
-				$in: [
-					"requested",
-					"awaiting pickup",
-					"started",
-					"completed",
-					"awaiting payment",
-				],
-			},
-		}).populate("customer driver vehicle");
+		const { bookingId } = await req.json();
+		if (!bookingId) {
+			return NextResponse.json(
+				{ message: "bookingId Required" },
+				{ status: 401 },
+			);
+		}
+
+		const booking =
+			await Booking.findById(bookingId).populate("customer driver");
 
 		if (!booking || booking.length == 0) {
 			return NextResponse.json(
@@ -52,7 +50,7 @@ export async function GET() {
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ message: "find customer's acitve booking error" },
+			{ message: "get active ride for customer error" },
 			{ status: 500 },
 		);
 	}

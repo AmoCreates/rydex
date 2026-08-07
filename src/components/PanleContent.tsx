@@ -121,7 +121,7 @@ const PanleContent = ({
 
 	useEffect(() => {
 		const controlGetSuggestion = async () => {
-			// getSuggestions();
+			getSuggestions();
 		};
 
 		controlGetSuggestion();
@@ -297,7 +297,7 @@ const PanleContent = ({
 						</div>
 						<div className="shrink-0 bg-zinc-900 px-3 py-1.5 rounded-lg">
 							<p className="text-white text-xs font-black tracking-widest font-mono">
-								{booking.vehicle.vehicleNumber}
+								{booking.vehicle.vehicleNumber ?? "XXXXYY0000"}
 							</p>
 						</div>
 					</div>

@@ -23,6 +23,7 @@ import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
 
 export interface IBooking {
+	_id: string,
 	customer: IUser;
 	driver: IUser;
 	vehicle: IVehicle;
@@ -366,7 +367,7 @@ const Page = () => {
 														<button
 															onClick={() =>
 																router.push(
-																	"/customer/active-ride",
+																	`/customer/active-ride/${b._id}`,
 																)
 															}
 															className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer "

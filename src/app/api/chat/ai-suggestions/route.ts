@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 			If ${role} is "driver": ["I am canceling the ride", "Please wait 2 minutes", "I have reached", "Sorry, traffic is heavy"]`;
 
 		const res = await axios.post(geminiUrl, {
-			model: "gemini-3.5-flash",
+			model: "gemini-3.6-flash",
 			input: prompt,
 		});
 
