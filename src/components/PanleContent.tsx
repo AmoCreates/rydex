@@ -5,6 +5,15 @@ import { AnimatePresence, motion } from "motion/react";
 import RideChat from "./RideChat";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
+import axios from "axios";
+
+type message = {
+	bookingId: string;
+	sender: "driver" | "customer";
+	msg: string;
+	createdAt: Date;
+	tempId?: string;
+};
 
 const PanleContent = ({
 	isActive,
@@ -14,21 +23,91 @@ const PanleContent = ({
 	status,
 	booking,
 	paymentStatus,
+	currRole
 }: any) => {
 	const canChat = status === "awaiting pickup";
 	const [chatOpen, setChatOpen] = useState(false);
 	const { userData } = useSelector((state: RootState) => state.user);
-	const [currRole, setCurrRole] = useState("");
-	
-	useEffect(() => {
-		(() => {
-			if (userData) {
-				const role =
-					userData?.role === "partner" ? "driver" : "customer";
-				setCurrRole(role);
+	const [suggestionErr, setSuggestionErr] = useState("");
+	const [chatSuggestions, setChatSuggestions] = useState<string[]>([]);
+	const [suggestionLoading, setSuggestionLoading] = useState(true);
+	const [chat, setChat] = useState<message[]>([]);
+
+	const getSuggestions = async () => {
+		if (!booking?._id) return;
+
+		try {
+			setSuggestionErr("");
+			setSuggestionLoading(true);
+			const res = await axios.post("/api/chat/ai-suggestions", {
+				bookingId: booking._id,
+				currentRole: currRole,
+			});
+			if (res.status === 200) {
+				setChatSuggestions(res.data.suggestions || []);
 			}
-		})();
-	}, [userData, userData?._id, userData?.role, currRole]);
+		} catch (error: any) {
+			console.log(error.response?.data?.message || error.message || error);
+			setSuggestionErr(
+				"Sorry!, unable to generate suggestions right now.",
+			);
+		} finally {
+			setSuggestionLoading(false);
+		}
+	};
+
+	const handleSendMessage = async (messageText: string) => {
+		if (!booking?._id || !messageText.trim()) return;
+
+		const senderRole = (currRole || (userData?.role === "partner" ? "driver" : "customer")) as message["sender"];
+		const optimisticMessage: message = {
+			bookingId: booking._id,
+			sender: senderRole,
+			msg: messageText.trim(),
+			createdAt: new Date(),
+			tempId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+		};
+
+		setChat((prev) => [...prev, optimisticMessage]);
+
+		try {
+			await axios.post("/api/chat/send", {
+				bookingId: booking._id,
+				sender: senderRole,
+				msg: messageText.trim(),
+			});
+		} catch (error: any) {
+			setChat((prev) =>
+				prev.filter((item) => item.tempId !== optimisticMessage.tempId),
+			);
+			throw error;
+		}
+	};
+
+	useEffect(() => {
+		getSuggestions();
+	}, [booking?._id]);
+
+	useEffect(() => {
+		const getChat = async () => {
+			if (!booking?._id) return;
+
+			try {
+				const { data } = await axios.post("/api/chat/get-chat", {
+					bookingId: booking?._id,
+				});
+				console.log("Chat data:", data);
+				setChat(data || []);
+			} catch (error: any) {
+				console.error(
+					"Error fetching chat:",
+					error?.response?.data || error.message || error,
+				);
+			}
+		};
+
+		getChat();
+	}, [booking?._id]);
 
 	return (
 		<div className="flex flex-col pt-5 pb-4 gap-3">
@@ -145,14 +224,20 @@ const PanleContent = ({
 						}}
 						className="mx-5 lg:mx-6 overflow-hidden"
 					>
-						<div className="rounded-2xl overflow-hidden border border-zinc-100 h-[460px]">
+						<div className="rounded-2xl overflow-hidden border border-zinc-100 h-135">
 							<RideChat
 								currentRole={currRole}
 								bookingId={booking?._id}
 								driverName={booking?.driver.name}
 								customerName={booking?.customerName}
+								chat={chat}
+								chatSuggestions={chatSuggestions}
+								suggestionLoading={suggestionLoading}
+								suggestionErr={suggestionErr}
+								onSendMessage={handleSendMessage}
+								onRefreshSuggestions={getSuggestions}
 							/>
-						</div>	
+						</div>
 					</motion.div>
 				)}
 			</AnimatePresence>

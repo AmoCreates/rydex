@@ -5,18 +5,25 @@ import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Bike, UserRound } from "lucide-react";
 
-type Props = {
-	currentRole: string;
-	bookingId: string;
-	driverName: string;
-	customerName: string;
-};
-
 type message = {
 	bookingId: string;
 	sender: "driver" | "customer";
 	msg: string;
 	createdAt: Date;
+	tempId?: string;
+};
+
+type Props = {
+	currentRole: string;
+	bookingId: string;
+	driverName: string;
+	customerName: string;
+	chat: message[] | [];
+	chatSuggestions: string[] | [];
+	suggestionLoading: boolean;
+	suggestionErr: string;
+	onSendMessage?: (message: string) => Promise<void> | void;
+	onRefreshSuggestions?: () => Promise<void> | void;
 };
 
 const RideChat = ({
@@ -24,58 +31,37 @@ const RideChat = ({
 	bookingId,
 	driverName,
 	customerName,
+	chat,
+	chatSuggestions,
+	suggestionLoading,
+	suggestionErr,
+	onSendMessage,
+	onRefreshSuggestions,
 }: Props) => {
 	const otherName = currentRole === "driver" ? customerName : driverName;
 	const myName = currentRole === "driver" ? driverName : customerName;
 	const icon =
 		currentRole === "driver" ? <Bike size={15} /> : <UserRound size={15} />;
-	const [chat, setChat] = useState<message[]>([]);
-	const [chatSuggestions, setChatSuggestions] = useState<string[]>([]);
-	const [suggestionLoading, setSuggestionLoading] = useState(true);
+
 	const [msg, setMsg] = useState("");
 	const [loading, setLoading] = useState(false);
-	const [suggestionErr, setSuggestionErr] = useState("")
-
-	useEffect(() => {
-		const getSuggestions = async () => {
-			try {
-				setSuggestionErr("")
-				setSuggestionLoading(true);
-				const res = await axios.post("/api/chat/ai-suggestions", {
-					bookingId,
-				});
-				console.log(res);
-				if (res.status === 200) {
-					console.log(res.data.suggestions);
-					setChatSuggestions(res.data.suggestions);
-				}
-			} catch (error: any) {
-				console.log(error.response.data.message);
-				setSuggestionErr("Sorry!, unable to generate suggestions right now.")
-			} finally {
-				setSuggestionLoading(false);
-			}
-		};
-
-		getSuggestions();
-	}, [bookingId]);
 
 	const sendMsg = async () => {
-		if (msg.length === 0) return;
+		const trimmedMessage = msg.trim();
+		if (trimmedMessage.length === 0 || loading) return;
+
 		try {
 			setLoading(true);
-			const { data } = await axios.post("/api/chat/send", {
-				bookingId,
-				sender: currentRole,
-				msg,
-			});
-
-			console.log(data);
+			if (onSendMessage) {
+				await onSendMessage(trimmedMessage);
+			}
+			setMsg("");
 		} catch (error: any) {
-			console.log(error.response.data.message);
+			console.log(
+				error?.response?.data?.message || error?.message || error,
+			);
 		} finally {
 			setLoading(false);
-			setMsg("");
 		}
 	};
 
@@ -86,28 +72,6 @@ const RideChat = ({
 			minute: "2-digit",
 		});
 	};
-
-	useEffect(() => {
-		const getChat = async () => {
-			console.log(bookingId);
-			if (!bookingId) return;
-
-			try {
-				const { data } = await axios.post("/api/chat/get-chat", {
-					bookingId,
-				});
-				console.log("Chat data:", data);
-				setChat(data || []);
-			} catch (error: any) {
-				console.error(
-					"Error fetching chat:",
-					error?.response?.data || error.message || error,
-				);
-			}
-		};
-
-		getChat();
-	}, [bookingId]);
 
 	return (
 		<div className="flex flex-col h-full min-h-0 bg-white rounded-2xl overflow-hidden border border-zinc-100">
@@ -199,7 +163,7 @@ const RideChat = ({
 							</div>
 						</div>
 
-						{suggestionErr && (
+						{suggestionErr && chatSuggestions.length == 0 && (
 							<p className="text-[11px] text-red-500 mb-2">
 								{suggestionErr}
 							</p>
@@ -225,7 +189,7 @@ const RideChat = ({
 										<div
 											onClick={() => setMsg(msg)}
 											key={i}
-											className={`py-1 px-2.5 bg-zinc-100 rounded-xl cursor-pointer hover:bg-zinc-300 text-xs text-zinc-800 active:scale-97 transition-all`}
+											className={`py-1 px-2.5 bg-zinc-100 rounded-xl cursor-pointer hover:bg-violet-50 hover:text-violet-600 text-xs text-zinc-800 active:scale-97 transition-all`}
 										>
 											{msg}
 										</div>
@@ -234,23 +198,33 @@ const RideChat = ({
 							</div>
 						)}
 
-						<div className="flex rounded-xl p-1.5 gap-2 bg-zinc-100">
-							<div className="bg-white h-7 w-7 rounded-lg flex justify-center items-center">
-								{icon}
-							</div>
+						<div className="flex flex-1 rounded-full p-1.5 gap-2 bg-zinc-100 items-center ">
+							<button
+								id="gts"
+								className="bg-white h-7 w-7 rounded-full flex justify-center items-center cursor-pointer"
+								type="button"
+								onClick={onRefreshSuggestions}
+							>
+								<RiSparkling2Fill
+									size={15}
+									className="text-violet-500"
+								/>
+							</button>
 
 							<input
-								className="flex-1 outline-none text-zinc-600"
+								className="flex-1 outline-none text-zinc-600 text-sm py-1.5 min-w-0"
 								type="text"
 								value={msg}
 								onChange={(e) => setMsg(e.target.value)}
-								placeholder={`${currentRole === "driver" ? "main paunch gaya, aap kha ho ?" : "Kab tak aaoge ?"}`}
-								onKeyDown={(e) => e.key === 'Enter' && sendMsg()}
+								placeholder="Send a message..."
+								onKeyDown={(e) =>
+									e.key === "Enter" && sendMsg()
+								}
 							/>
 
 							<button
-								className={` h-7 w-7 rounded-lg flex justify-center items-center active:scale-97 transition-all ${msg.length === 0 ? "bg-zinc-700 pointer-events-none" : "bg-zinc-950 cursor-pointer"}`}
-								disabled={msg.length === 0}
+								className={` h-7 w-7 rounded-full flex justify-center items-center active:scale-97 transition-all ${msg.trim().length === 0 || loading ? "bg-zinc-700 pointer-events-none" : "bg-zinc-950 cursor-pointer"}`}
+								disabled={msg.trim().length === 0 || loading}
 								onClick={sendMsg}
 							>
 								{

@@ -20,8 +20,10 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const role = "session.user.role;"; // "driver" or "customer"
-		const { bookingId } = await req.json();
+
+		const { bookingId, currentRole } = await req.json();
+		const role = currentRole || session.user.role; // e.g., "driver"
+		const otherRole = role === "driver" ? "customer" : "driver";
 
 		if (!bookingId) {
 			return NextResponse.json(
@@ -43,46 +45,47 @@ export async function POST(req: NextRequest) {
 			.sort({ createdAt: -1 })
 			.limit(10);
 
-		// Format chat history (oldest -> newest) matching schema keys
+		// Format chat history (oldest -> newest)
 		const formattedHistory = conversion
 			.slice()
 			.reverse()
 			.map((chat) => `${chat.sender}: ${chat.msg}`)
 			.join("\n");
 
-		const lastMessage = conversion[0]
-			? `${conversion[0].sender}: ${conversion[0].msg}`
-			: "No previous messages yet.";
+		const lastChat = conversion[0];
+		const lastSender = lastChat ? lastChat.sender : "none";
+		const lastMsgText = lastChat ? lastChat.msg : "No previous messages yet.";
 
 		const prompt = `You are an AI quick-reply assistant for a ride-hailing app (Rydex).
-        Generate contextually relevant quick replies ONLY for the role: ${role}.
 
-        Context:
-        - Chat History:
-        ${formattedHistory || "No conversation history."}
+			CRITICAL INSTRUCTION:
+			- You are generating quick-reply suggestions strictly from the perspective of the user who is a: ${role}.
+			- The other person in the chat is the: ${otherRole}.
+			- The last message in the chat was sent by: ${lastSender}.
 
-        - Last Received Message:
-        ${lastMessage}
+			Chat History:
+			${formattedHistory || "No conversation history."}
 
-        Rules:
-        1. Role Focus: Write suggestions from the perspective of the ${role} responding to the other party based on the conversation history above.
-        2. Quantity: Return between 3 and 6 suggestions.
-        3. Length: Keep each suggestion concise (1 to 8 words).
-        4. Tone: Helpful, polite, and situational (e.g., waiting, traffic, pickup, confirming location).
-        5. Language: User's natural language, like: english, hinglish, hindi, etc., if no past conversations then prefer english.
-        6. Format: Return ONLY a valid JSON array of strings. No extra text, markdown, or commentary.
+			Last Message:
+			[${lastSender}]: "${lastMsgText}"
 
-        Examples:
-        - If ${role} is "customer": ["I'm waiting outside", "How long will it take?", "I'm near the entrance", "Thanks!", "Where are you", "ok", "no problem"]
-        - If ${role} is "driver": ["I have arrived", "Stuck in heavy traffic", "I am on my way", "Where are you standing?"]`;
+			Rules:
+			1. Perspective: Write 3 to 6 suggestions ONLY from the viewpoint of the ${role}. 
+				- If ${role} is the "driver", suggest actions/replies a driver would send to a customer (e.g., status updates, confirmation, warnings, ride cancellation reasons).
+				- Do NOT suggest replies from the perspective of the ${otherRole}, In sort bascially you have to guess that now what will be next message of current role to the other, like if currentRole is driver and last msg from driver side is I am in traffic then your suggestion is like i am still in traffic, sorry for the delay and and you may also guess for the reply to other party like if the lastmessage if from other side then suggest what to reply him.
+			2. Quantity: Return between 3 and 6 suggestions.
+			3. Length: Keep each suggestion concise (1 to 8 words).
+			4. Language: Match the language/tone used in the chat (Hinglish, Hindi, or English).
+			5. Format: Return ONLY a valid JSON array of strings. No extra text, markdown, or commentary.
 
-		// Clean API call using full env URL
+			Example:
+			If ${role} is "driver": ["I am canceling the ride", "Please wait 2 minutes", "I have reached", "Sorry, traffic is heavy"]`;
+
 		const res = await axios.post(geminiUrl, {
-			model: "gemini-3.6-flash",
+			model: "gemini-3.5-flash",
 			input: prompt,
 		});
 
-		// Extract output step dynamically from Interactions API format
 		const steps = res.data.steps || [];
 		const outputStep = steps.find((s: any) => s.type === "model_output");
 		const rawText = outputStep?.content?.[0]?.text;
@@ -91,7 +94,6 @@ export async function POST(req: NextRequest) {
 			throw new Error("No output text received from Gemini");
 		}
 
-		// Parse cleaned JSON array
 		const suggestions = JSON.parse(
 			rawText.replace(/```json|```/g, "").trim(),
 		);

@@ -233,7 +233,8 @@ const Page = () => {
 		cfg,
 		status,
 		booking,
-		paymentStatus
+		paymentStatus,
+		currRole: "driver"
 	};
 
 	return (
