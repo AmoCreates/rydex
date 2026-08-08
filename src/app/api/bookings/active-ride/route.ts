@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
+import Vehicle from "@/model/vehicle.model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -36,8 +37,13 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const booking =
-			await Booking.findById(bookingId).populate("customer vehicle driver");
+		const booking = await Booking.findById(bookingId)
+			.populate([
+				{ path: "customer", model: User },
+				{ path: "driver", model: User },
+				{ path: "vehicle", model: Vehicle },
+			])
+			.sort({ createdAt: -1 });
 
 		if (!booking || booking.length == 0) {
 			return NextResponse.json(

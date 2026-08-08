@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/db";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
+import Vehicle from "@/model/vehicle.model";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -31,13 +32,13 @@ export async function GET() {
 		const booking = await Booking.findOne({
 			driver: partner._id,
 			bookingStatus: {
-				$in: [
-					"awaiting pickup",
-					"started",
-					"completed",
-				],
+				$in: ["awaiting pickup", "started", "completed"],
 			},
-		}).populate("customer driver vehicle")
+		}).populate([
+			{ path: "customer", model: User },
+			{ path: "driver", model: User },
+			{ path: "vehicle", model: Vehicle },
+		]);
 
 		if (!booking || booking.length == 0) {
 			return NextResponse.json(
