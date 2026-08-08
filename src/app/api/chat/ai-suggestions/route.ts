@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 			If ${role} is "driver": ["I am canceling the ride", "Please wait 2 minutes", "I have reached", "Sorry, traffic is heavy"]`;
 
 		const res = await axios.post(geminiUrl, {
-			model: "gemini-3.6-flash",
+			model: "gemini-3.5-flash",
 			input: prompt,
 		});
 
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json({ suggestions }, { status: 200 });
 	} catch (error) {
-		console.error("Get chat suggestions error:", error);
+		console.error("Get chat suggestions error:",error);
 		return NextResponse.json(
 			{ message: "get chat suggestions error" },
 			{ status: 500 },
