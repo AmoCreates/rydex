@@ -65,9 +65,26 @@ const Nav = ({ onOpen }: Props) => {
 		await signOut({ callbackUrl: "/", redirect: false });
 		dispatch({ type: "user/setUserData", payload: null });
 		setProfileOpen(false);
+
+		if (typeof window !== "undefined") {
+			window.localStorage.removeItem("userId");
+		}
+
+		const socket = getSocket();
+		socket?.disconnect();
 	};
 
 	useEffect(() => {
+		// persist user id and inform socket on login/change so reconnects re-auth
+		if (userData?._id) {
+			if (typeof window !== "undefined") {
+				window.localStorage.setItem("userId", String(userData._id));
+			}
+			const socket = getSocket();
+			socket?.connect();
+			socket?.emit("identity", String(userData._id));
+		}
+
 		const fetchPendingCount = async () => {
 			try {
 				const { data } = await axios.get(

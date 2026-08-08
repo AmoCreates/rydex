@@ -30,7 +30,7 @@ export async function GET() {
 
 		const bookings = await Booking.find({
 			customer: user._id,
-		}).populate("customer driver").sort({createdAt: -1})
+		}).populate("customer vehicle driver").sort({createdAt: -1})
 
 		if (!bookings || bookings.length == 0) {
 			return NextResponse.json(

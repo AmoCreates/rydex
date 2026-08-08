@@ -8,6 +8,7 @@ import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { useParams } from "next/navigation";
+import { getSocket } from "@/lib/socket";
 
 export interface IBooking {
 	customer: IUser;
@@ -71,7 +72,7 @@ const getStatusStyle = (status: string | undefined) => {
 		case "awaiting pickup":
 			return {
 				label: "Heading to Pickup",
-				sublabel: "Drive to the pickup location",
+				sublabel: "Arriving to the pickup location",
 				dot: "bg-amber-400",
 			};
 		case "started":
@@ -144,16 +145,16 @@ const Page = () => {
 	const [estPickUpTime, setEstPickUpTime] = useState(0);
 	const [estDropTime, setEstDropTime] = useState(0);
 	const [expanded, setExpanded] = useState(false);
-	const {id} = useParams()
+	const { id } = useParams();
 
 	useEffect(() => {
 		const getActiveRides = async () => {
 			try {
 				setLoading(true);
-				const { data } = await axios.post(
-					"/api/bookings/active-ride", {bookingId: id}
-				);
-				console.log(data)
+				const { data } = await axios.post("/api/bookings/active-ride", {
+					bookingId: id,
+				});
+				console.log(data);
 				if (data.success) {
 					setBooking(data.booking);
 					setStatus(data.booking.bookingStatus);
@@ -176,38 +177,24 @@ const Page = () => {
 		};
 
 		getActiveRides();
-	}, []);
+	}, [id]);
 
-	// Fetching Customer's Live Location
+	// room
 	useEffect(() => {
-		const getCurrentLocation = async () => {
-			if (!navigator.geolocation) {
-				console.log("cant find navigator");
-				return;
-			}
-
-			const watcher = navigator.geolocation.watchPosition(
-				({ coords }) => {
-					const lon = coords.longitude;
-					const lat = coords.latitude;
-					setDriverPos([lat, lon]);
-				},
-				(err) => {
-					console.log(err);
-				},
-				{
-					enableHighAccuracy: true,
-					maximumAge: 2000,
-					timeout: 10000,
-				},
-			);
-			return () => {
-				navigator.geolocation.clearWatch(watcher);
-			};
+		const socket = getSocket();
+		if (!socket) return;
+		socket.connect();
+		socket.emit("join-ride", id);
+		const handler = ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+			setDriverPos([latitude, longitude]);
 		};
 
-		getCurrentLocation();
-	}, []);
+		socket.on("driver-location", handler);
+
+		return () => {
+			socket.off("driver-location", handler);
+		};
+	}, [id]);
 
 	if (loading) {
 		return (

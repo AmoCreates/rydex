@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const booking =
-			await Booking.findById(bookingId).populate("customer driver");
+			await Booking.findById(bookingId).populate("customer vehicle driver");
 
 		if (!booking || booking.length == 0) {
 			return NextResponse.json(

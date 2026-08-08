@@ -74,7 +74,8 @@ export async function POST(req: NextRequest) {
 			2. Quantity: Return between 3 and 6 suggestions.
 			3. Length: Keep each suggestion concise (1 to 8 words).
 			4. Language: Match the language/tone used in the chat (Hinglish, Hindi, or English).
-			5. Format: Return ONLY a valid JSON array of strings. No extra text, markdown, or commentary.
+			5. You can also reply with emaojies ans short message like: Ok, done, 👍🏻, 😁, 🚲, etc.
+			6. Format: Return ONLY a valid JSON array of strings. No extra text, markdown, or commentary.
 
 			Example:
 			If ${role} is "driver": ["I am canceling the ride", "Please wait 2 minutes", "I have reached", "Sorry, traffic is heavy"]`;

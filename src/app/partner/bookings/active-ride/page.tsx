@@ -7,8 +7,10 @@ import { motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
+import { getSocket } from "@/lib/socket";
 
 export interface IBooking {
+	_id: string;
 	customer: IUser;
 	driver: IUser;
 	vehicle: string;
@@ -183,12 +185,18 @@ const Page = () => {
 				console.log("cant find navigator");
 				return;
 			}
-
+			const socket = getSocket();
 			const watcher = navigator.geolocation.watchPosition(
 				({ coords }) => {
 					const lon = coords.longitude;
 					const lat = coords.latitude;
 					setDriverPos([lat, lon]);
+					socket?.emit("driver-location-update", {
+						bookingId: booking?._id,
+						status: status,
+						latitude: lat,
+						longitude: lon,
+					});
 				},
 				(err) => {
 					console.log(err);
@@ -205,7 +213,24 @@ const Page = () => {
 		};
 
 		getCurrentLocation();
-	}, []);
+	}, [booking?._id, status]);
+
+
+	useEffect(() => {
+		if (!booking?._id) return;
+		const socket = getSocket();
+		socket?.connect();
+		socket?.emit("join-ride", booking?._id);
+		const handler = ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+			setDriverPos([latitude, longitude]);
+		};
+
+		socket?.on("driver-location", handler);
+
+		return () => {
+			socket?.off("driver-location", handler);
+		};
+	}, [booking?._id]);
 
 	if (loading) {
 		return (
@@ -363,7 +388,7 @@ const Page = () => {
 							</motion.div>
 						</div>
 					</div>
-					<div className="h-px bg-zinc-100 mx-5"/>
+					<div className="h-px bg-zinc-100 mx-5" />
 
 					<div className="flex-1 overflow-y-auto min-h-0">
 						<PanleContent {...panelProps} />

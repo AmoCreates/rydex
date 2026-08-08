@@ -1,7 +1,7 @@
 "use client";
 import { RiSendPlaneFill, RiSparkling2Fill } from "@remixicon/react";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Bike, UserRound } from "lucide-react";
 
@@ -40,9 +40,7 @@ const RideChat = ({
 }: Props) => {
 	const otherName = currentRole === "driver" ? customerName : driverName;
 	const myName = currentRole === "driver" ? driverName : customerName;
-	const icon =
-		currentRole === "driver" ? <Bike size={15} /> : <UserRound size={15} />;
-
+	const bottomRef = useRef<HTMLDivElement>(null);
 	const [msg, setMsg] = useState("");
 	const [loading, setLoading] = useState(false);
 
@@ -72,6 +70,34 @@ const RideChat = ({
 			minute: "2-digit",
 		});
 	};
+
+	const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+		requestAnimationFrame(() => {
+			bottomRef.current?.scrollIntoView({ behavior, block: "end" });
+		});
+	};
+
+	// 1. Scroll whenever chat messages update
+	useEffect(() => {
+		if (chat.length > 0) {
+			scrollToBottom("smooth");
+		}
+	}, [chat]);
+
+	// 2. Scroll immediately when RideChat mounts (e.g. when chatOpen becomes true)
+	useEffect(() => {
+		// Instant scroll on mount so the user doesn't see a delayed auto-scroll animation from top to bottom
+		scrollToBottom("auto");
+	}, []);
+
+	// In RideChat.tsx - add chatOpen to props if needed, or simply handle layout changes:
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+		}, 300); // Wait for open animation (~320ms) to complete
+
+		return () => clearTimeout(timer);
+	}, []);
 
 	return (
 		<div className="flex flex-col h-full min-h-0 bg-white rounded-2xl overflow-hidden border border-zinc-100">
@@ -141,6 +167,8 @@ const RideChat = ({
 							</motion.div>
 						);
 					})}
+				{/* 3. Empty dummy div anchoring the bottom */}
+				<div ref={bottomRef} />
 			</div>
 
 			<AnimatePresence>

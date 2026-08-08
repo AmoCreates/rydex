@@ -17,6 +17,7 @@ import RideChat from "./RideChat";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import axios from "axios";
+import { getSocket } from "@/lib/socket";
 
 const getIcon = (vehicleType?: string) => {
 	switch (vehicleType?.toLocaleLowerCase()) {
@@ -103,14 +104,18 @@ const PanleContent = ({
 			tempId: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
 		};
 
-		setChat((prev) => [...prev, optimisticMessage]);
-
+		const socket = getSocket();
 		try {
-			await axios.post("/api/chat/send", {
+			const res = await axios.post("/api/chat/send", {
 				bookingId: booking._id,
 				sender: senderRole,
 				msg: messageText.trim(),
 			});
+			console.log(res);
+			if (res.status === 200) {
+				console.log("message success");
+				socket?.emit("new-message", res.data.chat);
+			}
 		} catch (error: any) {
 			setChat((prev) =>
 				prev.filter((item) => item.tempId !== optimisticMessage.tempId),
@@ -118,6 +123,15 @@ const PanleContent = ({
 			throw error;
 		}
 	};
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on("new-message", (data) => {
+			setChat((prev) => [...prev, data]);
+		});
+
+		return () => {socket?.off("new-message")};
+	}, []);
 
 	useEffect(() => {
 		const controlGetSuggestion = async () => {
