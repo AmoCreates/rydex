@@ -44,7 +44,7 @@ export interface IBooking {
 	adminCommission: number;
 	partnerAmount: number;
 
-	pikcUpOtp: string;
+	pickUpOtp: string;
 	pickUpOtpExpires: Date;
 	dropOtp: string;
 	dropOtpExpires: Date;

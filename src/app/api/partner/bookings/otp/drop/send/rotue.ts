@@ -50,8 +50,8 @@ export async function POST(req: NextRequest) {
 		const otpExpiry = new Date();
 		otpExpiry.setMinutes(otpExpiry.getMinutes() + 2);
 
-		booking.pickUpOtp = otp;
-		booking.pickUpOtpExpires = otpExpiry;
+		booking.dropOtp = otp;
+		booking.dropOtpExpires = otpExpiry;
 		await booking.save();
 
 		if (!booking.user.email) {
@@ -66,13 +66,13 @@ export async function POST(req: NextRequest) {
 
 		const email = booking.customer.email;
 		const driverName = booking.driver.name;
-		const pickupAddress = booking.pickUpAddress;
+		const dropAddress = booking.dropAddress;
 		const vehicleDetails = `Vehicle: ${booking.vehicle.type}, Model: ${booking.vehicle.vehicleModel}, Vehicle Number : ${booking.vehicle.vehicleNumber}`;
 
 		await sendMail(
 			email,
-			`Your RYDEX Pickup Code: ${otp}`,
-			`Your pickup OTP is ${otp}. Share this with your driver (${driverName}) to start your trip.`,
+			`Your RYDEX Drop Code: ${otp}`,
+			`Your drop OTP is ${otp}. Share this with your driver (${driverName}) to start your trip.`,
 			`
   <div style="background-color: #f0f2f5; padding: 40px 15px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.08);">
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       <!-- Main Heading -->
       <tr>
         <td style="padding: 15px 40px 0 40px; text-align: center;">
-          <h2 style="color: #1a202c; font-size: 22px; font-weight: 700; margin: 0;">Ride Pickup OTP</h2>
+          <h2 style="color: #1a202c; font-size: 22px; font-weight: 700; margin: 0;">Ride Drop OTP</h2>
           <p style="color: #64748b; font-size: 14px; line-height: 22px; margin-top: 10px;">
             Hi <strong>${name}</strong>, your driver has arrived! Share the code below with your driver to start your ride.
           </p>
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
               <td style="color: #475569; font-size: 13px; line-height: 20px;">
                 🚗 <strong>Driver:</strong> ${driverName || "Your Assigned Driver"}<br>
                 🚘 <strong>Vehicle:</strong> ${vehicleDetails || "RYDEX Cab"}<br>
-                📍 <strong>Pickup:</strong> ${pickupAddress || "Your current location"}
+                📍 <strong>Drop:</strong> ${dropAddress || "Your current location"}
               </td>
             </tr>
           </table>
@@ -166,13 +166,13 @@ export async function POST(req: NextRequest) {
 		);
 
 		return NextResponse.json(
-			{ success: true, message: "pickup otp sent successfully" },
+			{ success: true, message: "drop otp sent successfully" },
 			{ status: 200 },
 		);
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ success: false, message: "pickup OTP generation failed" },
+			{ success: false, message: "drop OTP generation failed" },
 			{ status: 500 },
 		);
 	}
