@@ -1,9 +1,9 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
 import axios from "axios";
-import { ChevronUp, CircleDashed, Zap } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { ArrowRight, ChevronUp, CircleDashed, MapPin, Zap } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
@@ -146,6 +146,136 @@ const Page = () => {
 	const [estDropTime, setEstDropTime] = useState(0);
 	const [expanded, setExpanded] = useState(false);
 
+	const [otpMode, setOtpMode] = useState(false);
+	const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
+	const otpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
+	const [loadingOtp, setLoadingOtp] = useState(false);
+	const [otpErr, setOtpErr] = useState("");
+	const [otpVerified, setOtpVerified] = useState(false);
+
+	const clearOtpDigits = () => setOtpDigits(Array(6).fill(""));
+
+	const sendPickupOtp = async () => {
+		if (status !== "awaiting pickup" || otpVerified) return;
+		try {
+			console.log("sending");
+			setLoadingOtp(true);
+			clearOtpDigits();
+			const { data } = await axios.post(
+				"/api/partner/bookings/otp/pickup/send",
+				{ bookingId: booking?._id },
+			);
+			if (data.success) {
+				console.log(data);
+				setOtpMode(true);
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoadingOtp(false);
+		}
+	};
+	const sendDropOtp = async () => {
+		if (status !== "started") return;
+		try {
+			console.log("sending");
+			setLoadingOtp(true);
+			clearOtpDigits();
+			const { data } = await axios.post(
+				"/api/partner/bookings/otp/drop/send",
+				{ bookingId: booking?._id },
+			);
+			if (data.success) {
+				console.log(data);
+				setOtpMode(true);
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setLoadingOtp(false);
+		}
+	};
+	const verifyPickupOtp = async () => {
+		if (status !== "awaiting pickup" || !otpMode || otpVerified) return;
+		const otp = otpDigits.join("");
+		if (otp.length !== 6) {
+			setOtpErr("Enter all 6 digits to verify the pickup otp.");
+			return;
+		}
+		try {
+			setLoadingOtp(true);
+			setOtpErr("");
+			const { data } = await axios.post(
+				"/api/partner/bookings/otp/pickup/verify",
+				{ bookingId: booking?._id, otp },
+			);
+
+			if (data.success) {
+				setOtpVerified(true);
+				setStatus("started");
+				setBooking((prev) =>
+					prev ? { ...prev, bookingStatus: "started" } : prev,
+				);
+				setOtpErr("Pickup verified. Ride started.");
+			} else {
+				setOtpErr(data.message || "Unable to verify the pickup OTP.");
+			}
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				setOtpErr(
+					error.response?.data?.message ||
+						"Unable to verify the pickup OTP.",
+				);
+			} else {
+				setOtpErr("Unable to verify the pickup OTP.");
+			}
+		} finally {
+			setLoadingOtp(false);
+		}
+	};
+	const verifyDropOtp = async () => {
+		if (status !== "started" || !otpMode) return;
+		const otp = otpDigits.join("");
+		if (otp.length !== 6) {
+			setOtpErr("Enter all 6 digits to verify the drop otp.");
+			return;
+		}
+		try {
+			setLoadingOtp(true);
+			setOtpErr("");
+			const { data } = await axios.post(
+				"/api/partner/bookings/otp/drop/verify",
+				{ bookingId: booking?._id, otp },
+			);
+
+			if (data.success) {
+				setOtpVerified(true);
+				setStatus("started");
+				setBooking((prev) =>
+					prev ? { ...prev, bookingStatus: "completed" } : prev,
+				);
+				setOtpErr("Pickup verified. Ride started.");
+			} else {
+				setOtpErr(data.message || "Unable to verify the pickup OTP.");
+			}
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				setOtpErr(
+					error.response?.data?.message ||
+						"Unable to verify the drop OTP.",
+				);
+			} else {
+				setOtpErr("Unable to verify the drop OTP.");
+			}
+		} finally {
+			setLoadingOtp(false);
+		}
+	};
+
+	function maskEmail(email: string | undefined) {
+		return email!.replace(/(?<=^.{2}).+(?=.+@)/, "*****");
+	}
+
 	useEffect(() => {
 		const getActiveRides = async () => {
 			try {
@@ -163,6 +293,7 @@ const Page = () => {
 					setDropPos(
 						data.booking.dropLocation.coordinates.toReversed(),
 					);
+					setOtpMode(data.booking?.pickUpOtp.length ? true : false);
 				}
 			} catch (error) {
 				if (axios.isAxiosError(error)) {
@@ -215,13 +346,18 @@ const Page = () => {
 		getCurrentLocation();
 	}, [booking?._id, status]);
 
-
 	useEffect(() => {
 		if (!booking?._id) return;
 		const socket = getSocket();
 		socket?.connect();
 		socket?.emit("join-ride", booking?._id);
-		const handler = ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+		const handler = ({
+			latitude,
+			longitude,
+		}: {
+			latitude: number;
+			longitude: number;
+		}) => {
 			setDriverPos([latitude, longitude]);
 		};
 
@@ -301,6 +437,7 @@ const Page = () => {
 				</motion.div>
 			</div>
 
+			{/* Desktop View*/}
 			<motion.div
 				initial={{ x: 60, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}
@@ -392,6 +529,201 @@ const Page = () => {
 
 					<div className="flex-1 overflow-y-auto min-h-0">
 						<PanleContent {...panelProps} />
+					</div>
+
+					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
+						<AnimatePresence mode="wait">
+							{(status === "awaiting pickup" ||
+								status === "started") &&
+								!otpMode &&
+								!otpVerified &&
+								(
+									<motion.button
+										onClick={() => {
+											console.log(status)
+											if(status === "awaiting pickup") {
+												sendPickupOtp()
+											} else {
+												sendDropOtp();
+											}
+										}}
+										key={status === "awaiting pickup" ? "arrived" : "dropped"}
+										initial={{ opacity: 0, y: 6 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -6 }}
+										className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+										disabled={loadingOtp}
+									>
+										<MapPin size={16} /> <p>{status === "awaiting pickup" ? "I've Arrived at Pickup" : "I've Dropped off the Customer"}</p>
+										<ArrowRight
+											size={15}
+											className="ml-1"
+										/>
+									</motion.button>
+								)}
+						</AnimatePresence>
+
+						{(status === "awaiting pickup" || status === "started") &&
+							otpMode &&
+							!otpVerified && (
+								<motion.div
+									onClick={() => setExpanded(true)}
+									initial={{ opacity: 0, y: 8 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -8 }}
+									className="space-y-4"
+								>
+									<div className="rounded-xl border border-zinc-200 bg-zinc-950 p-4">
+										<p className="text-sm font-semibold text-white">
+											Enter the {status === "awaiting pickup" ? "pickup " : "drop "} otp from the
+											customer&apos;s email.
+										</p>
+										<p className="text-xs text-zinc-400 mt-1">
+											The customer receives this OTP on
+											email{" "}
+											<span className="text-green-600 font-medium">
+												{maskEmail(
+													booking?.customer.email,
+												)}
+											</span>
+											, ask them to share it when the
+											driver arrives.
+										</p>
+									</div>
+
+									<div className="max-w-96 mx-auto grid grid-cols-6 gap-2">
+										{otpDigits.map((digit, idx) => (
+											<input
+												key={idx}
+												type="text"
+												inputMode="numeric"
+												maxLength={1}
+												value={digit}
+												onChange={(e) => {
+													const value =
+														e.target.value.replace(
+															/\D/g,
+															"",
+														);
+													if (!value) {
+														setOtpDigits((prev) => {
+															const next = [
+																...prev,
+															];
+															next[idx] = "";
+															return next;
+														});
+														return;
+													}
+													const char =
+														value.slice(-1);
+													setOtpDigits((prev) => {
+														const next = [...prev];
+														next[idx] = char;
+														return next;
+													});
+													if (
+														char &&
+														idx <
+															otpDigits.length - 1
+													) {
+														otpInputsRef.current[
+															idx + 1
+														]?.focus();
+													}
+												}}
+												onKeyDown={(e) => {
+													if (
+														e.key === "Backspace" &&
+														!digit &&
+														idx > 0
+													) {
+														otpInputsRef.current[
+															idx - 1
+														]?.focus();
+													}
+													if (
+														e.key === "ArrowLeft" &&
+														idx > 0
+													) {
+														otpInputsRef.current[
+															idx - 1
+														]?.focus();
+													}
+													if (
+														e.key ===
+															"ArrowRight" &&
+														idx <
+															otpDigits.length - 1
+													) {
+														otpInputsRef.current[
+															idx + 1
+														]?.focus();
+													}
+												}}
+												ref={(el) => {
+													otpInputsRef.current[idx] =
+														el;
+												}}
+												className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
+											/>
+										))}
+									</div>
+
+									<button
+										onClick={() => {
+											console.log(status)
+											if(status === "awaiting pickup") {
+												verifyPickupOtp()
+											} else {
+												verifyDropOtp();
+											}
+										}}
+										disabled={
+											loadingOtp ||
+											otpDigits.some((d) => !d)
+										}
+										className={`w-full rounded-3xl px-4 py-4 text-sm font-bold tracking-widest transition ${loadingOtp || otpDigits.some((d) => !d) ? "bg-zinc-300 text-zinc-500 cursor-not-allowed" : "bg-zinc-900 text-white hover:bg-zinc-800"}`}
+									>
+										{loadingOtp
+											? "Verifying..."
+											: `Verify ${status === "awaiting pickup" ? "Pickup " : "Drop "} OTP`}
+									</button>
+
+									{otpErr ? (
+										<p
+											className={`rounded-3xl border px-4 py-3 text-sm font-medium ${otpErr.toLowerCase().includes("success") ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}
+										>
+											{otpErr}
+										</p>
+									) : null}
+
+									<div className="grid gap-3 md:grid-cols-2">
+										<button
+											onClick={() => {
+											if(status === "awaiting pickup") {
+												sendPickupOtp()
+											} else {
+												sendDropOtp();
+											}
+										}}
+											disabled={loadingOtp}
+											className="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+										>
+											Resend otp
+										</button>
+										<button
+											onClick={() => {
+												clearOtpDigits();
+												setOtpErr("");
+											}}
+											className="w-full rounded-3xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
+										>
+											Clear
+										</button>
+									</div>
+								</motion.div>
+							)}
 					</div>
 				</motion.div>
 			</div>

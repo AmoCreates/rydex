@@ -29,20 +29,13 @@ export async function POST(req: Request) {
 
 		const { bookingId, otp } = await req.json();
 		if (!bookingId || !otp) {
-			return Response.json(
-				{ message: "otp and bookingId is required" },
+			return NextResponse.json(
+				{ success: false, message: "otp and bookingId is required" },
 				{ status: 400 },
 			);
 		}
 
-		if (!bookingId) {
-			return NextResponse.json(
-				{ success: false, message: "booking Id required" },
-				{ status: 401 },
-			);
-		}
-
-		const booking = await Booking.findById(bookingId)
+		const booking = await Booking.findById(bookingId);
 		if (!booking) {
 			return NextResponse.json(
 				{ success: false, message: "no booking found" },
@@ -50,30 +43,38 @@ export async function POST(req: Request) {
 			);
 		}
 
-    if(!booking.pickUpOtp) {
-      return Response.json({ message: "pickup otp not generated yet" }, { status: 400 });
-    }
+		if (!booking.pickUpOtp) {
+			return NextResponse.json(
+				{ success: false, message: "pickup otp not generated yet" },
+				{ status: 400 },
+			);
+		}
 
 		if (booking.pickUpOtpExpires < new Date()) {
-			return Response.json({ message: "otp expired" }, { status: 400 });
+			return NextResponse.json(
+				{ success: false, message: "otp expired" },
+				{ status: 400 },
+			);
 		}
 
-		if (booking.otp !== otp) {
-			return Response.json({ success: false, message: "invalid otp" });
+		if (booking.pickUpOtp !== otp) {
+			return NextResponse.json(
+				{ success: false, message: "invalid otp" },
+			);
 		}
 
-    booking.bookingStatus = "started"
+		booking.bookingStatus = "started";
 		booking.pickUpOtp = undefined;
 		booking.pickUpOtpExpires = undefined;
 		await booking.save();
 
-		return Response.json(
-			{ message: "pickup otp verified successfully" },
+		return NextResponse.json(
+			{ success: true, message: "pickup otp verified successfully" },
 			{ status: 200 },
 		);
 	} catch (error) {
-		return Response.json(
-			{ message: "something went wrong, pickup otp verification failed", error },
+		return NextResponse.json(
+			{ success: false, message: "something went wrong, pickup otp verification failed", error },
 			{ status: 500 },
 		);
 	}

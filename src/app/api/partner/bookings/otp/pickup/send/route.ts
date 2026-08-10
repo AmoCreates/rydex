@@ -3,6 +3,7 @@ import dbConnect from "@/lib/db";
 import { sendMail } from "@/lib/sendMail";
 import Booking from "@/model/booking.model";
 import User from "@/model/user.model";
+import Vehicle from "@/model/vehicle.model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -37,7 +38,11 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const booking = await Booking.findById(bookingId).populate("customer");
+		const booking = await Booking.findById(bookingId).populate([
+				{ path: "customer", model: User },
+				{ path: "driver", model: User },
+				{ path: "vehicle", model: Vehicle },
+			]);
 
 		if (!booking) {
 			return NextResponse.json(
@@ -48,13 +53,13 @@ export async function POST(req: NextRequest) {
 
 		const otp = Math.floor(100000 + Math.random() * 900000).toString();
 		const otpExpiry = new Date();
-		otpExpiry.setMinutes(otpExpiry.getMinutes() + 2);
+		otpExpiry.setMinutes(otpExpiry.getMinutes() + 5);
 
 		booking.pickUpOtp = otp;
 		booking.pickUpOtpExpires = otpExpiry;
 		await booking.save();
 
-		if (!booking.user.email) {
+		if (!booking.customer.email) {
 			return NextResponse.json(
 				{
 					success: false,
@@ -64,10 +69,12 @@ export async function POST(req: NextRequest) {
 			);
 		}
 
-		const email = booking.customer.email;
+    const customerName = booking.customer.name;
+		// const email = booking.customer.email;
+		const email = "AmoCreates@outlook.com";
 		const driverName = booking.driver.name;
 		const pickupAddress = booking.pickUpAddress;
-		const vehicleDetails = `Vehicle: ${booking.vehicle.type}, Model: ${booking.vehicle.vehicleModel}, Vehicle Number : ${booking.vehicle.vehicleNumber}`;
+		const vehicleDetails = `${booking.vehicle.type}, ${booking.vehicle.vehicleModel}, ${booking.vehicle.vehicleNumber}`;
 
 		await sendMail(
 			email,
@@ -96,7 +103,7 @@ export async function POST(req: NextRequest) {
         <td style="padding: 15px 40px 0 40px; text-align: center;">
           <h2 style="color: #1a202c; font-size: 22px; font-weight: 700; margin: 0;">Ride Pickup OTP</h2>
           <p style="color: #64748b; font-size: 14px; line-height: 22px; margin-top: 10px;">
-            Hi <strong>${name}</strong>, your driver has arrived! Share the code below with your driver to start your ride.
+            Hi <strong>${customerName}</strong>, your driver has arrived! Share the code below with your driver to start your ride.
           </p>
         </td>
       </tr>
