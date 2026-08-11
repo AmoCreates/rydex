@@ -389,7 +389,7 @@ const Page = () => {
 	}
 
 	if(status === "completed" && booking) {
-		return <CompletedScreen booking={booking}/>
+		return <CompletedScreen booking={booking} role={"driver"}/>
 	}
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");

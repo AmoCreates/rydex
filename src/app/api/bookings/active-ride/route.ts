@@ -61,3 +61,57 @@ export async function POST(req: NextRequest) {
 		);
 	}
 }
+
+
+export async function GET() {
+	try {
+		await dbConnect();
+
+		const session = await auth();
+		if (
+			!session ||
+			!session.user?.email ||
+			session.user?.role !== "customer"
+		) {
+			return NextResponse.json(
+				{ message: "unauthorized, please log in" },
+				{ status: 401 },
+			);
+		}
+
+		const customer = await User.findOne({ email: session.user.email });
+		if (!customer) {
+			return NextResponse.json(
+				{ message: "user not found" },
+				{ status: 401 },
+			);
+		}
+
+		const booking = await Booking.findOne({
+			customer: customer._id,
+			bookingStatus: {
+				$in: [
+					"requested",
+					"started",
+					"confirmed",
+					"awaiting payment",
+				],
+			},
+		});
+
+		if (!booking) {
+			return NextResponse.json(
+				{ message: "no previous booking found" },
+				{ status: 200 },
+			);
+		}
+
+		return NextResponse.json(booking, { status: 200 });
+	} catch (error) {
+		console.log(error);
+		return NextResponse.json(
+			{ message: "find customer's acitve booking error" },
+			{ status: 500 },
+		);
+	}
+}

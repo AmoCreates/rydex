@@ -72,16 +72,14 @@ const getStatusStyles = (status: string) => {
 	switch (normalizedStatus) {
 		case "requested":
 			return "bg-amber-100 border-amber-200";
-		case "awaiting pickup":
-			return "bg-sky-100 border-sky-200";
-		case "started":
-			return "bg-blue-100 border-blue-200";
-		case "completed":
-			return "bg-emerald-100 border-emerald-200";
 		case "awaiting payment":
 			return "bg-violet-100 border-violet-200";
 		case "confirmed":
 			return "bg-green-100 border-green-200";
+		case "started":
+			return "bg-blue-100 border-blue-200";
+		case "completed":
+			return "bg-emerald-100 border-emerald-200";
 		case "cancelled":
 			return "bg-rose-100 border-rose-200";
 		case "rejected":
@@ -363,27 +361,27 @@ const Page = () => {
 												</div>
 
 												{(b.bookingStatus ===
-													"awaiting pickup" ||
+													"confirmed" ||
 													b.bookingStatus ===
 														"started" ||
 													b.bookingStatus ===
 														"completed") && (
-														<div className="flex items-center gap-2">
-															<button
-																onClick={() =>
-																	router.push(
-																		"/partner/bookings/active-ride",
-																	)
-																}
-																className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer"
-															>
-																<span>
-																	View Details
-																</span>
-																<ChevronRightIcon className="w-4 h-4" />
-															</button>
-														</div>
-													)}
+													<div className="flex items-center gap-2">
+														<button
+															onClick={() =>
+																router.push(
+																	"/partner/bookings/active-ride",
+																)
+															}
+															className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer"
+														>
+															<span>
+																View Details
+															</span>
+															<ChevronRightIcon className="w-4 h-4" />
+														</button>
+													</div>
+												)}
 											</div>
 										</div>
 									</motion.div>

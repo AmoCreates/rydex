@@ -36,17 +36,17 @@ export async function POST(
 			customer: session.user.id,
 		});
 
-		const allowedStatuses = ["awaiting payment"];
+		const allowedStatuses = ["completed"];
 
-		// if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
-		// 	return NextResponse.json(
-		// 		{
-		// 			message:
-		// 				"Sorry, we can't allowed you to pay before ride completed",
-		// 		},
-		// 		{ status: 400 },
-		// 	);
-		// }
+		if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
+			return NextResponse.json(
+				{
+					message:
+						"Sorry, we can't allowed you to pay right now",
+				},
+				{ status: 400 },
+			);
+		}
 
 		booking.paymentStatus = "pending";
 		booking.paymentMode = "cash";

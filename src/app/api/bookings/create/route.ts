@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 		const customerBooking = await Booking.findOne({
 			customer: session.user.id,
 			bookingStatus: {
-				$in: ["requested", "awaiting pickup", "awaiting payment", "started"],
+				$in: ["requested", "awaiting payment", "confirmed", "started"],
 			},
 		});
 

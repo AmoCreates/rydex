@@ -32,7 +32,7 @@ export async function GET() {
 		const booking = await Booking.findOne({
 			driver: partner._id,
 			bookingStatus: {
-				$in: ["awaiting pickup", "started", "completed"],
+				$in: ["awaiting payment", "started", "completed"],
 			},
 		}).populate([
 			{ path: "customer", model: User },

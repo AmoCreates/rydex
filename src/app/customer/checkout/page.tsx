@@ -47,6 +47,7 @@ type Status =
 	| "started"
 	| "completed"
 	| "awaiting payment"
+	| "payment"
 	| "confirmed"
 	| "cancelled"
 	| "rejected"
@@ -77,11 +78,12 @@ const Page = () => {
 	const [currBookingId, setCurrBookingId] = useState<string | null>(null);
 	const [payMode, setPayMode] = useState<"cash" | "online">("cash");
 	const { userData } = useSelector((state: RootState) => state.user);
+	const [bar, setBar] = useState(true);
 
 	const handleBookRequest = async () => {
 		try {
 			setLoading(true);
-			const res = await axios.post("/api/booking/create", {
+			const res = await axios.post("/api/bookings/create", {
 				driverId,
 				vehicleId,
 				pickUpAddress: pickUp,
@@ -205,9 +207,7 @@ const Page = () => {
 						);
 
 						if (data.success) {
-							alert(
-								`🎉 Payment Successful!\nThanks for choosing Rydex`,
-							);
+							window.location.href = `/customer/active-ride/${currBookingId}`;
 							setStatus("confirmed");
 						} else {
 							alert("Payment verification failed");
@@ -266,9 +266,10 @@ const Page = () => {
 	useEffect(() => {
 		const activeBooking = async () => {
 			try {
-				const { data } = await axios.get("/api/booking/active-booking");
-				setCurrBookingId(data[0]._id.toString());
-				setStatus(data[0].bookingStatus);
+				const { data } = await axios.get("/api/bookings/active-ride");
+				console.log(data);
+				setCurrBookingId(data._id.toString());
+				setStatus(data.bookingStatus);
 			} catch (error: unknown) {
 				console.log(error);
 			}
@@ -278,9 +279,19 @@ const Page = () => {
 	}, []);
 
 	useEffect(() => {
-		if (status !== "completed") return;
+		if (status !== "awaiting payment") return;
 		const t = setTimeout(() => {
-			setStatus("awaiting payment");
+			setStatus("payment");
+		}, 1200);
+		return () => {
+			clearTimeout(t);
+		};
+	}, [status]);
+
+	useEffect(() => {
+		if (status !== "confirmed") return;
+		const t = setTimeout(() => {
+			setBar(false);
 		}, 1200);
 		return () => {
 			clearTimeout(t);
@@ -566,7 +577,7 @@ const Page = () => {
 									</motion.div>
 								)}
 
-								{status === "awaiting pickup" && (
+								{status === "awaiting payment" && (
 									<motion.div
 										key="awaiting pickup"
 										initial={{ opacity: 0, scale: 0.94 }}
@@ -608,28 +619,12 @@ const Page = () => {
 												className="h-full bg-zinc-900 rounded-full"
 											/>
 										</div>
-
-										<motion.button
-											onClick={() =>
-												router.push(
-													`/ride/${currBookingId}`,
-												)
-											}
-											initial={{ opacity: 0, y: 8 }}
-											animate={{ opacity: 1, y: 0 }}
-											whileTap={{ scale: 0.97 }}
-											whileHover={{ scale: 1.03 }}
-											className="flex items-center gap-2.5 bg-zinc-900 hover:bg-black text-white font-black text-sm px-8 py-4 rounded-2xl transition-colors shadow-md cursor-pointer"
-										>
-											Track Your Ride{" "}
-											<RiRoadMapFill size={15} />
-										</motion.button>
 									</motion.div>
 								)}
 
-								{status === "awaiting payment" && (
+								{status === "payment" && (
 									<motion.div
-										key="awaiting payment"
+										key="payment"
 										initial={{ opacity: 0, y: 12 }}
 										animate={{ opacity: 1, y: 0 }}
 										exit={{ opacity: 0 }}
@@ -651,7 +646,7 @@ const Page = () => {
 													id: "cash",
 													Icon: Banknote,
 													title: "Cash",
-													sub: "Pay driver in cash",
+													sub: "Pay driver after ride",
 												},
 												{
 													id: "online",
@@ -746,16 +741,16 @@ const Page = () => {
 											) : payMode === "cash" ? (
 												<>
 													<Banknote size={16} />
-													Pay in Cash
+													Confirm Cash Ride
+													<RiArrowRightSLine />
 												</>
 											) : (
 												<>
 													<Wallet size={16} />
 													Proceed to Payment
+													<RiArrowRightSLine />
 												</>
 											)}
-
-											<RiArrowRightSLine />
 										</motion.button>
 									</motion.div>
 								)}
@@ -813,12 +808,12 @@ const Page = () => {
 												transition={{ delay: 0.3 }}
 												className="text-2xl font-black text-zinc-900 mb-1"
 											>
-												Ride Completed!
+												Ride Confirmed!
 											</motion.h3>
 											<motion.div className="text-zinc-400 text-sm font-medium">
 												<p>
 													Your ride has been
-													successfully completed.
+													successfully confirmed.
 												</p>
 												<p className="text-center">
 													Thankyou for choosing Rydex
@@ -826,7 +821,9 @@ const Page = () => {
 											</motion.div>
 										</div>
 
-										<div className="w-48 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+										<div
+											className={`${bar ? "visible" : "hidden"} w-48 h-1.5 bg-zinc-100 rounded-full overflow-hidden`}
+										>
 											<motion.div
 												initial={{ width: 0 }}
 												animate={{ width: "100%" }}
@@ -834,6 +831,34 @@ const Page = () => {
 												className="h-full bg-zinc-900 rounded-full"
 											/>
 										</div>
+										{!bar && (
+											<motion.button
+												initial={{ opacity: 0, y: 6 }}
+												animate={{ opacity: 1, y: 0 }}
+												className=" w-auto px-7 h-14 bg-zinc-900 hover:bg-black disabled:opacity-30 text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 cursor-pointer shadow-md  -mb-1 active:scale-97 transition-all"
+												onClick={() =>
+													router.push(
+														`/customer/active-ride/${currBookingId}`,
+													)
+												}
+											>
+												{loading ? (
+													<>
+														<CircleDashed className="w-5 h-5 text-white animate-spin" />
+														<span>
+															Redirecting...
+														</span>
+													</>
+												) : (
+													<>
+														<RiRoadMapFill />
+														Track Your Ride
+													</>
+												)}
+
+												<RiArrowRightSLine />
+											</motion.button>
+										)}
 									</motion.div>
 								)}
 

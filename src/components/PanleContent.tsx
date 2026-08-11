@@ -138,7 +138,7 @@ const PanleContent = ({
 			getSuggestions();
 		};
 
-		controlGetSuggestion();
+		// controlGetSuggestion();
 	}, [booking?._id]);
 
 	useEffect(() => {

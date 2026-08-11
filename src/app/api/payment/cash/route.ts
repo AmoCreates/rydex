@@ -31,7 +31,6 @@ export async function POST() {
 
 		if (
 			!booking ||
-			booking.bookingStatus !== "awaiting payment" ||
 			booking.paymentMode !== "cash" ||
 			booking.paymentStatus !== "pending"
 		) {
