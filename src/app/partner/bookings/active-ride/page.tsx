@@ -8,8 +8,9 @@ import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { getSocket } from "@/lib/socket";
+import CompletedScreen from "@/components/CompletedScreen";
 
-export interface IBooking {
+interface IBooking {
 	_id: string;
 	customer: IUser;
 	driver: IUser;
@@ -78,7 +79,7 @@ const getStatusStyle = (status: string | undefined) => {
 		case "started":
 			return {
 				label: "Ride in Progress",
-				sublabel: "Heding to drop location",
+				sublabel: "Heading to drop location",
 				dot: "bg-emerald-400",
 			};
 		case "completed":
@@ -385,6 +386,10 @@ const Page = () => {
 				</div>
 			</div>
 		);
+	}
+
+	if(status === "completed" && booking) {
+		return <CompletedScreen booking={booking}/>
 	}
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");

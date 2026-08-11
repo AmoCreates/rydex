@@ -23,7 +23,7 @@ import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
 
-export interface IBooking {
+interface IBooking {
 	customer: IUser;
 	driver: IUser;
 	vehicle: IVehicle;

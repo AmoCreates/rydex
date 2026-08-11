@@ -22,7 +22,7 @@ import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
 
-export interface IBooking {
+interface IBooking {
 	_id: string,
 	customer: IUser;
 	driver: IUser;
@@ -362,7 +362,7 @@ const Page = () => {
 												</div>
 
 												{b.bookingStatus !==
-													"completed" && (
+													"confirmed" &&  (
 													<div className="flex items-center gap-2">
 														<button
 															onClick={() =>
