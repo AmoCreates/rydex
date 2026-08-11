@@ -32,7 +32,7 @@ export async function GET() {
 		const booking = await Booking.findOne({
 			driver: partner._id,
 			bookingStatus: {
-				$in: ["awaiting payment", "started", "completed"],
+				$in: ["awaiting payment", "confirmed", "started"],
 			},
 		}).populate([
 			{ path: "customer", model: User },
@@ -40,7 +40,7 @@ export async function GET() {
 			{ path: "vehicle", model: Vehicle },
 		]);
 
-		if (!booking || booking.length == 0) {
+		if (!booking) {
 			return NextResponse.json(
 				{ success: false, message: "no active booking found" },
 				{ status: 200 },

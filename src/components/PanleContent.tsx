@@ -56,7 +56,7 @@ const PanleContent = ({
 	paymentStatus,
 	currRole,
 }: any) => {
-	const canChat = status === "awaiting pickup";
+	const canChat = status === "confirmed";
 	const [chatOpen, setChatOpen] = useState(false);
 	const { userData } = useSelector((state: RootState) => state.user);
 	const [suggestionErr, setSuggestionErr] = useState("");

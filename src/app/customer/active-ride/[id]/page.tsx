@@ -70,7 +70,7 @@ const getStatusStyle = (status: string | undefined) => {
 				sublabel: "Booking is being processed",
 				dot: "bg-amber-400",
 			};
-		case "awaiting pickup":
+		case "confirmed":
 			return {
 				label: "Heading to Pickup",
 				sublabel: "Arriving to the pickup location",
@@ -93,12 +93,6 @@ const getStatusStyle = (status: string | undefined) => {
 				label: "Payment Pending",
 				sublabel: "Customer payment is pending",
 				dot: "bg-purple-400",
-			};
-		case "confirmed":
-			return {
-				label: "Payment Done",
-				sublabel: "Customer paid",
-				dot: "bg-green-400",
 			};
 		case "cancelled":
 			return {
@@ -136,7 +130,7 @@ const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 
 const Page = () => {
 	const [booking, setBooking] = useState<IBooking | null>(null);
-	const [status, setStatus] = useState("awaiting pickup");
+	const [status, setStatus] = useState("confirmed");
 	const [loading, setLoading] = useState(false);
 	const [driverPos, setDriverPos] = useState<[number, number] | null>(null);
 	const [pickUpPos, setPickUpPos] = useState<[number, number] | null>(null);
@@ -215,12 +209,12 @@ const Page = () => {
 	}
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
-	const isActive = ["awaiting pickup", "started"].includes(status);
+	const isActive = ["confirmed", "started"].includes(status);
 	const paymentStatus = PAYMENT_BADGE[booking?.paymentStatus ?? "pending"];
 	const displayTime =
-		status === "awaiting pickup" ? estPickUpTime : estDropTime;
+		status === "confirmed" ? estPickUpTime : estDropTime;
 	const displayDistance =
-		status === "awaiting pickup" ? dstToPickUp : dstToDrop;
+		status === "confirmed" ? dstToPickUp : dstToDrop;
 	const panelProps = {
 		isActive,
 		displayDistance,

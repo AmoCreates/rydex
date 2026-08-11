@@ -62,7 +62,7 @@ const LiveRideMap = ({
 
 	useEffect(() => {
 		if (
-			formattedStatus === "confirmed" ||
+			
 			formattedStatus === "completed"
 		) {
 			Promise.resolve().then(() => {
@@ -114,7 +114,7 @@ const LiveRideMap = ({
 			let pickupData = { coords: [] as [number, number][], distance: 0, duration: 0 };
 			let dropData = { coords: [] as [number, number][], distance: 0, duration: 0 };
 
-			if (formattedStatus === "awaiting pickup") {
+			if (formattedStatus === "confirmed") {
 				if (driverLocation && pickUpLocation) {
 					pickupData = await fetchOSRMRoute([driverLocation, pickUpLocation]);
 					setDriverToPickupRoute(pickupData.coords);

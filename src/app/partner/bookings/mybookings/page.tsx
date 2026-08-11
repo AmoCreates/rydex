@@ -206,10 +206,10 @@ const Page = () => {
 						>
 							<option>All</option>
 							<option>Requested</option>
-							<option>Awaiting Pickup</option>
-							<option>Started</option>
 							<option>Awaiting Payment</option>
 							<option>Confirmed</option>
+							<option>Started</option>
+							<option>Completed</option>
 							<option>Cancelled</option>
 							<option>Rejected</option>
 							<option>Expired</option>

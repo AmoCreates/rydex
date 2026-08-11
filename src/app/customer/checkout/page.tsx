@@ -43,12 +43,11 @@ const VEHICE_META: any = {
 type Status =
 	| "idle"
 	| "requested"
-	| "awaiting pickup"
+	| "awaiting payment"
+	| "confirmed"
 	| "started"
 	| "completed"
-	| "awaiting payment"
 	| "payment"
-	| "confirmed"
 	| "cancelled"
 	| "rejected"
 	| "expired";
@@ -117,7 +116,7 @@ const Page = () => {
 		try {
 			setLoading(true);
 			const res = await axios.post(
-				`/api/booking/${currBookingId}/cancel-ride`,
+				`/api/bookings/${currBookingId}/cancel-ride`,
 			);
 
 			if (res.status === 200) {
@@ -579,7 +578,7 @@ const Page = () => {
 
 								{status === "awaiting payment" && (
 									<motion.div
-										key="awaiting pickup"
+										key="awaiting payment"
 										initial={{ opacity: 0, scale: 0.94 }}
 										animate={{ opacity: 1, scale: 1 }}
 										exit={{ opacity: 0 }}

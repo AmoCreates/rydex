@@ -188,18 +188,16 @@ const Nav = ({ onOpen }: Props) => {
 											className={`relative text-[12px] sm:text-sm text-center font-medium transition pl-2 ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
 										>
 											{item.label}
-											{item.label !== "Active Ride" ? (
+											{item.label === "Pending Request" ? (
 												<span
-													className={`${item.label === "Pending Request" && (pendingRequestCount > 0 ? "absolute" : "hidden")} ${item.label === "My Bookings" && (myBookingsCount > 0 ? "absolute" : "hidden")}  absolute -top-1.5 -right-2 w-4 h-4 bg-white text-black text-[9px] rounded-full flex items-center justify-center font-bold`}
+													className={`${item.label === "Pending Request" && (pendingRequestCount > 0 ? "absolute" : "hidden")} -top-1.5 -right-2 w-4 h-4 bg-white text-black text-[9px] rounded-full flex items-center justify-center font-bold`}
 												>
 													{item.label ===
 														"Pending Request" &&
 														pendingRequestCount}
-													{item.label ===
-														"My Bookings" &&
-														myBookingsCount}
 												</span>
 											) : (
+												item.label === "Active Ride" &&
 												<span
 													className={`${isActiveRide ? "absolute" : "hidden"} -top-1.5 -right-2 w-4 h-4 bg-green-500 text-[9px] rounded-full flex items-center justify-center font-bold`}
 												/>

@@ -70,7 +70,7 @@ const getStatusStyle = (status: string | undefined) => {
 				sublabel: "Booking is being processed",
 				dot: "bg-amber-400",
 			};
-		case "awaiting pickup":
+		case "confirmed":
 			return {
 				label: "Heading to Pickup",
 				sublabel: "Drive to the pickup location",
@@ -93,12 +93,6 @@ const getStatusStyle = (status: string | undefined) => {
 				label: "Payment Pending",
 				sublabel: "Customer payment is pending",
 				dot: "bg-purple-400",
-			};
-		case "confirmed":
-			return {
-				label: "Payment Done",
-				sublabel: "Customer paid",
-				dot: "bg-green-400",
 			};
 		case "cancelled":
 			return {
@@ -136,7 +130,7 @@ const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 
 const Page = () => {
 	const [booking, setBooking] = useState<IBooking | null>(null);
-	const [status, setStatus] = useState("awaiting pickup");
+	const [status, setStatus] = useState("confirmed");
 	const [loading, setLoading] = useState(false);
 	const [driverPos, setDriverPos] = useState<[number, number] | null>(null);
 	const [pickUpPos, setPickUpPos] = useState<[number, number] | null>(null);
@@ -158,7 +152,7 @@ const Page = () => {
 	const clearOtpDigits = () => setOtpDigits(Array(6).fill(""));
 
 	const sendPickupOtp = async () => {
-		if (status !== "awaiting pickup" || otpVerified) return;
+		if (status !== "confirmed" || otpVerified) return;
 		try {
 			console.log("sending");
 			setLoadingOtp(true);
@@ -200,7 +194,7 @@ const Page = () => {
 		}
 	};
 	const verifyPickupOtp = async () => {
-		if (status !== "awaiting pickup" || !otpMode || otpVerified) return;
+		if (status !== "confirmed" || !otpMode || otpVerified) return;
 		const otp = otpDigits.join("");
 		if (otp.length !== 6) {
 			setOtpErr("Enter all 6 digits to verify the pickup otp.");
@@ -289,6 +283,7 @@ const Page = () => {
 				const { data } = await axios.get(
 					"/api/partner/bookings/active-ride",
 				);
+				console.log(data)
 				console.log(data.booking);
 				if (data.success) {
 					setBooking(data.booking);
@@ -393,12 +388,12 @@ const Page = () => {
 	}
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
-	const isActive = ["awaiting pickup", "started"].includes(status);
+	const isActive = ["confirmed", "started"].includes(status);
 	const paymentStatus = PAYMENT_BADGE[booking?.paymentStatus ?? "pending"];
 	const displayTime =
-		status === "awaiting pickup" ? estPickUpTime : estDropTime;
+		status === "confirmed" ? estPickUpTime : estDropTime;
 	const displayDistance =
-		status === "awaiting pickup" ? dstToPickUp : dstToDrop;
+		status === "confirmed" ? dstToPickUp : dstToDrop;
 	const panelProps = {
 		isActive,
 		displayDistance,
@@ -490,20 +485,20 @@ const Page = () => {
 
 						{/* Button: Send Pickup/Drop OTP */}
 						<AnimatePresence mode="wait">
-							{(status === "awaiting pickup" ||
+							{(status === "confirmed" ||
 								status === "started") &&
 								!otpMode && (
 									<motion.button
 										onClick={() => {
 											console.log(status);
-											if (status === "awaiting pickup") {
+											if (status === "confirmed") {
 												sendPickupOtp();
 											} else {
 												sendDropOtp();
 											}
 										}}
 										key={
-											status === "awaiting pickup"
+											status === "confirmed"
 												? "arrived"
 												: "dropped"
 										}
@@ -515,7 +510,7 @@ const Page = () => {
 									>
 										{!loadingOtp && <MapPin size={16} />}{" "}
 										<p>
-											{status === "awaiting pickup" &&
+											{status === "confirmed" &&
 												(loadingOtp
 													? "Sending Pikcup OTP..."
 													: "I've Arrived at Pickup")}
@@ -533,7 +528,7 @@ const Page = () => {
 						</AnimatePresence>
 
 						{/* OTP: Verify, Input, Clear, Resend */}
-						{(status === "awaiting pickup" ||
+						{(status === "confirmed" ||
 							status === "started") &&
 							otpMode &&
 							!otpVerified && (
@@ -548,7 +543,7 @@ const Page = () => {
 									<div className="rounded-xl border border-zinc-200 bg-zinc-950 p-4">
 										<p className="text-sm font-semibold text-white">
 											Enter the{" "}
-											{status === "awaiting pickup"
+											{status === "confirmed"
 												? "pickup "
 												: "drop "}{" "}
 											otp from the customer&apos;s email.
@@ -651,7 +646,7 @@ const Page = () => {
 									<button
 										onClick={() => {
 											console.log(status);
-											if (status === "awaiting pickup") {
+											if (status === "confirmed") {
 												verifyPickupOtp();
 											} else {
 												verifyDropOtp();
@@ -665,7 +660,7 @@ const Page = () => {
 									>
 										{loadingOtp
 											? "Verifying..."
-											: `Verify ${status === "awaiting pickup" ? "Pickup " : "Drop "} OTP`}
+											: `Verify ${status === "confirmed" ? "Pickup " : "Drop "} OTP`}
 									</button>
 
 									{/* OTP Error UI */}
@@ -683,7 +678,7 @@ const Page = () => {
 										<button
 											onClick={() => {
 												if (
-													status === "awaiting pickup"
+													status === "confirmed"
 												) {
 													sendPickupOtp();
 												} else {
@@ -783,20 +778,20 @@ const Page = () => {
 
 						{/* Button: Send Pickup/Drop OTP */}
 						<AnimatePresence mode="wait">
-							{(status === "awaiting pickup" ||
+							{(status === "confirmed" ||
 								status === "started") &&
 								!otpMode && (
 									<motion.button
 										onClick={() => {
 											console.log(status);
-											if (status === "awaiting pickup") {
+											if (status === "confirmed") {
 												sendPickupOtp();
 											} else {
 												sendDropOtp();
 											}
 										}}
 										key={
-											status === "awaiting pickup"
+											status === "confirmed"
 												? "arrived"
 												: "dropped"
 										}
@@ -808,7 +803,7 @@ const Page = () => {
 									>
 										{!loadingOtp && <MapPin size={16} />}{" "}
 										<p>
-											{status === "awaiting pickup" &&
+											{status === "confirmed" &&
 												(loadingOtp
 													? "Sending Pikcup OTP..."
 													: "I've Arrived at Pickup")}
@@ -826,7 +821,7 @@ const Page = () => {
 						</AnimatePresence>
 
 						{/* OTP: Verify, Input, Clear, Resend */}
-						{(status === "awaiting pickup" ||
+						{(status === "confirmed" ||
 							status === "started") &&
 							otpMode &&
 							!otpVerified && (
@@ -841,7 +836,7 @@ const Page = () => {
 									<div className="rounded-xl border border-zinc-200 bg-zinc-950 p-4">
 										<p className="text-sm font-semibold text-white">
 											Enter the{" "}
-											{status === "awaiting pickup"
+											{status === "confirmed"
 												? "pickup "
 												: "drop "}{" "}
 											otp from the customer&apos;s email.
@@ -944,7 +939,7 @@ const Page = () => {
 									<button
 										onClick={() => {
 											console.log(status);
-											if (status === "awaiting pickup") {
+											if (status === "confirmed") {
 												verifyPickupOtp();
 											} else {
 												verifyDropOtp();
@@ -958,7 +953,7 @@ const Page = () => {
 									>
 										{loadingOtp
 											? "Verifying..."
-											: `Verify ${status === "awaiting pickup" ? "Pickup " : "Drop "} OTP`}
+											: `Verify ${status === "confirmed" ? "Pickup " : "Drop "} OTP`}
 									</button>
 
 									{/* OTP Error UI */}
@@ -976,7 +971,7 @@ const Page = () => {
 										<button
 											onClick={() => {
 												if (
-													status === "awaiting pickup"
+													status === "confirmed"
 												) {
 													sendPickupOtp();
 												} else {
