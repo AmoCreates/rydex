@@ -148,7 +148,8 @@ const Page = () => {
 
 	const [otpMode, setOtpMode] = useState(false);
 	const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
-	const otpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
+	const desktopOtpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
+	const mobileOtpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
 	const [loadingOtp, setLoadingOtp] = useState(false);
 	const [otpErr, setOtpErr] = useState("");
 	const [otpVerified, setOtpVerified] = useState(false);
@@ -180,6 +181,7 @@ const Page = () => {
 		try {
 			console.log("sending");
 			setLoadingOtp(true);
+			setOtpErr("");
 			clearOtpDigits();
 			const { data } = await axios.post(
 				"/api/partner/bookings/otp/drop/send",
@@ -188,6 +190,7 @@ const Page = () => {
 			if (data.success) {
 				console.log(data);
 				setOtpMode(true);
+				setOtpVerified(false);
 			}
 		} catch (error) {
 			console.log(error);
@@ -217,6 +220,7 @@ const Page = () => {
 					prev ? { ...prev, bookingStatus: "started" } : prev,
 				);
 				setOtpErr("Pickup verified. Ride started.");
+				setOtpMode(false);
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");
 			}
@@ -250,7 +254,7 @@ const Page = () => {
 
 			if (data.success) {
 				setOtpVerified(true);
-				setStatus("started");
+				setStatus("completed");
 				setBooking((prev) =>
 					prev ? { ...prev, bookingStatus: "completed" } : prev,
 				);
@@ -276,6 +280,7 @@ const Page = () => {
 		return email!.replace(/(?<=^.{2}).+(?=.+@)/, "*****");
 	}
 
+	// Fetch Active Ride
 	useEffect(() => {
 		const getActiveRides = async () => {
 			try {
@@ -346,6 +351,7 @@ const Page = () => {
 		getCurrentLocation();
 	}, [booking?._id, status]);
 
+	// Update Driver's Live Location to Customer Side: (Socket.io)
 	useEffect(() => {
 		if (!booking?._id) return;
 		const socket = getSocket();
@@ -401,6 +407,7 @@ const Page = () => {
 
 	return (
 		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
+			{/* Map & Status Label */}
 			<div className="realtive flex-1 h-full z-0">
 				<LiveRideMap
 					driverLocation={driverPos}
@@ -437,13 +444,15 @@ const Page = () => {
 				</motion.div>
 			</div>
 
-			{/* Desktop View*/}
+			{/* Panel: Desktop View*/}
+			{/* Header View Common in Both(Large, Small Devices) */}
 			<motion.div
 				initial={{ x: 60, opacity: 0 }}
 				animate={{ x: 0, opacity: 1 }}
 				transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
 				className="hidden lg:flex w-[420px] lg:w-[460px] xl:w-[500px] bg-white border-l border-zinc-100 flex-col"
 			>
+				{/* Panel Header */}
 				<div className="bg-zinc-950 px-6 py-5 shrink-0">
 					<p className="text-zinc-500 text-[10px] tracking-[0.2em] uppercase font-semibold mb-1">
 						Driver Panel
@@ -463,19 +472,249 @@ const Page = () => {
 					</div>
 				</div>
 
+				{/* Panel Content: Booking Details, Ride-Chat, OTP Verification */}
 				<div className="flex-1 flex-col overflow-hidden">
+
+					{/* Panel Content: Booking Details, Ride-Chat */}
 					<div className="flex-1 overflow-y-auto">
 						<PanleContent {...panelProps} />
 					</div>
+
+					{/* Panel Content: OTP Verification */}
+					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
+
+						{/* Button: Send Pickup/Drop OTP */}
+						<AnimatePresence mode="wait">
+							{(status === "awaiting pickup" ||
+								status === "started") &&
+								!otpMode && (
+									<motion.button
+										onClick={() => {
+											console.log(status);
+											if (status === "awaiting pickup") {
+												sendPickupOtp();
+											} else {
+												sendDropOtp();
+											}
+										}}
+										key={
+											status === "awaiting pickup"
+												? "arrived"
+												: "dropped"
+										}
+										initial={{ opacity: 0, y: 6 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -6 }}
+										className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+										disabled={loadingOtp}
+									>
+										{!loadingOtp && <MapPin size={16} />}{" "}
+										<p>
+											{status === "awaiting pickup" &&
+												(loadingOtp
+													? "Sending Pikcup OTP..."
+													: "I've Arrived at Pickup")}
+											{status === "started" &&
+												(loadingOtp
+													? "Sending Drop OTP..."
+													: "Mark As Dropped")}
+										</p>
+										<ArrowRight
+											size={15}
+											className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
+										/>
+									</motion.button>
+								)}
+						</AnimatePresence>
+
+						{/* OTP: Verify, Input, Clear, Resend */}
+						{(status === "awaiting pickup" ||
+							status === "started") &&
+							otpMode &&
+							!otpVerified && (
+								<motion.div
+									onClick={() => setExpanded(true)}
+									initial={{ opacity: 0, y: 8 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -8 }}
+									className="space-y-4"
+								>
+									{/* Message for Driver */}
+									<div className="rounded-xl border border-zinc-200 bg-zinc-950 p-4">
+										<p className="text-sm font-semibold text-white">
+											Enter the{" "}
+											{status === "awaiting pickup"
+												? "pickup "
+												: "drop "}{" "}
+											otp from the customer&apos;s email.
+										</p>
+										<p className="text-xs text-zinc-400 mt-1">
+											The customer receives this OTP on
+											email{" "}
+											<span className="text-green-600 font-medium">
+												{maskEmail(
+													booking?.customer.email,
+												)}
+											</span>
+											, ask them to share it when the
+											driver arrives.
+										</p>
+									</div>
+
+									{/* OTP Input Boxes */}
+									<div className="max-w-96 mx-auto grid grid-cols-6 gap-2">
+										{otpDigits.map((digit, idx) => (
+											<input
+												key={idx}
+												type="text"
+												inputMode="numeric"
+												maxLength={1}
+												value={digit}
+												onChange={(e) => {
+													const value =
+														e.target.value.replace(
+															/\D/g,
+															"",
+														);
+													if (!value) {
+														setOtpDigits((prev) => {
+															const next = [
+																...prev,
+															];
+															next[idx] = "";
+															return next;
+														});
+														return;
+													}
+													const char =
+														value.slice(-1);
+													setOtpDigits((prev) => {
+														const next = [...prev];
+														next[idx] = char;
+														return next;
+													});
+													if (
+														char &&
+														idx <
+															otpDigits.length - 1
+													) {
+														desktopOtpInputsRef.current[
+															idx + 1
+														]?.focus();
+													}
+												}}
+												onKeyDown={(e) => {
+													if (
+														e.key === "Backspace" &&
+														!digit &&
+														idx > 0
+													) {
+														desktopOtpInputsRef.current[
+															idx - 1
+														]?.focus();
+													}
+													if (
+														e.key === "ArrowLeft" &&
+														idx > 0
+													) {
+														desktopOtpInputsRef.current[
+															idx - 1
+														]?.focus();
+													}
+													if (
+														e.key ===
+															"ArrowRight" &&
+														idx <
+															otpDigits.length - 1
+													) {
+														desktopOtpInputsRef.current[
+															idx + 1
+														]?.focus();
+													}
+												}}
+												ref={(el) => {
+													desktopOtpInputsRef.current[
+														idx
+													] = el;
+												}}
+												className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
+											/>
+										))}
+									</div>
+
+									{/* Verify OTP: Pickup/Drop  */}
+									<button
+										onClick={() => {
+											console.log(status);
+											if (status === "awaiting pickup") {
+												verifyPickupOtp();
+											} else {
+												verifyDropOtp();
+											}
+										}}
+										disabled={
+											loadingOtp ||
+											otpDigits.some((d) => !d)
+										}
+										className={`w-full rounded-3xl px-4 py-4 text-sm font-bold tracking-widest transition ${loadingOtp || otpDigits.some((d) => !d) ? "bg-zinc-300 text-zinc-500 cursor-not-allowed" : "bg-zinc-900 text-white hover:bg-zinc-800"}`}
+									>
+										{loadingOtp
+											? "Verifying..."
+											: `Verify ${status === "awaiting pickup" ? "Pickup " : "Drop "} OTP`}
+									</button>
+
+									{/* OTP Error UI */}
+									{otpErr ? (
+										<p
+											className={`rounded-3xl border px-4 py-3 text-sm font-medium ${otpErr.toLowerCase().includes("success") ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}
+										>
+											{otpErr}
+										</p>
+									) : null}
+
+									{/* Clear & Resend */}
+									<div className="grid gap-3 md:grid-cols-2">
+										{/* Resend OTP */}
+										<button
+											onClick={() => {
+												if (
+													status === "awaiting pickup"
+												) {
+													sendPickupOtp();
+												} else {
+													sendDropOtp();
+												}
+											}}
+											disabled={loadingOtp}
+											className="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
+										>
+											Resend otp
+										</button>
+										{/* Resend OTP */}
+										<button
+											onClick={() => {
+												clearOtpDigits();
+												setOtpErr("");
+											}}
+											className="w-full rounded-3xl bg-zinc-900 px-4 py-3 text-sm font-semibold text-white hover:bg-zinc-800"
+										>
+											Clear
+										</button>
+									</div>
+								</motion.div>
+							)}
+					</div>
 				</div>
 			</motion.div>
-
+						
+			{/* Panel: Mobile or Small Screen View */}
 			<div className="lg:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-none">
 				<motion.div
 					className="bg-white rounded-t-3xl shadow-2xl pointer-events-auto overflow-hidden flex flex-col"
 					animate={{ height: expanded ? "82vh" : 142 }}
 					transition={{ type: "spring", stiffness: 320, damping: 38 }}
 				>
+					{/* Click to Expand */}
 					<div
 						className="shrink-0 cursor-pointer select-none"
 						onClick={() => setExpanded(!expanded)}
@@ -487,6 +726,7 @@ const Page = () => {
 						</div>
 					</div>
 
+					{/* Booking Status: Lable, subLabel, Timing and Pricing */}
 					<div className="px-5 py-3 flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							<span
@@ -525,45 +765,64 @@ const Page = () => {
 							</motion.div>
 						</div>
 					</div>
-					<div className="h-px bg-zinc-100 mx-5" />
 
+					<div className="h-px bg-zinc-100 mx-5" />
+					
+					{/* Panel Content: Booking Details, Ride-Chat*/}
 					<div className="flex-1 overflow-y-auto min-h-0">
 						<PanleContent {...panelProps} />
 					</div>
 
+					{/* Pickup/Drop: OTP Verification */}
 					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
+
+						{/* Button: Send Pickup/Drop OTP */}
 						<AnimatePresence mode="wait">
 							{(status === "awaiting pickup" ||
 								status === "started") &&
-								!otpMode &&
-								!otpVerified &&
-								(
+								!otpMode && (
 									<motion.button
 										onClick={() => {
-											console.log(status)
-											if(status === "awaiting pickup") {
-												sendPickupOtp()
+											console.log(status);
+											if (status === "awaiting pickup") {
+												sendPickupOtp();
 											} else {
 												sendDropOtp();
 											}
 										}}
-										key={status === "awaiting pickup" ? "arrived" : "dropped"}
+										key={
+											status === "awaiting pickup"
+												? "arrived"
+												: "dropped"
+										}
 										initial={{ opacity: 0, y: 6 }}
 										animate={{ opacity: 1, y: 0 }}
 										exit={{ opacity: 0, y: -6 }}
 										className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
 										disabled={loadingOtp}
 									>
-										<MapPin size={16} /> <p>{status === "awaiting pickup" ? "I've Arrived at Pickup" : "I've Dropped off the Customer"}</p>
+										{!loadingOtp && <MapPin size={16} />}{" "}
+										<p>
+											{status === "awaiting pickup" &&
+												(loadingOtp
+													? "Sending Pikcup OTP..."
+													: "I've Arrived at Pickup")}
+											{status === "started" &&
+												(loadingOtp
+													? "Sending Drop OTP"
+													: "Mark As Dropped")}
+										</p>
 										<ArrowRight
 											size={15}
-											className="ml-1"
+											className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
 										/>
 									</motion.button>
 								)}
 						</AnimatePresence>
 
-						{(status === "awaiting pickup" || status === "started") &&
+						{/* OTP: Verify, Input, Clear, Resend */}
+						{(status === "awaiting pickup" ||
+							status === "started") &&
 							otpMode &&
 							!otpVerified && (
 								<motion.div
@@ -573,10 +832,14 @@ const Page = () => {
 									exit={{ opacity: 0, y: -8 }}
 									className="space-y-4"
 								>
+									{/* Message for Driver */}
 									<div className="rounded-xl border border-zinc-200 bg-zinc-950 p-4">
 										<p className="text-sm font-semibold text-white">
-											Enter the {status === "awaiting pickup" ? "pickup " : "drop "} otp from the
-											customer&apos;s email.
+											Enter the{" "}
+											{status === "awaiting pickup"
+												? "pickup "
+												: "drop "}{" "}
+											otp from the customer&apos;s email.
 										</p>
 										<p className="text-xs text-zinc-400 mt-1">
 											The customer receives this OTP on
@@ -590,7 +853,8 @@ const Page = () => {
 											driver arrives.
 										</p>
 									</div>
-
+											
+									{/* OTP Input Boxes */}
 									<div className="max-w-96 mx-auto grid grid-cols-6 gap-2">
 										{otpDigits.map((digit, idx) => (
 											<input
@@ -627,7 +891,7 @@ const Page = () => {
 														idx <
 															otpDigits.length - 1
 													) {
-														otpInputsRef.current[
+														mobileOtpInputsRef.current[
 															idx + 1
 														]?.focus();
 													}
@@ -638,7 +902,7 @@ const Page = () => {
 														!digit &&
 														idx > 0
 													) {
-														otpInputsRef.current[
+														mobileOtpInputsRef.current[
 															idx - 1
 														]?.focus();
 													}
@@ -646,7 +910,7 @@ const Page = () => {
 														e.key === "ArrowLeft" &&
 														idx > 0
 													) {
-														otpInputsRef.current[
+														mobileOtpInputsRef.current[
 															idx - 1
 														]?.focus();
 													}
@@ -656,25 +920,27 @@ const Page = () => {
 														idx <
 															otpDigits.length - 1
 													) {
-														otpInputsRef.current[
+														mobileOtpInputsRef.current[
 															idx + 1
 														]?.focus();
 													}
 												}}
 												ref={(el) => {
-													otpInputsRef.current[idx] =
-														el;
+													mobileOtpInputsRef.current[
+														idx
+													] = el;
 												}}
 												className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
 											/>
 										))}
 									</div>
 
+									{/* Verify OTP: Pickup/Drop */}
 									<button
 										onClick={() => {
-											console.log(status)
-											if(status === "awaiting pickup") {
-												verifyPickupOtp()
+											console.log(status);
+											if (status === "awaiting pickup") {
+												verifyPickupOtp();
 											} else {
 												verifyDropOtp();
 											}
@@ -690,6 +956,7 @@ const Page = () => {
 											: `Verify ${status === "awaiting pickup" ? "Pickup " : "Drop "} OTP`}
 									</button>
 
+									{/* OTP Error UI */}
 									{otpErr ? (
 										<p
 											className={`rounded-3xl border px-4 py-3 text-sm font-medium ${otpErr.toLowerCase().includes("success") ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700"}`}
@@ -698,20 +965,25 @@ const Page = () => {
 										</p>
 									) : null}
 
+									{/* OTP Clear & Resend */}
 									<div className="grid gap-3 md:grid-cols-2">
+										{/* Resend */}
 										<button
 											onClick={() => {
-											if(status === "awaiting pickup") {
-												sendPickupOtp()
-											} else {
-												sendDropOtp();
-											}
-										}}
+												if (
+													status === "awaiting pickup"
+												) {
+													sendPickupOtp();
+												} else {
+													sendDropOtp();
+												}
+											}}
 											disabled={loadingOtp}
 											className="w-full rounded-3xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 hover:bg-zinc-50"
 										>
 											Resend otp
 										</button>
+										{/* Clear */}
 										<button
 											onClick={() => {
 												clearOtpDigits();
