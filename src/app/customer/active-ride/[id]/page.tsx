@@ -180,8 +180,10 @@ const Page = () => {
 		if (!socket) return;
 		socket.connect();
 		socket.emit("join-ride", id);
-		const handler = ({ latitude, longitude }: { latitude: number; longitude: number }) => {
+		const handler = ({ latitude, longitude, status }: { latitude: number; longitude: number; status: string; }) => {
+			console.log("receving status", status)
 			setDriverPos([latitude, longitude]);
+			setStatus(status)
 		};
 
 		socket.on("driver-location", handler);

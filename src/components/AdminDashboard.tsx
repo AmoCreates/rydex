@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/Toolkit/store";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
+import AdminEarning from "./AdminEarning";
 
 type Stats = {
 	totalPartners: number;
@@ -33,7 +34,8 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
-	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] = useState<[]>();
+	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] =
+		useState<[]>();
 	const [pendingKyc, setPendingKyc] = useState<any>();
 	const [pendingPricing, setPendingPricing] = useState<any>();
 	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
@@ -166,6 +168,8 @@ const AdminDashboard = () => {
 					/>
 				</section>
 
+				<AdminEarning />
+				
 				<section className="bg-white rounded-2xl flex flex-wrap gap-2 px-2 py-3 overflow-hidden shadow-2xl">
 					<TabButton
 						icon={<RiGroupLine size={16} />}

@@ -141,6 +141,9 @@ const Page = () => {
 	const [estDropTime, setEstDropTime] = useState(0);
 	const [expanded, setExpanded] = useState(false);
 
+	const statusRef = useRef(status);
+	const bookingRef = useRef(booking);
+
 	const [otpMode, setOtpMode] = useState(false);
 	const [otpDigits, setOtpDigits] = useState<string[]>(Array(6).fill(""));
 	const desktopOtpInputsRef = useRef<Array<HTMLInputElement | null>>([]);
@@ -216,6 +219,16 @@ const Page = () => {
 				);
 				setOtpErr("Pickup verified. Ride started.");
 				setOtpMode(false);
+
+				const socket = getSocket();
+				if (driverPos) {
+					socket?.emit("driver-location-update", {
+						bookingId: booking?._id,
+						status: "started",
+						latitude: driverPos[0],
+						longitude: driverPos[1],
+					});
+				}
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");
 			}
@@ -254,6 +267,16 @@ const Page = () => {
 					prev ? { ...prev, bookingStatus: "completed" } : prev,
 				);
 				setOtpErr("Pickup verified. Ride started.");
+
+				const socket = getSocket();
+				if (driverPos) {
+					socket?.emit("driver-location-update", {
+						bookingId: booking?._id,
+						status: "started",
+						latitude: driverPos[0],
+						longitude: driverPos[1],
+					});
+				}
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");
 			}
@@ -283,7 +306,7 @@ const Page = () => {
 				const { data } = await axios.get(
 					"/api/partner/bookings/active-ride",
 				);
-				console.log(data)
+				console.log(data);
 				console.log(data.booking);
 				if (data.success) {
 					setBooking(data.booking);
@@ -323,6 +346,7 @@ const Page = () => {
 					const lon = coords.longitude;
 					const lat = coords.latitude;
 					setDriverPos([lat, lon]);
+					console.log("Sending status", status);
 					socket?.emit("driver-location-update", {
 						bookingId: booking?._id,
 						status: status,
@@ -370,6 +394,11 @@ const Page = () => {
 		};
 	}, [booking?._id]);
 
+	useEffect(() => {
+		statusRef.current = status;
+		bookingRef.current = booking;
+	}, [status, booking]);
+
 	if (loading) {
 		return (
 			<div className="h-screen w-full bg-zinc-950 flex items-center justify-center">
@@ -383,17 +412,15 @@ const Page = () => {
 		);
 	}
 
-	if(status === "completed" && booking) {
-		return <CompletedScreen booking={booking} role={"driver"}/>
+	if (status === "completed" && booking) {
+		return <CompletedScreen booking={booking} role={"driver"} />;
 	}
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
 	const isActive = ["confirmed", "started"].includes(status);
 	const paymentStatus = PAYMENT_BADGE[booking?.paymentStatus ?? "pending"];
-	const displayTime =
-		status === "confirmed" ? estPickUpTime : estDropTime;
-	const displayDistance =
-		status === "confirmed" ? dstToPickUp : dstToDrop;
+	const displayTime = status === "confirmed" ? estPickUpTime : estDropTime;
+	const displayDistance = status === "confirmed" ? dstToPickUp : dstToDrop;
 	const panelProps = {
 		isActive,
 		displayDistance,
@@ -474,7 +501,6 @@ const Page = () => {
 
 				{/* Panel Content: Booking Details, Ride-Chat, OTP Verification */}
 				<div className="flex-1 flex-col overflow-hidden">
-
 					{/* Panel Content: Booking Details, Ride-Chat */}
 					<div className="flex-1 overflow-y-auto">
 						<PanleContent {...panelProps} />
@@ -482,11 +508,9 @@ const Page = () => {
 
 					{/* Panel Content: OTP Verification */}
 					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
-
 						{/* Button: Send Pickup/Drop OTP */}
 						<AnimatePresence mode="wait">
-							{(status === "confirmed" ||
-								status === "started") &&
+							{(status === "confirmed" || status === "started") &&
 								!otpMode && (
 									<motion.button
 										onClick={() => {
@@ -528,8 +552,7 @@ const Page = () => {
 						</AnimatePresence>
 
 						{/* OTP: Verify, Input, Clear, Resend */}
-						{(status === "confirmed" ||
-							status === "started") &&
+						{(status === "confirmed" || status === "started") &&
 							otpMode &&
 							!otpVerified && (
 								<motion.div
@@ -677,9 +700,7 @@ const Page = () => {
 										{/* Resend OTP */}
 										<button
 											onClick={() => {
-												if (
-													status === "confirmed"
-												) {
+												if (status === "confirmed") {
 													sendPickupOtp();
 												} else {
 													sendDropOtp();
@@ -706,7 +727,7 @@ const Page = () => {
 					</div>
 				</div>
 			</motion.div>
-						
+
 			{/* Panel: Mobile or Small Screen View */}
 			<div className="lg:hidden fixed bottom-0 left-0 right-0 z-20 pointer-events-none">
 				<motion.div
@@ -767,7 +788,7 @@ const Page = () => {
 					</div>
 
 					<div className="h-px bg-zinc-100 mx-5" />
-					
+
 					{/* Panel Content: Booking Details, Ride-Chat*/}
 					<div className="flex-1 overflow-y-auto min-h-0">
 						<PanleContent {...panelProps} />
@@ -775,11 +796,9 @@ const Page = () => {
 
 					{/* Pickup/Drop: OTP Verification */}
 					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
-
 						{/* Button: Send Pickup/Drop OTP */}
 						<AnimatePresence mode="wait">
-							{(status === "confirmed" ||
-								status === "started") &&
+							{(status === "confirmed" || status === "started") &&
 								!otpMode && (
 									<motion.button
 										onClick={() => {
@@ -821,8 +840,7 @@ const Page = () => {
 						</AnimatePresence>
 
 						{/* OTP: Verify, Input, Clear, Resend */}
-						{(status === "confirmed" ||
-							status === "started") &&
+						{(status === "confirmed" || status === "started") &&
 							otpMode &&
 							!otpVerified && (
 								<motion.div
@@ -853,7 +871,7 @@ const Page = () => {
 											driver arrives.
 										</p>
 									</div>
-											
+
 									{/* OTP Input Boxes */}
 									<div className="max-w-96 mx-auto grid grid-cols-6 gap-2">
 										{otpDigits.map((digit, idx) => (
@@ -970,9 +988,7 @@ const Page = () => {
 										{/* Resend */}
 										<button
 											onClick={() => {
-												if (
-													status === "confirmed"
-												) {
+												if (status === "confirmed") {
 													sendPickupOtp();
 												} else {
 													sendDropOtp();
