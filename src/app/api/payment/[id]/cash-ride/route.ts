@@ -36,25 +36,25 @@ export async function POST(
 			customer: session.user.id,
 		});
 
-		const allowedStatus = ["awaiting payment"];
+		const allowedStatuses = ["awaiting payment"];
 
-		if (!booking || !allowedStatus.includes(booking.bookingStatus)) {
+		if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
 			return NextResponse.json(
 				{
 					message:
-						"Sorry, for cash ride, customer only allowed to pay after dropped successfully",
+						"Sorry, we were unable to find any pending bookings",
 				},
 				{ status: 400 },
 			);
 		}
 
-		booking.paymentStatus = "requested";
+		booking.paymentStatus = "pending";
 		booking.paymentMode = "cash";
-		booking.bookingStatus = "awaiting payment"
+		booking.bookingStatus = "confirmed"
 		await booking.save();
 
 		return NextResponse.json(
-			{ success: true, message: "waiting for partner confirmation" },
+			{ success: true, message: "cash ride confirmed" },
 			{ status: 200 },
 		);
 	} catch (error) {
@@ -67,3 +67,4 @@ export async function POST(
 		);
 	}
 }
+

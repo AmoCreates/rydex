@@ -1,7 +1,17 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
 import axios from "axios";
-import { ArrowRight, ChevronUp, CircleDashed, MapPin, Zap } from "lucide-react";
+import {
+	ArrowRight,
+	ChevronUp,
+	CircleDashed,
+	HandCoins,
+	IndianRupee,
+	MapPin,
+	Phone,
+	UserRound,
+	Zap,
+} from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
@@ -152,6 +162,7 @@ const Page = () => {
 	const [loadingOtp, setLoadingOtp] = useState(false);
 	const [otpErr, setOtpErr] = useState("");
 	const [otpVerified, setOtpVerified] = useState(false);
+	const [cashRequested, setCashRequested] = useState(false);
 
 	const clearOtpDigits = () => setOtpDigits(Array(6).fill(""));
 
@@ -262,21 +273,24 @@ const Page = () => {
 			);
 
 			if (data.success) {
+				console.log(data);
 				setOtpVerified(true);
-				setStatus("completed");
+				setStatus(data.booking.bookingStatus);
 				setBooking((prev) =>
-					prev ? { ...prev, bookingStatus: "completed" } : prev,
+					prev
+						? { ...prev, bookingStatus: data.booking.bookingStatus }
+						: prev,
 				);
 				setOtpErr("Pickup verified. Ride started.");
 
 				const socket = getSocket();
 				if (driverPos) {
-						socket?.emit("driver-location-update", {
-							bookingId: booking?._id,
-							status: "completed",
-							latitude: driverPos[0],
-							longitude: driverPos[1],
-						});
+					socket?.emit("driver-location-update", {
+						bookingId: booking?._id,
+						status: data.booking.bookingStatus,
+						latitude: driverPos[0],
+						longitude: driverPos[1],
+					});
 				}
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");
@@ -298,6 +312,23 @@ const Page = () => {
 	function maskEmail(email: string | undefined) {
 		return email!.replace(/(?<=^.{2}).+(?=.+@)/, "*****");
 	}
+
+	const handleCashPayment = async () => {
+		if (!cashRequested) return;
+		try {
+			const { data } = await axios.post("/api/payment/cash");
+			console.log(data);
+			if (data.success) {
+				setCashRequested(false);
+				setStatus("completed");
+
+				const socket = getSocket();
+				socket?.emit("cash-received", {bookingId: booking?._id})
+			}
+		} catch (error:any) {
+			console.log(error.response.data.message);
+		}
+	};
 
 	// Fetch Active Ride
 	useEffect(() => {
@@ -399,6 +430,29 @@ const Page = () => {
 		statusRef.current = status;
 		bookingRef.current = booking;
 	}, [status, booking]);
+
+	useEffect(() => {
+		const cashReuqest = async () => {
+			try {
+				const { data } = await axios.get("/api/payment/cash");
+				console.log(data);
+				if (data.success) {
+					setCashRequested(true);
+				}
+			} catch (error: any) {
+				console.log(error.response.data.message);
+			}
+		};
+		cashReuqest();
+	}, [status]);
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on("cash-requested", () => {
+			console.log("requested")
+			setCashRequested(true);
+		})
+	})
 
 	if (loading) {
 		return (
@@ -1034,6 +1088,74 @@ const Page = () => {
 					</div>
 				</motion.div>
 			</div>
+
+			{/* Cash confirmation popup */}
+			{cashRequested && (
+				<AnimatePresence>
+					<div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+						/>
+						<motion.div
+							initial={{ scale: 0.9, opacity: 0, y: 20 }}
+							animate={{ scale: 1, opacity: 1, y: 0 }}
+							exit={{ scale: 0.9, opacity: 0, y: 20 }}
+							className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6"
+						>
+							<div className=" p-2 text-zinc-600 flex text-sm justify-between font-semibold -mt-2 bg-zinc-300 rounded-xl">
+								<h1 className="flex items-center gap-2">
+									<UserRound size={16} />
+									Customer - {booking?.customerName}
+								</h1>
+								<h1 className="flex items-center gap-2">
+									<Phone size={16} /> Mobile -{" "}
+									{booking?.customerMobile}
+								</h1>
+							</div>
+							<div className="flex items-center gap-3">
+								<div
+									className={`p-3 rounded-2xl $bg-green-50 text-green-600`}
+								>
+									<HandCoins size={24} />
+								</div>
+								<div>
+									<div className="flex items-center justify-between">
+										<h3 className="text-xl font-bold">
+											Accept Cash
+										</h3>
+										<div className="flex items-center">
+											<IndianRupee size={15} />
+											<p className="text-2xl font-black">
+												{booking?.fare}
+											</p>
+										</div>
+									</div>
+									<p className="text-sm text-gray-500">
+										This is a confirmation popup. Click Yes
+										if you received the cash successfully
+									</p>
+								</div>
+							</div>
+
+							<div className="flex gap-3 pt-2">
+								<button className="flex-1 py-3 rounded-xl font-semibold text-black bg-gray-300 hover:bg-gray-100 transition-colors cursor-pointer">
+									Not Paid!
+								</button>
+								<button
+									onClick={handleCashPayment}
+									className={`flex-1 py-3 rounded-xl font-semibold text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-black
+									}`}
+								>
+									Yes, Received
+								</button>
+							</div>
+						</motion.div>
+					</div>
+				</AnimatePresence>
+			)}
 		</div>
 	);
 };

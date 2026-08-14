@@ -225,15 +225,16 @@ const Page = () => {
 		}
 	};
 
-	const handleCashPayment = async () => {
+	const handleCashRide = async () => {
 		if (!currBookingId || !payMode || payMode !== "cash") return;
 		try {
 			const { data } = await axios.post(
-				`/api/payment/${currBookingId}/cash-request`,
+				`/api/payment/${currBookingId}/cash-ride`,
 			);
 			console.log(data);
 			if (data.success) {
-				alert(data.message);
+				window.location.href = `/customer/active-ride/${currBookingId}`;
+				setStatus("confirmed")
 			}
 		} catch (error: any) {
 			console.log(error.response.data.message);
@@ -723,7 +724,7 @@ const Page = () => {
 											onClick={
 												payMode === "online"
 													? handleOnlinePayment
-													: handleCashPayment
+													: handleCashRide
 											}
 											whileTap={{ scale: 0.97 }}
 											whileHover={

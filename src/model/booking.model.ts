@@ -11,7 +11,7 @@ export type BookingStatus =
 	| "rejected"
 	| "expired";
 
-export type PaymentStatus = "idle" | "pending" | "paid" | "failed";
+export type PaymentStatus = "idle" | "requested" | "pending" | "paid" | "failed";
 
 export interface IBooking extends mongoose.Document {
 	customer: mongoose.Types.ObjectId;
@@ -147,7 +147,7 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 
 		paymentStatus: {
 			type: String,
-			enum: ["idle", "pending", "paid", "failed"],
+			enum: ["idle", "requested", "pending", "paid", "failed"],
 			default: "pending",
 		},
 

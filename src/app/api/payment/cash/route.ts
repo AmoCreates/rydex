@@ -25,15 +25,10 @@ export async function POST() {
 			driver: partner._id,
 			bookingStatus: "awaiting payment",
 			paymentMode: "cash",
-			paymentStatus: "pending"
+			paymentStatus: "requested",
 		});
 
-
-		if (
-			!booking ||
-			booking.paymentMode !== "cash" ||
-			booking.paymentStatus !== "pending"
-		) {
+		if (!booking) {
 			return NextResponse.json(
 				{ success: false, message: "no cash request found" },
 				{ status: 400 },
@@ -43,7 +38,7 @@ export async function POST() {
 		const adminCommission = Number(booking.fare * 0.1);
 		const partnerAmount = Number(booking.fare - adminCommission);
 
-		booking.bookingStatus = "confirmed";
+		booking.bookingStatus = "completed";
 		booking.paymentStatus = "paid";
 		booking.adminCommission = adminCommission;
 		booking.partnerAmount = partnerAmount;
@@ -93,23 +88,22 @@ export async function GET() {
 			driver: partner._id,
 			bookingStatus: "awaiting payment",
 			paymentMode: "cash",
-			paymentStatus: "pending"
+			paymentStatus: "requested",
 		});
 
-		if (
-			booking &&
-			booking.bookingStatus === "awaiting payment" &&
-			booking.paymentMode === "cash" &&
-			booking.paymentStatus === "pending"
-		) {
-	
+		if(!booking) {
+			return NextResponse.json({success: false, message: "no cash request found"}, {status: 200})
+		}
+
+
+
 			return NextResponse.json(
 				{ success: true, booking },
 				{ status: 200 },
 			);
 		}
 
-		return NextResponse.json({ message: "no cash payment requested" });
+		return NextResponse.json({ success: false, message: "no cash payment requested" });
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
@@ -118,4 +112,3 @@ export async function GET() {
 		);
 	}
 }
-

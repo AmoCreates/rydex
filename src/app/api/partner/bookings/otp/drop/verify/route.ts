@@ -64,13 +64,14 @@ export async function POST(req: Request) {
 			});
 		}
 
-		booking.bookingStatus = "completed";
+
+		booking.bookingStatus = booking.paymentStatus === "paid" ? "completed" : "awaiting payment";
 		booking.dropOtp = undefined;
 		booking.dropOtpExpires = undefined;
 		await booking.save();
 
 		return NextResponse.json(
-			{ success: true, message: "drop otp verified successfully" },
+			{ success: true, booking, message: "drop otp verified successfully" },
 			{ status: 200 },
 		);
 	} catch (error) {

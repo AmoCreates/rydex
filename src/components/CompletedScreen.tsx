@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { Bike, CheckCircle2, IndianRupee, Star, UserRound } from "lucide-react";
+import { Bike, CheckCircle2, IndianRupee, UserRound } from "lucide-react";
 import { PaymentStatus } from "@/model/booking.model";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import axios from "axios";
 
 const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
+	requested: { label: "N/A", cls: "bg-blue-100 text-blue-700" },
 	pending: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
 	paid: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
 	failed: { label: "Failed", cls: "bg-red-100 text-red-700" },
@@ -24,7 +25,7 @@ const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
 			return;
 		}
 		try {
-			const { data } = await axios.post("/api/bookings/review", {
+			await axios.post("/api/bookings/review", {
 				id: booking._id,
 				review: reviewCount,
 			});
@@ -91,9 +92,9 @@ const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
 								Payment Status
 							</span>
 							<span
-								className={`px-2.5 py-1 rounded-full font-semibold text-[11px] ${PAYMENT_BADGE[booking.paymentStatus]?.cls}`}
+								className={`px-2.5 py-1 rounded-full font-semibold text-[11px] ${PAYMENT_BADGE[booking.paymentStatus as PaymentStatus]?.cls ?? "bg-zinc-700 text-zinc-300"}`}
 							>
-								{PAYMENT_BADGE[booking.paymentStatus]?.label ??
+								{PAYMENT_BADGE[booking.paymentStatus as PaymentStatus]?.label ??
 									booking.paymentStatus}
 							</span>
 						</div>

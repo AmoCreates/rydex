@@ -1,9 +1,9 @@
 "use client";
 import LiveRideMap from "@/components/LiveRideMap";
 import axios from "axios";
-import { ChevronUp, CircleDashed, Zap } from "lucide-react";
+import { ChevronUp, CircleDashed, HandCoins, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import PanleContent from "@/components/PanleContent";
 import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
@@ -123,6 +123,7 @@ const getStatusStyle = (status: string | undefined) => {
 
 const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
+	requested: { label: "Cash Request", cls: "bg-blue-100 text-blue-700" },
 	pending: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
 	paid: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
 	failed: { label: "Failed", cls: "bg-red-100 text-red-700" },
@@ -140,7 +141,24 @@ const Page = () => {
 	const [estPickUpTime, setEstPickUpTime] = useState(0);
 	const [estDropTime, setEstDropTime] = useState(0);
 	const [expanded, setExpanded] = useState(false);
+	const [cashRequested, setCashRequested] = useState(false);
 	const { id } = useParams();
+
+	const hanldeCashRequest = async () => {
+		try {
+			setCashRequested(true);
+			const { data } = await axios.post(
+				`/api/payment/${id}/cash-request`,
+			);
+			console.log(data);
+			if (data.success) {
+				const socket = getSocket();
+				socket?.emit("cash-request", { bookingId: id });
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	};
 
 	useEffect(() => {
 		const getActiveRides = async () => {
@@ -180,12 +198,22 @@ const Page = () => {
 		if (!socket) return;
 		socket.connect();
 		socket.emit("join-ride", id);
-		const handler = async ({ latitude, longitude, bStatus }: { latitude: number; longitude: number; bStatus: BookingStatus; }) => {
+		const handler = async ({
+			latitude,
+			longitude,
+			bStatus,
+		}: {
+			latitude: number;
+			longitude: number;
+			bStatus: BookingStatus;
+		}) => {
 			setDriverPos([latitude, longitude]);
-			setStatus(bStatus)
+			setStatus(bStatus);
 			setBooking((prev) =>
-					prev ? { ...prev, bookingStatus: bStatus as BookingStatus } : prev,
-				);
+				prev
+					? { ...prev, bookingStatus: bStatus as BookingStatus }
+					: prev,
+			);
 		};
 
 		socket.on("driver-location", handler);
@@ -194,6 +222,16 @@ const Page = () => {
 			socket.off("driver-location", handler);
 		};
 	}, [id, status]);
+
+	useEffect(() => {
+		const socket = getSocket();
+		socket?.on("cash-received", () => {
+			setStatus("completed");
+			setBooking((prev) =>
+				prev ? { ...prev, bookingStatus: "completed", paymentStatus: "paid" } : prev,
+			);
+		});
+	});
 
 	if (loading) {
 		return (
@@ -208,17 +246,15 @@ const Page = () => {
 		);
 	}
 
-		if(status === "completed" && booking) {
-		return <CompletedScreen booking={booking} role="customer"/>
+	if (status === "completed" && booking && booking.paymentStatus === "paid") {
+		return <CompletedScreen booking={booking} role="customer" />;
 	}
 
 	const cfg = getStatusStyle(booking?.bookingStatus ?? "confirmed");
 	const isActive = ["confirmed", "started"].includes(status);
 	const paymentStatus = PAYMENT_BADGE[booking?.paymentStatus ?? "pending"];
-	const displayTime =
-		status === "confirmed" ? estPickUpTime : estDropTime;
-	const displayDistance =
-		status === "confirmed" ? dstToPickUp : dstToDrop;
+	const displayTime = status === "confirmed" ? estPickUpTime : estDropTime;
+	const displayDistance = status === "confirmed" ? dstToPickUp : dstToDrop;
 	const panelProps = {
 		isActive,
 		displayDistance,
@@ -359,6 +395,28 @@ const Page = () => {
 
 					<div className="flex-1 overflow-y-auto min-h-0">
 						<PanleContent {...panelProps} />
+					</div>
+					<div className="shrink-0 border-t border-zinc-100 bg-white px-3 py-4">
+						<AnimatePresence mode="wait">
+							{status === "awaiting payment" && (
+								<motion.button
+									onClick={hanldeCashRequest}
+									key="payment"
+									initial={{ opacity: 0, y: 6 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -6 }}
+									className={`w-full ${cashRequested ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+									disabled={cashRequested}
+								>
+									{!cashRequested && <HandCoins size={16} />}{" "}
+									<p>
+										{cashRequested
+											? "Waiting for Ryder Confirmation..."
+											: "Pay Cash"}
+									</p>
+								</motion.button>
+							)}
+						</AnimatePresence>
 					</div>
 				</motion.div>
 			</div>
