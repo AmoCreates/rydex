@@ -20,6 +20,7 @@ import { AppDispatch, RootState } from "@/Toolkit/store";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import AdminEarning from "./AdminEarning";
+import AdminStatusOverview from "./AdminStatusOverview";
 
 type Stats = {
 	totalPartners: number;
@@ -168,8 +169,13 @@ const AdminDashboard = () => {
 					/>
 				</section>
 
+				<AdminStatusOverview
+					approved={stats?.totalApprovedPartners || 0}
+					pending={stats?.totalPendingPartners || 0}
+					rejected={stats?.totalRejectedPartners || 0}
+				/>
 				<AdminEarning />
-				
+
 				<section className="bg-white rounded-2xl flex flex-wrap gap-2 px-2 py-3 overflow-hidden shadow-2xl">
 					<TabButton
 						icon={<RiGroupLine size={16} />}

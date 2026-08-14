@@ -101,7 +101,7 @@ const VehicleCard = ({
 						size={9}
 						className="fill-yellow-400 text-yellow-500"
 					/>
-					4.8
+					{(!vehicle.rating || vehicle.rating === 0) ? "0" : vehicle.rating?.toFixed(1) }
 				</div>
 			</div>
 

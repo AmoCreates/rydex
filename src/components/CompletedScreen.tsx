@@ -1,8 +1,11 @@
 "use client";
 import { motion } from "motion/react";
-import { Bike, CheckCircle2, IndianRupee, UserRound } from "lucide-react";
+import { Bike, CheckCircle2, IndianRupee, Star, UserRound } from "lucide-react";
 import { PaymentStatus } from "@/model/booking.model";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { RiStarFill, RiStarLine } from "@remixicon/react";
+import axios from "axios";
 
 const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
@@ -12,7 +15,25 @@ const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 };
 
 const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
-  const router = useRouter();
+	const router = useRouter();
+	const [reviewCount, setReviewCount] = useState(booking.reviewed);
+
+	const handleSubmitReview = async () => {
+		if (reviewCount == 0 || booking.reviewed > 0) {
+			router.push("/");
+			return;
+		}
+		try {
+			const { data } = await axios.post("/api/bookings/review", {
+				id: booking._id,
+				review: reviewCount,
+			});
+			console.log(data);
+		} catch (error: any) {
+			console.log(error.response.data.message);
+		}
+	};
+
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
@@ -77,8 +98,8 @@ const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
 							</span>
 						</div>
 					</div>
-          
-          {/* About Customer */}
+
+					{/* About Customer */}
 					{booking.customer && role === "driver" && (
 						<div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center gap-3 mb-3">
 							<div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
@@ -98,27 +119,113 @@ const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
 						</div>
 					)}
 
-          {/* About Driver */}
+					{/* About Driver */}
 					{booking.driver && role === "customer" && (
-						<div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center gap-3 mb-3">
-							<div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
-								<Bike
-									size={20}
-									className="text-zinc-400"
-								/>
+						<div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex items-center justify-between mb-3">
+							<div className="flex gap-3">
+								<div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center shrink-0">
+									<Bike size={20} className="text-zinc-400" />
+								</div>
+								<div>
+									<p className="text-zinc-500 text-[10px] uppercase tracking-wider font-semibold">
+										Driver
+									</p>
+									<p className="text-white text-sm font-bold">
+										{booking.driver.name ?? "Customer"}
+									</p>
+								</div>
 							</div>
-							<div>
-								<p className="text-zinc-500 text-[10px] uppercase tracking-wider font-semibold">
-									Driver
-								</p>
-								<p className="text-white text-sm font-bold">
-									{booking.driver.name ?? "Customer"}
-								</p>
+							<div className="text-zinc-400 bg-zinc-800 text-xs py-1.5 rounded-xl px-2.5">
+								{booking.vehicle.vehicleNumber ?? "ABZYXXXX00"}
 							</div>
 						</div>
 					)}
 
-          <button onClick={() => router.push('/')} className="w-full border border-zinc-700 text-zinc-400 py-3 rounded-2xl text-sm font-semibold hover:bg-zinc-900 transition-colors cursor-pointer">Back To Home</button>
+					{/* Pickup Drop Address */}
+					<div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden mb-3">
+						<div className="flex gap-3 p-4 border-b border-zinc-800">
+							<div className="flex flex-col items-center shrink-0 pt-1">
+								<div className="w-2 h-2 rounded-full bg-zinc-400 shadow-sm" />
+								<div
+									className="w-px bg-zinc-400 mt-1"
+									style={{ height: 20 }}
+								/>
+							</div>
+
+							<div className="flex-1 min-w-0">
+								<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+									Pick Up
+								</p>
+								<p className="text-sm text-white leading-snug">
+									{booking?.pickUpAddress}
+								</p>
+							</div>
+						</div>
+
+						<div className="flex gap-3 p-4">
+							<div className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm" />
+
+							<div className="flex-1 min-w-0">
+								<p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">
+									Drop
+								</p>
+								<p className="text-sm text-white leading-snug">
+									{booking?.dropAddress}
+								</p>
+							</div>
+						</div>
+					</div>
+
+					{/* Rating Section for Customer */}
+					{booking.customer && role === "customer" && (
+						<div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 mb-3">
+							<p className="text-zinc-500 text-sm text-center font-semibold">
+								{booking.reviewed > 0
+									? "Your shared experience"
+									: "How was your experience?"}
+							</p>
+
+							<div className="flex mt-2.5 justify-center gap-2 overflow-x-hidden">
+								{[1, 2, 3, 4, 5].map((c) => (
+									<button
+										onClick={() => {
+											if (reviewCount === c) {
+												setReviewCount(0);
+											} else {
+												setReviewCount(c);
+											}
+										}}
+										key={c}
+										className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 cursor-pointer ${reviewCount >= c ? "bg-yellow-50" : "bg-zinc-800"}`}
+										disabled={booking.reviewed > 0}
+									>
+										{reviewCount >= c ? (
+											<RiStarFill
+												size={20}
+												className="text-amber-400"
+											/>
+										) : (
+											<RiStarLine
+												size={20}
+												className="text-zinc-400"
+											/>
+										)}
+									</button>
+								))}
+							</div>
+						</div>
+					)}
+
+					<button
+						onClick={handleSubmitReview}
+						className="w-full bg-white border border-zinc-700 text-zinc-950 py-3 rounded-2xl text-sm font-semibold hover:bg-white/90 cursor-pointer active:scale-97 transition-all"
+					>
+						{booking.reviewed > 0
+							? "Back To Home"
+							: reviewCount === 0
+								? "Back To Home"
+								: "Submit Review & Back To Home"}
+					</button>
 				</motion.div>
 			</div>
 		</motion.div>

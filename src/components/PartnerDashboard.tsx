@@ -21,6 +21,7 @@ import ActionCard from "./ActionCard";
 import axios from "axios";
 import { IVehicle } from "@/model/vehicle.model";
 import { IBooking } from "@/model/booking.model";
+import PartnerEarning from "./PartnerEarning";
 
 type Step = {
 	id: number;
@@ -249,11 +250,14 @@ const PartnerDashboard = () => {
 							</button>
 						</motion.div>
 					)}
+
+					
+				<PartnerEarning />
 			</div>
 
 			{/* Cash confirmation popup */}
-			<AnimatePresence>
-				{cashRequested && (
+			{cashRequested && (
+				<AnimatePresence>
 					<div className="fixed inset-0 z-100 flex items-center justify-center p-4">
 						<motion.div
 							initial={{ opacity: 0 }}
@@ -317,8 +321,8 @@ const PartnerDashboard = () => {
 							</div>
 						</motion.div>
 					</div>
-				)}
-			</AnimatePresence>
+				</AnimatePresence>
+			)}
 		</div>
 	);
 };

@@ -9,6 +9,7 @@ import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { getSocket } from "@/lib/socket";
 import CompletedScreen from "@/components/CompletedScreen";
+import { RiSendPlane2Fill, RiSendPlaneFill } from "@remixicon/react";
 
 interface IBooking {
 	_id: string;
@@ -508,47 +509,56 @@ const Page = () => {
 
 					{/* Panel Content: OTP Verification */}
 					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
-						{/* Button: Send Pickup/Drop OTP */}
+						{/* Button: Send Pickup OTP */}
 						<AnimatePresence mode="wait">
-							{(status === "confirmed" || status === "started") &&
-								!otpMode && (
-									<motion.button
-										onClick={() => {
-											console.log(status);
-											if (status === "confirmed") {
-												sendPickupOtp();
-											} else {
-												sendDropOtp();
-											}
-										}}
-										key={
-											status === "confirmed"
-												? "arrived"
-												: "dropped"
-										}
-										initial={{ opacity: 0, y: 6 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -6 }}
-										className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
-										disabled={loadingOtp}
-									>
-										{!loadingOtp && <MapPin size={16} />}{" "}
-										<p>
-											{status === "confirmed" &&
-												(loadingOtp
-													? "Sending Pikcup OTP..."
-													: "I've Arrived at Pickup")}
-											{status === "started" &&
-												(loadingOtp
-													? "Sending Drop OTP..."
-													: "Mark As Dropped")}
-										</p>
-										<ArrowRight
-											size={15}
-											className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
-										/>
-									</motion.button>
-								)}
+							{status === "confirmed" && !otpMode && (
+								<motion.button
+									onClick={sendPickupOtp}
+									key="arrived"
+									initial={{ opacity: 0, y: 6 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -6 }}
+									className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+									disabled={loadingOtp}
+								>
+									{!loadingOtp && <MapPin size={16} />}{" "}
+									<p>
+										{loadingOtp
+											? "Sending Pikcup OTP..."
+											: "I've Arrived at Pickup"}
+									</p>
+									<ArrowRight
+										size={15}
+										className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
+									/>
+								</motion.button>
+							)}
+
+							{/* Button: Send Drop OTP */}
+							{status === "started" && !otpMode && (
+								<motion.button
+									onClick={sendDropOtp}
+									key="dropped"
+									initial={{ opacity: 0, y: 6 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -6 }}
+									className={`w-full ${loadingOtp ? "bg-emerald-300" : "bg-emerald-600 hover:bg-emerald-500 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+									disabled={loadingOtp}
+								>
+									{!loadingOtp && (
+										<RiSendPlaneFill size={16} />
+									)}{" "}
+									<p>
+										{loadingOtp
+											? "Sending Drop OTP..."
+											: "Mark As Dropped"}
+									</p>
+									<ArrowRight
+										size={15}
+										className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
+									/>
+								</motion.button>
+							)}
 						</AnimatePresence>
 
 						{/* OTP: Verify, Input, Clear, Resend */}
@@ -796,47 +806,56 @@ const Page = () => {
 
 					{/* Pickup/Drop: OTP Verification */}
 					<div className="shrink-0 border-t border-zinc-100 bg-white px-5 py-4">
-						{/* Button: Send Pickup/Drop OTP */}
+						{/* Button: Send Pickup OTP */}
 						<AnimatePresence mode="wait">
-							{(status === "confirmed" || status === "started") &&
-								!otpMode && (
-									<motion.button
-										onClick={() => {
-											console.log(status);
-											if (status === "confirmed") {
-												sendPickupOtp();
-											} else {
-												sendDropOtp();
-											}
-										}}
-										key={
-											status === "confirmed"
-												? "arrived"
-												: "dropped"
-										}
-										initial={{ opacity: 0, y: 6 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -6 }}
-										className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
-										disabled={loadingOtp}
-									>
-										{!loadingOtp && <MapPin size={16} />}{" "}
-										<p>
-											{status === "confirmed" &&
-												(loadingOtp
-													? "Sending Pikcup OTP..."
-													: "I've Arrived at Pickup")}
-											{status === "started" &&
-												(loadingOtp
-													? "Sending Drop OTP"
-													: "Mark As Dropped")}
-										</p>
-										<ArrowRight
-											size={15}
-											className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
-										/>
-									</motion.button>
-								)}
+							{status === "confirmed" && !otpMode && (
+								<motion.button
+									onClick={sendPickupOtp}
+									key="arrived"
+									initial={{ opacity: 0, y: 6 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -6 }}
+									className={`w-full ${loadingOtp ? "bg-zinc-600" : "bg-zinc-900 hover:bg-zinc-800 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+									disabled={loadingOtp}
+								>
+									{!loadingOtp && <MapPin size={16} />}{" "}
+									<p>
+										{loadingOtp
+											? "Sending Pikcup OTP..."
+											: "I've Arrived at Pickup"}
+									</p>
+									<ArrowRight
+										size={15}
+										className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
+									/>
+								</motion.button>
+							)}
+
+							{/* Button: Send Drop OTP */}
+							{status === "started" && !otpMode && (
+								<motion.button
+									onClick={sendDropOtp}
+									key="dropped"
+									initial={{ opacity: 0, y: 6 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -6 }}
+									className={`w-full ${loadingOtp ? "bg-emerald-300" : "bg-emerald-600 hover:bg-emerald-500 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+									disabled={loadingOtp}
+								>
+									{!loadingOtp && (
+										<RiSendPlaneFill size={16} />
+									)}{" "}
+									<p>
+										{loadingOtp
+											? "Sending Drop OTP..."
+											: "Mark As Dropped"}
+									</p>
+									<ArrowRight
+										size={15}
+										className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
+									/>
+								</motion.button>
+							)}
 						</AnimatePresence>
 
 						{/* OTP: Verify, Input, Clear, Resend */}

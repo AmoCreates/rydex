@@ -52,6 +52,8 @@ export interface IBooking extends mongoose.Document {
 	dropOtp: string;
 	dropOtpExpires: Date;
 
+	reviewed?: number;
+
 	createdAt?: Date;
 	updatedAt?: Date;
 }
@@ -174,6 +176,11 @@ const bookingSchema = new mongoose.Schema<IBooking>(
 
 		pickUpOtpExpires: Date,
 		dropOtpExpires: Date,
+
+		reviewed: {
+			type: Number,
+			default: 0
+		}
 	},
 	{ timestamps: true },
 );

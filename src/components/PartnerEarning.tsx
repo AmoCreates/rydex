@@ -10,12 +10,12 @@ type Earning = {
 	earnings: number;
 };
 
-const AdminEarning = () => {
+const PartnerEarning = () => {
 	const [earningData, setEarningData] = useState<Earning[]>([]);
 	useEffect(() => {
 		const fetchEarning = async () => {
 			try {
-				const { data } = await axios.get("/api/admin/earning");
+				const { data } = await axios.get("/api/partner/earning");
 				console.log(data);
 				const SevenDayEarnings: Earning[] = Array.isArray(data)
 					? data.slice(-7)
@@ -91,7 +91,7 @@ const AdminEarning = () => {
 			<div className="flex items-start justify-between mb-6 flex-wrap gap-4">
 				<div>
 					<span className="inline-block text-[11px] font-semibold tracking-widest uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-2">
-						Admin Earnings
+						Partner Earnings
 					</span>
 					<h2 className="text-xl font-bold text-gray-900 tracking-tight">
 						Daily Earnings
@@ -204,4 +204,4 @@ const AdminEarning = () => {
 	);
 };
 
-export default AdminEarning;
+export default PartnerEarning;
