@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 		const existingBooking = await Booking.findOne({
 			customer: session.user.id,
 			bookingStatus: {
-				$in: ["idle", "cancelled"],
+				$in: ["idle"],
 			},
 		});
 
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
 				{ new: true }
 			);
 		} else {
-			// Create new booking if no idle/cancelled booking exists
+			// Create new booking if no idle booking exists
 			booking = await Booking.create({
 				customer: session.user.id,
 				driver: driver._id,

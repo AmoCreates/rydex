@@ -37,7 +37,7 @@ export async function POST(
 			customer: session.user.id,
 		});
 
-		const allowedStatuses = ["requested", "started"];
+		const allowedStatuses = ["requested"];
 
 		if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
 			return NextResponse.json(
@@ -49,19 +49,14 @@ export async function POST(
 			);
 		}
 
-		if (booking.bookingStatus === "requested") {
-			booking.bookingStatus = "idle";
-			booking.paymentStatus = "idle"
-		} else {
-			booking.bookingStatus = "cancelled";
-		}
+		booking.bookingStatus = "cancelled";
 		await booking.save();
 
 		await axios.post(`${process.env.NEXT_PUBLIC_SOCKET_URL}/emit`, {
-			event:"cancel-booking",
-			userId:booking.driver,
-			data:booking._id
-		})
+			event: "cancel-booking",
+			userId: booking.driver,
+			data: booking._id,
+		});
 
 		return NextResponse.json(
 			{ message: "booking cancelled" },
