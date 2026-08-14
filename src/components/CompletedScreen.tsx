@@ -28,7 +28,7 @@ const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
 				id: booking._id,
 				review: reviewCount,
 			});
-			console.log(data);
+			router.push('/');
 		} catch (error: any) {
 			console.log(error.response.data.message);
 		}
