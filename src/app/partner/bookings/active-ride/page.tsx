@@ -271,12 +271,12 @@ const Page = () => {
 
 				const socket = getSocket();
 				if (driverPos) {
-					socket?.emit("driver-location-update", {
-						bookingId: booking?._id,
-						status: "started",
-						latitude: driverPos[0],
-						longitude: driverPos[1],
-					});
+						socket?.emit("driver-location-update", {
+							bookingId: booking?._id,
+							status: "completed",
+							latitude: driverPos[0],
+							longitude: driverPos[1],
+						});
 				}
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");

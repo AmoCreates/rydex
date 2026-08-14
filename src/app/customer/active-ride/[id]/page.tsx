@@ -180,10 +180,12 @@ const Page = () => {
 		if (!socket) return;
 		socket.connect();
 		socket.emit("join-ride", id);
-		const handler = ({ latitude, longitude, status }: { latitude: number; longitude: number; status: string; }) => {
-			console.log("receving status", status)
+		const handler = async ({ latitude, longitude, bStatus }: { latitude: number; longitude: number; bStatus: BookingStatus; }) => {
 			setDriverPos([latitude, longitude]);
-			setStatus(status)
+			setStatus(bStatus)
+			setBooking((prev) =>
+					prev ? { ...prev, bookingStatus: bStatus as BookingStatus } : prev,
+				);
 		};
 
 		socket.on("driver-location", handler);
@@ -191,7 +193,7 @@ const Page = () => {
 		return () => {
 			socket.off("driver-location", handler);
 		};
-	}, [id]);
+	}, [id, status]);
 
 	if (loading) {
 		return (
