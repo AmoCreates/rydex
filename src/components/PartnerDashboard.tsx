@@ -22,6 +22,7 @@ import axios from "axios";
 import { IVehicle } from "@/model/vehicle.model";
 import { IBooking } from "@/model/booking.model";
 import PartnerEarning from "./PartnerEarning";
+import { getSocket } from "@/lib/socket";
 
 type Step = {
 	id: number;
@@ -91,6 +92,24 @@ const PartnerDashboard = () => {
 			}
 		} catch (error) {
 			console.log(error);
+		}
+	};
+
+	const cashRequestedDeclined = async () => {
+		try {
+			const { data } = await axios.post(
+				`/api/payment/${cashRequestedBooking!._id}/cash-decline`,
+			);
+			if (data.success) {
+				console.log(data);
+				setCashRequested(false);
+				const socket = getSocket();
+				socket?.emit("cash-declined", {
+					bookingId: cashRequestedBooking!._id,
+				});
+			}
+		} catch (error: any) {
+			console.log(error.response.data.message);
 		}
 	};
 
@@ -251,7 +270,6 @@ const PartnerDashboard = () => {
 						</motion.div>
 					)}
 
-					
 				<PartnerEarning />
 			</div>
 
@@ -308,7 +326,10 @@ const PartnerDashboard = () => {
 							</div>
 
 							<div className="flex gap-3 pt-2">
-								<button className="flex-1 py-3 rounded-xl font-semibold text-black bg-gray-300 hover:bg-gray-100 transition-colors cursor-pointer">
+								<button
+									className="flex-1 py-3 rounded-xl font-semibold text-black bg-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
+									onClick={cashRequestedDeclined}
+								>
 									Not Paid!
 								</button>
 								<button

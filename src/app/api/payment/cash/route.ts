@@ -91,19 +91,14 @@ export async function GET() {
 			paymentStatus: "requested",
 		});
 
-		if(!booking) {
-			return NextResponse.json({success: false, message: "no cash request found"}, {status: 200})
-		}
-
-
-
+		if (!booking) {
 			return NextResponse.json(
-				{ success: true, booking },
+				{ success: false, message: "no cash request found" },
 				{ status: 200 },
 			);
 		}
 
-		return NextResponse.json({ success: false, message: "no cash payment requested" });
+		return NextResponse.json({ success: true, booking }, { status: 200 });
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(

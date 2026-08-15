@@ -247,18 +247,13 @@ const Page = () => {
 			console.log("socket data", data);
 			setStatus(data);
 		});
-		return () => {
-			socket?.off("accept-booking");
-		};
-	});
 
-	useEffect(() => {
-		const socket = getSocket();
 		socket?.on("reject-booking", (data) => {
 			console.log("socket data", data);
 			setStatus(data);
 		});
 		return () => {
+			socket?.off("accept-booking");
 			socket?.off("reject-booking");
 		};
 	});

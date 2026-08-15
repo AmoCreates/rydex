@@ -123,7 +123,7 @@ const getStatusStyle = (status: string | undefined) => {
 
 const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
-	requested: { label: "Cash Request", cls: "bg-blue-100 text-blue-700" },
+	requested: { label: "Cash Requested", cls: "bg-blue-100 text-blue-700" },
 	pending: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
 	paid: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
 	failed: { label: "Failed", cls: "bg-red-100 text-red-700" },
@@ -231,6 +231,21 @@ const Page = () => {
 				prev ? { ...prev, bookingStatus: "completed", paymentStatus: "paid" } : prev,
 			);
 		});
+
+		socket?.on("cash-declined", () => {
+			console.log("cash-declined socket")
+			setStatus("awaiting payment");
+			setCashRequested(false)
+			setBooking((prev) =>
+				prev ? { ...prev, bookingStatus: "awaiting payment", paymentStatus: "pending" } : prev,
+			);
+		});
+
+		return () => {
+			socket?.off("cash-received");
+			socket?.off("cash-declined");
+		};
+		
 	});
 
 	if (loading) {

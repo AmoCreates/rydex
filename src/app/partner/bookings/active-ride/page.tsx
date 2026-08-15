@@ -134,6 +134,10 @@ const getStatusStyle = (status: string | undefined) => {
 
 const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
 	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
+	requested: {
+		label: "Cash Requested",
+		cls: "bg-blue-100 text-blue-700",
+	},
 	pending: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
 	paid: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
 	failed: { label: "Failed", cls: "bg-red-100 text-red-700" },
@@ -323,9 +327,25 @@ const Page = () => {
 				setStatus("completed");
 
 				const socket = getSocket();
-				socket?.emit("cash-received", {bookingId: booking?._id})
+				socket?.emit("cash-received", { bookingId: booking?._id });
 			}
-		} catch (error:any) {
+		} catch (error: any) {
+			console.log(error.response.data.message);
+		}
+	};
+
+	const cashRequestedDeclined = async () => {
+		try {
+			const { data } = await axios.post(
+				`/api/payment/${booking!._id}/cash-decline`,
+			);
+			if (data.success) {
+				console.log(data);
+				setCashRequested(false);
+				const socket = getSocket();
+				socket?.emit("cash-declined", { bookingId: booking!._id });
+			}
+		} catch (error: any) {
 			console.log(error.response.data.message);
 		}
 	};
@@ -449,10 +469,14 @@ const Page = () => {
 	useEffect(() => {
 		const socket = getSocket();
 		socket?.on("cash-requested", () => {
-			console.log("requested")
+			console.log("requested");
 			setCashRequested(true);
-		})
-	})
+		});
+
+		return () => {
+			socket?.off("cash-requested");
+		};
+	});
 
 	if (loading) {
 		return (
@@ -596,7 +620,7 @@ const Page = () => {
 									initial={{ opacity: 0, y: 6 }}
 									animate={{ opacity: 1, y: 0 }}
 									exit={{ opacity: 0, y: -6 }}
-									className={`w-full ${loadingOtp ? "bg-emerald-300" : "bg-emerald-600 hover:bg-emerald-500 active:scale-97 cursor-pointer"}  text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+									className={`w-full ${loadingOtp ? "bg-emerald-300" : "bg-emerald-600 hover:bg-emerald-500 active:scale-97 cursor-pointer"} text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
 									disabled={loadingOtp}
 								>
 									{!loadingOtp && (
@@ -1141,7 +1165,10 @@ const Page = () => {
 							</div>
 
 							<div className="flex gap-3 pt-2">
-								<button className="flex-1 py-3 rounded-xl font-semibold text-black bg-gray-300 hover:bg-gray-100 transition-colors cursor-pointer">
+								<button
+									className="flex-1 py-3 rounded-xl font-semibold text-black bg-gray-300 hover:bg-gray-100 transition-colors cursor-pointer"
+									onClick={cashRequestedDeclined}
+								>
 									Not Paid!
 								</button>
 								<button
