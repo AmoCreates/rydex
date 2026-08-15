@@ -11,8 +11,9 @@ export async function POST(req: NextRequest) {
 		await dbConnect();
 
 		const session = await auth();
+		const customerId = session?.user?.id ? String(session.user.id) : null;
 
-		if (!session || !session.user?.email || session.user.role !== "customer") {
+		if (!session || !session.user?.email || !customerId || session.user.role !== "customer") {
 			return NextResponse.json(
 				{ message: "unauthorized, please log in to book ride" },
 				{ status: 401 },
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		const customerBooking = await Booking.findOne({
-			customer: session.user.id,
+			customer: customerId,
 			bookingStatus: {
 				$in: ["requested", "awaiting payment", "confirmed", "started"],
 			},
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
 
 		// Check if there's an idle or cancelled booking to update
 		const existingBooking = await Booking.findOne({
-			customer: session.user.id,
+			customer: customerId,
 			bookingStatus: {
 				$in: ["idle"],
 			},
@@ -133,7 +134,7 @@ export async function POST(req: NextRequest) {
 		} else {
 			// Create new booking if no idle booking exists
 			booking = await Booking.create({
-				customer: session.user.id,
+				customer: customerId,
 				driver: driver._id,
 				vehicle: vehicleId,
 				pickUpAddress,

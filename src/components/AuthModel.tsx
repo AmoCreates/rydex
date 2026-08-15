@@ -32,15 +32,28 @@ const AuthModel = ({ open, onClose }: Props) => {
 			return;
 		}
 
+		const emailValue = String(email).trim();
+		const passwordValue = String(password);
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+			setErr("Please enter a valid email address");
+			return;
+		}
+
+		if (passwordValue.length < 6) {
+			setErr("Password must be at least 6 characters long");
+			return;
+		}
+
 		setLoading(true);
 		setErr("");
 
 		try {
-			setEmail(email as string);
+			setEmail(emailValue);
 			const response = await axios.post("/api/auth/signup", {
 				name,
-				email,
-				password,
+				email: emailValue,
+				password: passwordValue,
 			});
 			if (response.status == 201) {
 				setStep("otp");
@@ -65,26 +78,46 @@ const AuthModel = ({ open, onClose }: Props) => {
 			return;
 		}
 
+		const emailValue = String(email).trim();
+		const passwordValue = String(password);
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+			setErr("Please enter a valid email address");
+			return;
+		}
+
+		if (passwordValue.length < 6) {
+			setErr("Password must be at least 6 characters long");
+			return;
+		}
+
 		setLoading(true);
 		setErr("");
 		try {
 			const res = await signIn("credentials", {
-				email,
-				password,
+				email: emailValue,
+				password: passwordValue,
 				redirect: false,
 			});
+
+			if (res?.error) {
+				setErr(
+					res.error === "CredentialsSignin"
+						? "Invalid email or password"
+						: res.error.replace(/[-_]/g, " ") || "Login failed",
+				);
+				return;
+			}
+
 			if (res?.ok) {
 				onClose();
 				router.push("/");
-			} else {
-				setErr(
-					res?.error === "CredentialsSignin"
-						? "Invalid email or password"
-						: res?.error || "Login failed",
-				);
+				return;
 			}
+
+			setErr("Login failed");
 		} catch (error: unknown | any) {
-			console.log(error);
+			setErr(error?.message || "Login failed");
 		} finally {
 			setLoading(false);
 		}
@@ -98,6 +131,11 @@ const AuthModel = ({ open, onClose }: Props) => {
 	};
 
 	async function verifyEmail() {
+		if (otp.some((digit) => digit.trim() === "")) {
+			setErr("Please enter the complete 6-digit OTP");
+			return;
+		}
+
 		setErr("");
 		setLoading(true);
 
