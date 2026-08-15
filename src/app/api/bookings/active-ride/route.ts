@@ -102,7 +102,7 @@ export async function GET() {
 		if (!booking) {
 			return NextResponse.json(
 				{ message: "no previous booking found" },
-				{ status: 200 },
+				{ status: 404 },
 			);
 		}
 

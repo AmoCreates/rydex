@@ -12,8 +12,6 @@ import { RiArrowRightSLine } from "@remixicon/react";
 import axios from "axios";
 import { getSocket } from "@/lib/socket";
 
-// const publicNav = ["Home", "Bookings", "About Us", "Contact Us"];
-// const partnerNav = ["Home", "Active Ride", "Pending Request", "My Bookings"];
 const publicNav = [
 	{ label: "Home", route: "/" },
 	{ label: "Bookings", route: "/bookings" },
@@ -27,23 +25,11 @@ const partnerNav = [
 	{ label: "My Bookings", route: "/partner/bookings/mybookings" },
 ];
 
-const customerNav = [
-	{ label: "Home", route: "/" },
-	{ label: "Book Vehicle", route: "/customer/book" },
-	{ label: "My Bookings", route: "/customer/bookings" },
-];
-
 const partnerMenu = [
 	{ label: "Profile", route: "/partner/profile" },
 	{ label: "Active Ride", route: "/partner/bookings/active-ride" },
 	{ label: "Pending Request", route: "/partner/bookings/pending-requests" },
 	{ label: "My Bookings", route: "/partner/bookings/mybookings" },
-];
-
-const customerMenu = [
-	{ label: "Profile", route: "/customer/profile" },
-	{ label: "Book Vehicle", route: "/customer/book" },
-	{ label: "My Bookings", route: "/customer/bookings" },
 ];
 
 type Props = {
@@ -55,11 +41,27 @@ const Nav = ({ onOpen }: Props) => {
 	const dispatch = useDispatch<AppDispatch>();
 	const [profileOpen, setProfileOpen] = useState(false);
 	const [pendingRequestCount, setPendingRequestCount] = useState(0);
-	const [myBookingsCount, setMyBookingsCount] = useState(0);
 	const [isActiveRide, setIsActiveRide] = useState(false);
+	const [activeRideId, setActiveRideId] = useState<string | null>(null);
 	const { data: session } = useSession();
 	const userData = session?.user;
 	const router = useRouter();
+	const customerNav = [
+		{ label: "Home", route: "/" },
+		{
+			label: isActiveRide ? "Track My Ride" : "Book Vehicle",
+			route: activeRideId ? `/customer/active-ride/${activeRideId}` : "/customer/book",
+		},
+		{ label: "My Bookings", route: "/customer/bookings" },
+	];
+	const customerMenu = [
+		{ label: "Profile", route: "/customer/profile" },
+		{
+			label: isActiveRide ? "Track My Ride" : "Book Vehicle",
+			route: activeRideId ? `/customer/active-ride/${activeRideId}` : "/customer/book",
+		},
+		{ label: "My Bookings", route: "/customer/bookings" },
+	];
 
 	const handleSignOut = async () => {
 		await signOut({ callbackUrl: "/", redirect: false });
@@ -91,15 +93,15 @@ const Nav = ({ onOpen }: Props) => {
 					"/api/partner/bookings/pending-requests",
 				);
 				setPendingRequestCount(data.length || 0);
-			} catch (error: any) {
-				const axiosError = error;
-				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					"count pending request error",
-					axiosError?.response?.data ||
-						axiosError?.message ||
-						axiosError,
-				);
+			} catch (error: unknown) {
+				if (axios.isAxiosError(error)) {
+					console.log(
+						"count pending request error",
+						error.response?.data || error.message,
+					);
+					return;
+				}
+				console.log("count pending request error", error);
 			}
 		};
 
@@ -109,23 +111,42 @@ const Nav = ({ onOpen }: Props) => {
 					"/api/partner/bookings/active-ride",
 				);
 				setIsActiveRide(data.success);
-			} catch (error: any) {
-				const axiosError = error;
-				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					"count pending request error",
-					axiosError?.response?.data ||
-						axiosError?.message ||
-						axiosError,
-				);
+			} catch (error: unknown) {
+				if (axios.isAxiosError(error)) {
+					console.log(
+						"count pending request error",
+						error.response?.data || error.message,
+					);
+					return;
+				}
+				console.log("count pending request error", error);
 			}
+		};
+
+		const fetchCustomerActiveRide = async () => {
+			try {
+				const { data } = await axios.get("/api/bookings/active-ride");
+				if (data && data._id) {
+					setActiveRideId(data._id);
+					setIsActiveRide(true);
+					return;
+				}
+			} catch {
+				console.log("no customer active ride found");
+			}
+			setActiveRideId(null);
+			setIsActiveRide(false);
 		};
 
 		if (userData?.role === "partner") {
 			fetchPendingCount();
 			fetchActiveCount();
 		}
-	}, [userData?.role]);
+
+		if (userData?.role === "customer") {
+			fetchCustomerActiveRide();
+		}
+	}, [userData?._id, userData?.role]);
 
 	useEffect(() => {
 		const socket = getSocket();
@@ -181,6 +202,20 @@ const Nav = ({ onOpen }: Props) => {
 								{partnerNav.map((item, index) => {
 									const href = item.route;
 									const active = pathName === href;
+									const isDisabledActiveRide =
+										item.label === "Active Ride" && !isActiveRide;
+
+									if (isDisabledActiveRide) {
+										return (
+											<span
+												key={index}
+												className="relative text-[12px] sm:text-sm text-center font-medium transition pl-2 text-gray-500 opacity-40 pointer-events-none select-none"
+											>
+												{item.label}
+											</span>
+										);
+									}
+
 									return (
 										<Link
 											key={index}
@@ -314,20 +349,29 @@ const Nav = ({ onOpen }: Props) => {
 													)}
 
 												{userData?.role === "partner" &&
-													partnerMenu.map(
-														(item, idx) => (
-															<Link
-																key={idx}
-																href={
-																	item.route
-																}
-																className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
-															>
-																{item.label}
-															</Link>
-														),
-													)}
+										partnerMenu.map((item, idx) => {
+											if (item.label === "Active Ride" && !isActiveRide) {
+												return (
+													<button
+														key={idx}
+														type="button"
+														className="w-full px-4 py-2 rounded-lg text-sm text-left text-gray-500 opacity-40 pointer-events-none select-none"
+													>
+														{item.label}
+													</button>
+												);
+											}
 
+											return (
+												<Link
+													key={idx}
+													href={item.route}
+													className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+												>
+													{item.label}
+												</Link>
+											);
+										})}
 												<button
 													className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"
 													onClick={handleSignOut}
@@ -417,17 +461,33 @@ const Nav = ({ onOpen }: Props) => {
 							))}
 
 						{userData?.role === "partner" &&
-							partnerMenu.map((item, idx) => (
-								<Link
-									key={idx}
-									href={item.route}
-									className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
-								>
-									<div className="flex items-center justify-between">
-										{item.label} <RiArrowRightSLine />
-									</div>
-								</Link>
-							))}
+							partnerMenu.map((item, idx) => {
+								if (item.label === "Active Ride" && !isActiveRide) {
+									return (
+										<button
+											key={idx}
+											type="button"
+											className="w-full px-4 py-2 rounded-lg text-sm text-left text-gray-500 opacity-40 pointer-events-none select-none"
+										>
+											<div className="flex items-center justify-between">
+												{item.label} <RiArrowRightSLine />
+											</div>
+										</button>
+									);
+								}
+
+								return (
+									<Link
+										key={idx}
+										href={item.route}
+										className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+									>
+										<div className="flex items-center justify-between">
+											{item.label} <RiArrowRightSLine />
+										</div>
+									</Link>
+								);
+							})}
 
 						<button
 							className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"

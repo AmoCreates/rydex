@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import {
+	ArrowLeft,
 	Bike,
 	Bus,
 	Calendar,
@@ -167,7 +168,14 @@ const Page = () => {
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<header className="bg-white border-b border-gray-200">
+			<header className="relative bg-white border-b border-gray-200">
+				<motion.button
+					whileTap={{ scale: 0.88 }}
+					className="absolute top-7 sm:left-5 right-5 w-11 h-11 rounded-2xl cursor-pointer bg-white border-zinc-200 shadow-sm flex items-center justify-center hover:bg-zinc-50 transition-colors shrink-0"
+					onClick={() => router.back()}
+				>
+					<ArrowLeft className="text-zinc-900" />
+				</motion.button>
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 					<div className="max-w-3xl mx-auto py-6">
 						<div className="flex items-center gap-3">

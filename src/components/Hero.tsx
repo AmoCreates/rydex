@@ -1,8 +1,10 @@
 "use client";
 import { RootState } from "@/Toolkit/store";
+import axios from "axios";
 import { Bike, Bus, Car, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 type Props = {
@@ -12,6 +14,29 @@ type Props = {
 const Hero = ({ onOpen }: Props) => {
 	const { userData } = useSelector((state: RootState) => state.user);
 	const router = useRouter();
+	const [isActiveRide, setIsActiveRide] = useState(false);
+	const [activeRideId, setActiveRideId] = useState("")
+
+	useEffect(() => {
+		const isActiveBooking = async () => {
+			try {
+				const res = await axios.get("api/bookings/active-ride");
+				console.log(res);
+				if (res.status === 200) {
+					setIsActiveRide(true);
+					setActiveRideId(res.data._id);
+				}
+			} catch (error: unknown) {
+				if (axios.isAxiosError(error)) {
+					console.log(error.response?.data?.message);
+					return;
+				}
+				console.log(error);
+			}
+		};
+		isActiveBooking();
+	}, []);
+
 	return (
 		<div className="relative min-h-screen w-full overflow-hidden">
 			<div
@@ -51,10 +76,13 @@ const Hero = ({ onOpen }: Props) => {
 					className="cursor-pointer active:scale-95 mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition"
 					onClick={() => {
 						if (!userData) onOpen();
-						else router.push("/customer/book");
+						else {
+							if(isActiveRide) router.push(`/customer/active-ride/${activeRideId}`);
+							else router.push('/customer/book')
+						}
 					}}
 				>
-					Book Now
+					{isActiveRide ? "Track My Ride" : "Book Now"}
 				</motion.button>
 			</div>
 		</div>
