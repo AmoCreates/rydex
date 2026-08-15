@@ -130,7 +130,9 @@ const PanleContent = ({
 			setChat((prev) => [...prev, data]);
 		});
 
-		return () => {socket?.off("new-message")};
+		return () => {
+			socket?.off("new-message");
+		};
 	}, []);
 
 	useEffect(() => {
@@ -228,7 +230,7 @@ const PanleContent = ({
 								</div>
 							</div>
 
-							{booking.paymentMode && (
+							{booking.paymentStatus && (
 								<div className="flex items-center gap-2 mt-1.5">
 									<span
 										className={`${paymentStatus.cls ?? "bg-zinc-700 text-zinc-300"} rounded-full text-[10px] px-2 py-0.5 font-semibold`}
