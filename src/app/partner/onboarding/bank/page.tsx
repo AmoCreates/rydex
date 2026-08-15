@@ -281,12 +281,20 @@ const Page = () => {
 								<Phone />
 							</div>
 							<input
-								type="number"
-								placeholder="Enter 10 digit mobile number"
-								id="mn"
-								name="mobile"
-								value={formData.mobile}
-								onChange={handleChange}
+									type="text"
+									inputMode="numeric"
+									pattern="[0-9]*"
+									maxLength={10}
+									placeholder="Enter 10 digit mobile number"
+									id="mn"
+									name="mobile"
+									value={formData.mobile}
+									onChange={(e) => {
+										const digitsOnly = e.target.value.replace(/\D/g, "").slice(0, 10);
+										handleChange({
+											target: { name: e.target.name, value: digitsOnly },
+										} as React.ChangeEvent<HTMLInputElement>);
+									}}
 								disabled={isLoading || isInitialLoading}
 								className={`flex-1 border-b pb-2 text-sm focus:outline-none border-gray-300 focus:border-black ${fieldErrors.mobile && "border-red-500 focus:border-red-500"}`}
 							/>

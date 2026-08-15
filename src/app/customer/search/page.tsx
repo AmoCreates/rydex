@@ -3,11 +3,14 @@ import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, MapPin, RefreshCcw, Search, Zap } from "lucide-react";
-import Map from "@/components/Map";
 import { RiSendPlaneFill } from "@remixicon/react";
 import axios from "axios";
 import { vehicleType } from "@/model/vehicle.model";
 import VehicleCard from "@/components/VehicleCard";
+import dynamic from "next/dynamic";
+const Map = dynamic(() => import("@/components/Map"), {
+	ssr: false,
+});
 
 const VEHICE_META: any = {
 	bike: { label: "Bike" },
@@ -88,7 +91,10 @@ const Page = () => {
 	};
 
 	useEffect(() => {
-		void fetchVehicles();
+		const controleFetch = () => {
+			void fetchVehicles();
+		};
+		controleFetch();
 	}, [fetchVehicles]);
 
 	return (
@@ -278,21 +284,25 @@ const Page = () => {
 										const url = new URLSearchParams({
 											pickUp,
 											drop,
-											vehicle:v.type,
+											vehicle: v.type,
 											driver: v.owner,
 											vehicleId: String(v._id),
 											name,
-											mobile:String(mobile),
-											fare:String(v.baseFare! + v.pricePerKM! * distance),
+											mobile: String(mobile),
+											fare: String(
+												v.baseFare! +
+													v.pricePerKM! * distance,
+											),
 											pickupLat: String(pickupLat),
 											pickupLon: String(pickupLon),
 											dropLat: String(dropLat),
 											dropLon: String(dropLon),
 											distance: String(distance),
-										})
-										router.push(`/customer/checkout/?${url.toString()}`)
+										});
+										router.push(
+											`/customer/checkout/?${url.toString()}`,
+										);
 									}}
-
 								/>
 							</motion.div>
 						))}

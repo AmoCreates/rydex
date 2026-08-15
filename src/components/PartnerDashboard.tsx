@@ -269,8 +269,7 @@ const PartnerDashboard = () => {
 							</button>
 						</motion.div>
 					)}
-
-				<PartnerEarning />
+				{userData?.partnerOnBoardingStep === 7 && <PartnerEarning />}
 			</div>
 
 			{/* Cash confirmation popup */}

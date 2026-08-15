@@ -1,5 +1,4 @@
 "use client";
-import LiveRideMap from "@/components/LiveRideMap";
 import axios from "axios";
 import { ChevronUp, CircleDashed, HandCoins, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -10,6 +9,10 @@ import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { useParams } from "next/navigation";
 import { getSocket } from "@/lib/socket";
 import CompletedScreen from "@/components/CompletedScreen";
+import dynamic from "next/dynamic";
+const LiveRideMap = dynamic(() => import ("@/components/LiveRideMap"), {
+	ssr: false
+})
 
 interface IBooking {
 	customer: IUser;

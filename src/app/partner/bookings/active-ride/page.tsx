@@ -1,5 +1,4 @@
 "use client";
-import LiveRideMap from "@/components/LiveRideMap";
 import axios from "axios";
 import {
 	ArrowRight,
@@ -20,6 +19,10 @@ import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { getSocket } from "@/lib/socket";
 import CompletedScreen from "@/components/CompletedScreen";
 import { RiSendPlane2Fill, RiSendPlaneFill } from "@remixicon/react";
+import dynamic from "next/dynamic";
+const LiveRideMap = dynamic(() => import ("@/components/LiveRideMap"), {
+	ssr: false
+})
 
 interface IBooking {
 	_id: string;
