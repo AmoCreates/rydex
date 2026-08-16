@@ -43,7 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						);
 					}
 
-					const isMatch = await bcrypt.compare( password, user.password );
+					const isMatch = await bcrypt.compare(password, user.password);
 					if (!isMatch) {
 						throw new Error("password is incorrect");
 					}
@@ -70,21 +70,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		async signIn({ user, account }) {
 			if (account?.provider === "google") {
 				await dbConnect();
-				let userDoc = await User.findOne({ email: user.email });
-				if (!userDoc) {
-					userDoc = await User.create({
+
+				let dbUser = await User.findOne({ email: user.email });
+				if (!dbUser) {
+					dbUser = await User.create({
 						name: user.name,
 						email: user.email,
-						isEmailVerified: true,
+						role: "customer",
 					});
-				} else if (!userDoc.isEmailVerified) {
-					userDoc.isEmailVerified = true;
-					await userDoc.save();
 				}
 
-				// update manually **Google doesn't give these
-				user.id = userDoc._id;
-				user.role = userDoc.role;
+				user.id = String(dbUser._id);
+				user.role = dbUser.role || "customer";
 			}
 
 			return true;
@@ -98,8 +95,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				token.email = user.email;
 			}
 
-			if (trigger === "update" && session?.role) {
-				token.role = session.role;
+			if (trigger === "update" && session && typeof session === "object") {
+				const updatedRole = (session as { role?: string })?.role;
+				if (updatedRole && ["customer", "partner", "admin"].includes(updatedRole)) {
+					token.role = updatedRole as typeof token.role;
+				}
+			}
+
+			if (token.email) {
+				try {
+					await dbConnect();
+					const dbUser = await User.findOne({ email: token.email }).select("role");
+					if (dbUser?.role && dbUser.role !== token.role) {
+						token.role = dbUser.role;
+					}
+				} catch (error) {
+					console.error("Failed to refresh session role from DB:", error);
+				}
 			}
 
 			return token;
