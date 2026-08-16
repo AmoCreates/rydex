@@ -51,13 +51,25 @@ export async function POST(req: NextRequest) {
 				{ status: 404 },
 			);
 		}
-		const rating = booking.vehicle.rating;
 
-		if (!rating || rating === 0) {
-			booking.vehicle.rating = review;
-		} else {
-			booking.vehicle.rating = (rating + review) / 2;
+		// Check if booking has already been reviewed
+		if (booking.reviewed && booking.reviewed > 0) {
+			return NextResponse.json(
+				{ message: "Booking has already been reviewed" },
+				{ status: 400 },
+			);
 		}
+
+		const currentRating = booking.vehicle.rating || 0;
+		const currentCount = booking.vehicle.reviews || 0;
+
+		// Calculate exact new average
+		const newCount = currentCount + 1;
+		const newRating = (currentRating * currentCount + review) / newCount;
+
+		// Store updated values
+		booking.vehicle.rating = Number(newRating.toFixed(2)); // Round to 2 decimal places if needed
+		booking.vehicle.reviews = newCount;
 		booking.reviewed = review;
 		await booking.save();
 		await booking.vehicle.save();

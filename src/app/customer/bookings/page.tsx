@@ -14,6 +14,7 @@ import {
 	Package,
 	Phone,
 	Truck,
+	X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
@@ -122,6 +123,7 @@ const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [selectStatus, setSelectStatus] = useState("All");
 	const [loading, setLoading] = useState(false);
+	const [cancle, setCancel] = useState(false);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -164,6 +166,21 @@ const Page = () => {
 				minute: "2-digit",
 			})
 			.replace(",", "");
+	};
+
+	const handleCancelRequest = async (currBookingId: string) => {
+		setCancel(true);
+		try {
+			setLoading(true);
+			await axios.post(
+				`/api/bookings/${currBookingId}/cancel-ride`,
+			);
+		} catch (error: any) {
+			console.log(error?.response.data.message);
+		} finally {
+			setLoading(false);
+			setCancel(false);
+		}
 	};
 
 	return (
@@ -384,6 +401,20 @@ const Page = () => {
 																View Details
 															</span>
 															<ChevronRightIcon className="w-4 h-4" />
+														</button>
+													</div>
+												)}
+												{b.bookingStatus ===
+													"requested" && (
+													<div className="flex items-center gap-2">
+														<button
+															onClick={() =>
+																handleCancelRequest(b._id)
+															}
+															className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer "
+														>
+															<span>{cancle ? "Cancelling..." : "Cancel"}</span>
+															<X className="w-4 h-4" />
 														</button>
 													</div>
 												)}

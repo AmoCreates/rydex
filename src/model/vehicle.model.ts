@@ -23,6 +23,7 @@ export interface IVehicle extends mongoose.Document {
 	isActive?: boolean;
 	rejectionMsg?: string;
 	rating?: number;
+	reviews?: number;
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
 }
@@ -63,6 +64,11 @@ const vehicleSchema = new mongoose.Schema<IVehicle>(
 		},
 
 		rating: {
+			type: Number,
+			default: 0,
+		},
+
+		reviews: {
 			type: Number,
 			default: 0,
 		},

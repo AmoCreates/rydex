@@ -374,11 +374,11 @@ const Page = () => {
 					);
 					setOtpMode(data.booking?.pickUpOtp.length ? true : false);
 				}
-			} catch (error) {
+			} catch (error:any) {
 				if (axios.isAxiosError(error)) {
 					console.log(error.response?.data?.message);
 				} else {
-					console.log(error);
+					console.log(error.response.data.message);
 				}
 			} finally {
 				setLoading(false);
