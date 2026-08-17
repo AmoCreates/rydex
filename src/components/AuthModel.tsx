@@ -101,11 +101,12 @@ const AuthModel = ({ open, onClose }: Props) => {
 			});
 
 			if (res?.error) {
-				setErr(
-					res.error === "CredentialsSignin"
+				const normalizedError =
+					res.error === "CredentialsSignin" || res.error === "Configuration"
 						? "Invalid email or password"
-						: res.error.replace(/[-_]/g, " ") || "Login failed",
-				);
+						: res.error.replace(/[-_]/g, " ") || "Login failed";
+
+				setErr(normalizedError);
 				return;
 			}
 
@@ -117,6 +118,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 
 			setErr("Login failed");
 		} catch (error: unknown | any) {
+			setErr("Login failed");
 			setErr(error?.message || "Login failed");
 		} finally {
 			setLoading(false);

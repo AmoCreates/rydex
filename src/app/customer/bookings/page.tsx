@@ -252,8 +252,8 @@ const Page = () => {
 								No bookings yet.
 							</h1>
 							<p className="text-gray-500 text-sm mt-1">
-								When customer book rides, they{"'"}ll appear
-								here
+								When a customer books a ride, it will appear
+								here.
 							</p>
 						</div>
 					)}

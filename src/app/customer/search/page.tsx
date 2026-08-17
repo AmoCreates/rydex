@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, MapPin, RefreshCcw, Search, Zap } from "lucide-react";
@@ -42,7 +42,7 @@ interface IVehicle {
 	updatedAt?: Date;
 }
 
-const Page = () => {
+const SearchPageContent = () => {
 	const router = useRouter();
 	const params = useSearchParams();
 	const [pickUp, setPickUp] = useState(params.get("pickup") || "");
@@ -189,10 +189,10 @@ const Page = () => {
 						<div>
 							<h2 className="text-zinc-900 text-lg font-black tracking-tight">
 								{loading
-									? "Finding Nearby Vehicle"
+									? "Finding nearby vehicles"
 									: vehicles.length > 0
-										? "Avaiable vehicles"
-										: "No nearby vehicle"}
+										? "Available vehicles"
+										: "No nearby vehicles"}
 							</h2>
 							{meta && (
 								<div className="text-zinc-400 text-xs mt-0.5">
@@ -313,4 +313,18 @@ const Page = () => {
 	);
 };
 
-export default Page;
+export default function Page() {
+	return (
+		<Suspense
+			fallback={
+				<div className="min-h-screen bg-zinc-100 flex items-center justify-center">
+					<div className="text-sm font-medium text-zinc-500">
+						Loading search...
+					</div>
+				</div>
+			}
+		>
+			<SearchPageContent />
+		</Suspense>
+	);
+}

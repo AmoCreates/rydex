@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
 	ArrowLeft,
@@ -52,7 +52,7 @@ type Status =
 	| "rejected"
 	| "expired";
 
-const Page = () => {
+const CheckoutPageContent = () => {
 	const router = useRouter();
 	const params = useSearchParams();
 
@@ -155,6 +155,7 @@ const Page = () => {
 				const razorpayLoaded = await loadRazorPayScript();
 				if (!razorpayLoaded) {
 					alert("razorypay script load faild");
+					return
 				}
 			}
 
@@ -218,7 +219,7 @@ const Page = () => {
 				},
 			});
 			paymentObject.open();
-		} catch (error) {
+		} catch (error: any) {
 			console.log(error);
 		} finally {
 			setLoading(false);
@@ -508,7 +509,8 @@ const Page = () => {
 											onClick={handleBookRequest}
 											whileTap={{ scale: 0.97 }}
 											whileHover={{ scale: 1.02 }}
-											className="w-full h-14 mt-8 bg-zinc-900 hover:bg-black disalbed-opacity-40 disabled:pointer-events-none text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md cursor-pointer group overflow-x-hidden"
+											className={`w-full h-14 mt-8 bg-zinc-900 hover:bg-black ${loading && "opacity-80"} disabled:pointer-events-none text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md cursor-pointer group overflow-x-hidden`}
+											disabled={loading}
 										>
 											Request Ride{" "}
 											<Icon className="group-hover:translate-x-2 group-focus:translate-x-96 transition-transform duration-700" />
@@ -930,4 +932,10 @@ const Page = () => {
 	);
 };
 
-export default Page;
+export default function Page() {
+	return (
+		<Suspense fallback={<div className="min-h-screen bg-zinc-100" />}>
+			<CheckoutPageContent />
+		</Suspense>
+	);
+}

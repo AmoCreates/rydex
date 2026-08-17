@@ -26,36 +26,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 					throw new Error("missing credentials");
 				}
 
-				const email = credentials?.email;
-				const password = credentials?.password as string;
+				const email = credentials.email;
+				const password = credentials.password as string;
 
 				try {
 					await dbConnect();
 
 					const user = await User.findOne({ email });
-					if (!user) {
-						throw new Error("No user found with this email");
-					}
-
-					if (!user.password) {
-						throw new Error(
-							"This account does not have a password. Please use Google sign-in or reset your password.",
-						);
+					if (!user || !user.password) {
+						return null;
 					}
 
 					const isMatch = await bcrypt.compare(password, user.password);
 					if (!isMatch) {
-						throw new Error("password is incorrect");
+						return null;
 					}
 
 					return {
-						id: user._id,
+						id: String(user._id),
 						name: user.name,
 						email: user.email,
 						role: user.role,
 					};
 				} catch (error) {
-					throw new Error("Authentication Error, ERR: " + error);
+					console.error("Credentials auth failed:", error);
+					return null;
 				}
 			},
 		}),
