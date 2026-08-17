@@ -23,6 +23,7 @@ import { IVehicle } from "@/model/vehicle.model";
 import { IBooking } from "@/model/booking.model";
 import PartnerEarning from "./PartnerEarning";
 import { getSocket } from "@/lib/socket";
+import ApiErrorBanner from "./ApiErrorBanner";
 
 type Step = {
 	id: number;
@@ -46,6 +47,7 @@ const PartnerDashboard = () => {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [vehicleData, setVehicleData] = useState<IVehicle>();
 	const [cashRequested, setCashRequested] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const [cashRequestedBooking, setCashRequestedBooking] =
 		useState<IBooking | null>(null);
 
@@ -55,10 +57,14 @@ const PartnerDashboard = () => {
 	useEffect(() => {
 		const getData = async () => {
 			try {
+				setErrMsg("")
 				const { data } = await axios.get(
 					"/api/partner/onboarding/vehicle",
 				);
-				setVehicleData(data);
+				if(data.success) {
+					setErrMsg("")
+					setVehicleData(data);
+				}
 			} catch (error: unknown) {
 				const axiosError = error as {
 					response?: {
@@ -75,6 +81,7 @@ const PartnerDashboard = () => {
 						axiosError?.message ||
 						error,
 				);
+				setErrMsg(serverMessage || "failed to get vechile details, please refresh the page to try again")
 			}
 		};
 		getData();
@@ -113,37 +120,42 @@ const PartnerDashboard = () => {
 	const handleCashPayment = async () => {
 		if (!cashRequested) return;
 		try {
+			setErrMsg("")
 			const { data } = await axios.post("/api/payment/cash");
 			console.log(data);
 			if (data.success) {
+				setErrMsg("")
 				setCashRequested(false);
 			}
 		} catch (error: unknown) {
-				const axiosError = error as {
-					response?: {
-						data?: {
-							message?: string;
-						};
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
 					};
-					message?: string;
 				};
-				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
-			}
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(serverMessage || "failed to accept cash request, refresh the page and try again")
+		}
 	};
 
 	const cashRequestedDeclined = async () => {
 		try {
+			setErrMsg("")
 			const { data } = await axios.post(
 				`/api/payment/${cashRequestedBooking!._id}/cash-decline`,
 			);
 			if (data.success) {
 				console.log(data);
+				setErrMsg("")
 				setCashRequested(false);
 				const socket = getSocket();
 				socket?.emit("cash-declined", {
@@ -151,22 +163,23 @@ const PartnerDashboard = () => {
 				});
 			}
 		} catch (error: unknown) {
-				const axiosError = error as {
-					response?: {
-						data?: {
-							message?: string;
-						};
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
 					};
-					message?: string;
 				};
-				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
-			}
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(serverMessage || "failed to decline cash, please refresh the page and try again")
+		}
 	};
 
 	useEffect(() => {
@@ -181,7 +194,10 @@ const PartnerDashboard = () => {
 	const progress = ((currentStep - 1) / (TOTAL_STEPS - 1)) * 100;
 
 	return (
-		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200 pt-28 px-4 pb-20">
+		<div className="relative min-h-screen bg-linear-to-br from-gray-100 to-gray-200 pt-28 px-4 pb-20">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			<div className="max-w-7xl mx-auto space-y-16">
 				<div>
 					<h1 className="text-4xl font-bold">Partner Onboarding</h1>

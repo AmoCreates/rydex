@@ -18,7 +18,7 @@ export async function POST(
 			session.user.role !== "customer"
 		) {
 			return NextResponse.json(
-				{ message: "unauthorized, please log in to payment" },
+				{ success: false, message: "unauthorized, please log in to payment" },
 				{ status: 401 },
 			);
 		}
@@ -26,7 +26,7 @@ export async function POST(
 		const id = (await context.params).id;
 		if (!id) {
 			return NextResponse.json(
-				{ message: "missing id!, can't find any booking" },
+				{success: false, message: "missing id!, can't find any booking" },
 				{ status: 400 },
 			);
 		}
@@ -41,6 +41,7 @@ export async function POST(
 		if (!booking || !allowedStatuses.includes(booking.bookingStatus)) {
 			return NextResponse.json(
 				{
+					success: false,
 					message:
 						"Sorry, we were unable to find any pending bookings",
 				},
@@ -61,7 +62,8 @@ export async function POST(
 		console.log(error);
 		return NextResponse.json(
 			{
-				message: "cash selection error",
+				success: false,
+				message: "server error: failed to confirem cash ride",
 			},
 			{ status: 500 },
 		);

@@ -109,13 +109,16 @@ export async function GET() {
 		const session = await auth();
 
 		if (!session || !session.user?.email) {
-			return Response.json({ message: "unauthorized" }, { status: 401 });
+			return Response.json(
+				{ success: false, message: "unauthorized" },
+				{ status: 401 },
+			);
 		}
 
 		const user = await User.findOne({ email: session.user.email });
 		if (!user) {
 			return Response.json(
-				{ message: "user not found" },
+				{ success: false, message: "user not found" },
 				{ status: 401 },
 			);
 		}
@@ -125,14 +128,18 @@ export async function GET() {
 			return Response.json(vehicle, { status: 200 });
 		} else {
 			return Response.json(
-				{ message: "vehicle not found" },
+				{ success: false, message: "vehicle not found" },
 				{ status: 404 },
 			);
 		}
 	} catch (error) {
 		console.log("Get vehicle details error, err: ", error);
 		return Response.json(
-			{ message: "Get vehicle details error, err: ", error },
+			{
+				success: false,
+				message: "server error: failed to fetch vehicle details",
+				error,
+			},
 			{ status: 500 },
 		);
 	}

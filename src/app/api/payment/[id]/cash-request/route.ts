@@ -18,7 +18,10 @@ export async function POST(
 			session.user.role !== "customer"
 		) {
 			return NextResponse.json(
-				{ message: "unauthorized, please log in to payment" },
+				{
+					success: false,
+					message: "unauthorized, please log in to payment",
+				},
 				{ status: 401 },
 			);
 		}
@@ -26,7 +29,10 @@ export async function POST(
 		const id = (await context.params).id;
 		if (!id) {
 			return NextResponse.json(
-				{ message: "missing id!, can't find any booking" },
+				{
+					success: false,
+					message: "missing id!, can't find any booking",
+				},
 				{ status: 400 },
 			);
 		}
@@ -41,6 +47,7 @@ export async function POST(
 		if (!booking || !allowedStatus.includes(booking.bookingStatus)) {
 			return NextResponse.json(
 				{
+					success: false,
 					message:
 						"Sorry, for cash ride, customer only allowed to pay after dropped successfully",
 				},
@@ -50,7 +57,7 @@ export async function POST(
 
 		booking.paymentStatus = "requested";
 		booking.paymentMode = "cash";
-		booking.bookingStatus = "awaiting payment"
+		booking.bookingStatus = "awaiting payment";
 		await booking.save();
 
 		return NextResponse.json(
@@ -61,7 +68,8 @@ export async function POST(
 		console.log(error);
 		return NextResponse.json(
 			{
-				message: "cash selection error",
+				success: false,
+				message: "server error: failed to request cash",
 			},
 			{ status: 500 },
 		);

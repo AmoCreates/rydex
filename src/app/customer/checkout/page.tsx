@@ -335,7 +335,6 @@ const CheckoutPageContent = () => {
 						axiosError?.message ||
 						error,
 				);
-				setErrMsg(serverMessage || "failed to fetch the active ride, refresh the page and try again")
 			}
 		};
 

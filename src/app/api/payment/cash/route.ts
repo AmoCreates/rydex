@@ -10,13 +10,14 @@ export async function POST() {
 		const session = await auth();
 		if (!session || !session.user?.email) {
 			return NextResponse.json(
-				{ message: "unauthorized, please log in" },
+				{ success: false, message: "unauthorized, please log in" },
 				{ status: 401 },
 			);
 		}
 		const partner = await User.findById(session.user.id);
 		if (!partner) {
 			return NextResponse.json({
+				success: false,
 				message: "unauthorize!, please login to continue",
 			});
 		}
@@ -58,7 +59,8 @@ export async function POST() {
 		return NextResponse.json(
 			{
 				success: false,
-				message: "accecpt cash failed, please try again",
+				message:
+					"server error: failed to accept cash, please try again",
 			},
 			{ status: 500 },
 		);
@@ -80,7 +82,7 @@ export async function GET() {
 		const partner = await User.findById(session.user.id);
 		if (!partner) {
 			return NextResponse.json({
-				message: "unauthorize!, please login to continue",
+				success: false, message: "unauthorize!, please login to continue",
 			});
 		}
 
