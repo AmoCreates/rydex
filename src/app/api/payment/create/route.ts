@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				success: false,
-				message: "Checkout Failed Error",
+				message: "server error: Checkout failed",
 			},
 			{ status: 500 },
 		);

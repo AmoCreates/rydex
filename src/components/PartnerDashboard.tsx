@@ -59,8 +59,22 @@ const PartnerDashboard = () => {
 					"/api/partner/onboarding/vehicle",
 				);
 				setVehicleData(data);
-			} catch (error) {
-				console.log(error);
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
 			}
 		};
 		getData();
@@ -75,8 +89,22 @@ const PartnerDashboard = () => {
 					setCashRequested(true);
 					setCashRequestedBooking(data.booking);
 				}
-			} catch (error: any) {
-				console.log(error.response.data.message);
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
 			}
 		};
 		cashReuqest();
@@ -90,9 +118,23 @@ const PartnerDashboard = () => {
 			if (data.success) {
 				setCashRequested(false);
 			}
-		} catch (error) {
-			console.log(error);
-		}
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+			}
 	};
 
 	const cashRequestedDeclined = async () => {
@@ -108,9 +150,23 @@ const PartnerDashboard = () => {
 					bookingId: cashRequestedBooking!._id,
 				});
 			}
-		} catch (error: any) {
-			console.log(error.response.data.message);
-		}
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+			}
 	};
 
 	useEffect(() => {

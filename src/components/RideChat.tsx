@@ -54,11 +54,23 @@ const RideChat = ({
 				await onSendMessage(trimmedMessage);
 			}
 			setMsg("");
-		} catch (error: any) {
-			console.log(
-				error?.response?.data?.message || error?.message || error,
-			);
-		} finally {
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+			} finally {
 			setLoading(false);
 		}
 	};

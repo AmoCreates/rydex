@@ -24,7 +24,7 @@ export async function GET() {
 		const user = await User.findById(session.user.id);
 		if (!user) {
 			return NextResponse.json(
-				{ success: false, message: "user not found" },
+				{ success: false, message: "failed to fetch bookings, please login again" },
 				{ status: 401 },
 			);
 		}
@@ -50,7 +50,7 @@ export async function GET() {
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ message: "customer bookings find error" },
+			{ message: "server error: failed to fetch bookings" },
 			{ status: 500 },
 		);
 	}

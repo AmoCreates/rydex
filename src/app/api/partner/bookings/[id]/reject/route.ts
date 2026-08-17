@@ -35,7 +35,7 @@ export async function POST(
 		const partner = await User.findOne({ email: session.user.email });
 		if (!partner) {
 			return NextResponse.json(
-				{ message: "user not found" },
+				{ message: "please login again" },
 				{ status: 401 },
 			);
 		}
@@ -46,7 +46,7 @@ export async function POST(
 			return NextResponse.json(
 				{
 					message:
-						"invalid request!, customer may cancel the request or may else driver accept before you",
+						"invalid request!, the customer might have cancelled the request a just a moment ago.",
 				},
 				{ status: 401 },
 			);
@@ -66,7 +66,7 @@ export async function POST(
 	} catch (error) {
 		console.log("reject booking error: err", error);
 		return NextResponse.json(
-			{ message: "reject booking error" },
+			{ message: "server error: failed to reject booking" },
 			{ status: 500 },
 		);
 	}

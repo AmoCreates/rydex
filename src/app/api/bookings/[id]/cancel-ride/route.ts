@@ -66,7 +66,7 @@ export async function POST(
 		console.log(error);
 		return NextResponse.json(
 			{
-				message: "booking cancellation error",
+				message: "server error: cancel booking failed",
 			},
 			{ status: 500 },
 		);

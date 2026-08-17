@@ -16,7 +16,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 			session.user?.role !== "partner"
 		) {
 			return NextResponse.json(
-				{ message: "unauthorized, please log in" },
+				{ message: "unauthorized, please login" },
 				{ status: 401 },
 			);
 		}
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 		const partner = await User.findOne({ email: session.user.email });
 		if (!partner) {
 			return NextResponse.json(
-				{ message: "user not found" },
+				{ message: "pleaes login again" },
 				{ status: 401 },
 			);
 		}
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 
     if (!booking || booking.bookingStatus !== "requested") {
       return NextResponse.json(
-        { message: "invalid request!, customer may cancel the request or may else driver accept before you" },
+        { message: "invalid request!, the customer might have cancelled the request a just a moment ago." },
         { status: 401 }
       );
     }
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
 	} catch (error) {
 		console.log("accept booking error: err", error);
 		return NextResponse.json(
-			{ message: "accept booking error" },
+			{ message: "server error: failed to accept booking" },
 			{ status: 500 },
 		);
 	}

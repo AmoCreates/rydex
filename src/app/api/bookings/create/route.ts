@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
 		console.log(error);
 		return NextResponse.json(
 			{
-				message: "booking error",
+				message: "server error: failed to create booking",
 			},
 			{ status: 500 },
 		);

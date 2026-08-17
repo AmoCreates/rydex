@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 			session.user?.role !== "partner"
 		) {
 			return NextResponse.json(
-				{ success: false, message: "unauthorized, please log in" },
+				{ success: false, message: "unauthorized, please login" },
 				{ status: 401 },
 			);
 		}
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 		const partner = await User.findById(session.user.id);
 		if (!partner) {
 			return NextResponse.json(
-				{ success: false, message: "driver not found" },
+				{ success: false, message: "please login again" },
 				{ status: 401 },
 			);
 		}

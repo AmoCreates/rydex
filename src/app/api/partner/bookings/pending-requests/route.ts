@@ -23,7 +23,7 @@ export async function GET() {
 		const partner = await User.findOne({email: session.user.email});
 		if (!partner) {
 			return NextResponse.json(
-				{ message: "user not found" },
+				{ message: "Please login again" },
 				{ status: 401 },
 			);
 		}
@@ -36,7 +36,7 @@ export async function GET() {
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ message: "find bookings error" },
+			{ message: "server error: failed to fetch pending bookings" },
 			{ status: 500 }
 		);
 	}
