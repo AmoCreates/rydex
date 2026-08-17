@@ -15,6 +15,7 @@ import {
 	Truck,
 	Wind,
 } from "lucide-react";
+import { RiGroupFill } from "@remixicon/react";
 
 interface IVehicle {
 	owner: string;
@@ -31,6 +32,7 @@ interface IVehicle {
 	isActive?: boolean;
 	rejectionMsg?: string;
 	rating?: number;
+	reviews?: number;
 	createdAt?: Date; // no need to add these becaues extends above, only for more secureness
 	updatedAt?: Date;
 }
@@ -101,7 +103,17 @@ const VehicleCard = ({
 						size={9}
 						className="fill-yellow-400 text-yellow-500"
 					/>
-					{(!vehicle.rating || vehicle.rating === 0) ? "New" : vehicle.rating?.toFixed(1) }
+					{!vehicle.rating || vehicle.rating === 0
+						? "New"
+						: vehicle.rating?.toFixed(1)}{" "}
+						|
+					<span className="flex items-center">
+						<RiGroupFill
+							size={10}
+							className="fill-yellow-400 text-yellow-500"
+						/>{" "}
+						{vehicle.reviews}
+					</span>
 				</div>
 			</div>
 
