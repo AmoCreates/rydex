@@ -20,9 +20,10 @@ import { getSocket } from "@/lib/socket";
 import CompletedScreen from "@/components/CompletedScreen";
 import { RiSendPlane2Fill, RiSendPlaneFill } from "@remixicon/react";
 import dynamic from "next/dynamic";
-const LiveRideMap = dynamic(() => import ("@/components/LiveRideMap"), {
-	ssr: false
-})
+import ApiErrorBanner from "@/components/ApiErrorBanner";
+const LiveRideMap = dynamic(() => import("@/components/LiveRideMap"), {
+	ssr: false,
+});
 
 interface IBooking {
 	_id: string;
@@ -170,12 +171,14 @@ const Page = () => {
 	const [otpErr, setOtpErr] = useState("");
 	const [otpVerified, setOtpVerified] = useState(false);
 	const [cashRequested, setCashRequested] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 
 	const clearOtpDigits = () => setOtpDigits(Array(6).fill(""));
 
 	const sendPickupOtp = async () => {
 		if (status !== "confirmed" || otpVerified) return;
 		try {
+			setErrMsg("");
 			console.log("sending");
 			setLoadingOtp(true);
 			clearOtpDigits();
@@ -185,10 +188,29 @@ const Page = () => {
 			);
 			if (data.success) {
 				console.log(data);
+				setErrMsg("");
 				setOtpMode(true);
 			}
-		} catch (error) {
-			console.log(error);
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to send pickup OTP, refresh the page and try again",
+			);
 		} finally {
 			setLoadingOtp(false);
 		}
@@ -196,6 +218,7 @@ const Page = () => {
 	const sendDropOtp = async () => {
 		if (status !== "started") return;
 		try {
+			setErrMsg("");
 			console.log("sending");
 			setLoadingOtp(true);
 			setOtpErr("");
@@ -208,9 +231,28 @@ const Page = () => {
 				console.log(data);
 				setOtpMode(true);
 				setOtpVerified(false);
+				setErrMsg("");
 			}
-		} catch (error) {
-			console.log(error);
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to send drop OTP, refresh the page and try again",
+			);
 		} finally {
 			setLoadingOtp(false);
 		}
@@ -223,6 +265,7 @@ const Page = () => {
 			return;
 		}
 		try {
+			setErrMsg("");
 			setLoadingOtp(true);
 			setOtpErr("");
 			const { data } = await axios.post(
@@ -238,7 +281,7 @@ const Page = () => {
 				);
 				setOtpErr("Pickup verified. Ride started.");
 				setOtpMode(false);
-
+				setErrMsg("");
 				const socket = getSocket();
 				if (driverPos) {
 					socket?.emit("driver-location-update", {
@@ -251,15 +294,26 @@ const Page = () => {
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");
 			}
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				setOtpErr(
-					error.response?.data?.message ||
-						"Unable to verify the pickup OTP.",
-				);
-			} else {
-				setOtpErr("Unable to verify the pickup OTP.");
-			}
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to verify pickup OTP, refresh the page and try again",
+			);
 		} finally {
 			setLoadingOtp(false);
 		}
@@ -272,6 +326,7 @@ const Page = () => {
 			return;
 		}
 		try {
+			setErrMsg("");
 			setLoadingOtp(true);
 			setOtpErr("");
 			const { data } = await axios.post(
@@ -289,6 +344,7 @@ const Page = () => {
 						: prev,
 				);
 				setOtpErr("Pickup verified. Ride started.");
+				setErrMsg("");
 
 				const socket = getSocket();
 				if (driverPos) {
@@ -302,15 +358,26 @@ const Page = () => {
 			} else {
 				setOtpErr(data.message || "Unable to verify the pickup OTP.");
 			}
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				setOtpErr(
-					error.response?.data?.message ||
-						"Unable to verify the drop OTP.",
-				);
-			} else {
-				setOtpErr("Unable to verify the drop OTP.");
-			}
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to verify drop OTP, refresh the page and try again",
+			);
 		} finally {
 			setLoadingOtp(false);
 		}
@@ -323,33 +390,73 @@ const Page = () => {
 	const handleCashPayment = async () => {
 		if (!cashRequested) return;
 		try {
+			setErrMsg("");
 			const { data } = await axios.post("/api/payment/cash");
 			console.log(data);
 			if (data.success) {
+				setErrMsg("");
 				setCashRequested(false);
 				setStatus("completed");
 
 				const socket = getSocket();
 				socket?.emit("cash-received", { bookingId: booking?._id });
 			}
-		} catch (error: any) {
-			console.log(error.response.data.message);
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to accept cash, refresh the page and try again",
+			);
 		}
 	};
 
 	const cashRequestedDeclined = async () => {
 		try {
+			setErrMsg("");
 			const { data } = await axios.post(
 				`/api/payment/${booking!._id}/cash-decline`,
 			);
 			if (data.success) {
 				console.log(data);
 				setCashRequested(false);
+				setErrMsg("");
 				const socket = getSocket();
 				socket?.emit("cash-declined", { bookingId: booking!._id });
 			}
-		} catch (error: any) {
-			console.log(error.response.data.message);
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to decline the cash, refresh the page and try again",
+			);
 		}
 	};
 
@@ -357,6 +464,7 @@ const Page = () => {
 	useEffect(() => {
 		const getActiveRides = async () => {
 			try {
+				setErrMsg("");
 				setLoading(true);
 				const { data } = await axios.get(
 					"/api/partner/bookings/active-ride",
@@ -373,13 +481,25 @@ const Page = () => {
 						data.booking.dropLocation.coordinates.toReversed(),
 					);
 					setOtpMode(data.booking?.pickUpOtp.length ? true : false);
+					setErrMsg("");
 				}
-			} catch (error:any) {
-				if (axios.isAxiosError(error)) {
-					console.log(error.response?.data?.message);
-				} else {
-					console.log(error.response.data.message);
-				}
+			} catch (error: unknown) {
+				console.log(error);
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
 			} finally {
 				setLoading(false);
 			}
@@ -457,13 +577,33 @@ const Page = () => {
 	useEffect(() => {
 		const cashReuqest = async () => {
 			try {
+				setErrMsg("");
 				const { data } = await axios.get("/api/payment/cash");
 				console.log(data);
 				if (data.success) {
+					setErrMsg("");
 					setCashRequested(true);
 				}
-			} catch (error: any) {
-				console.log(error.response.data.message);
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(
+					serverMessage ||
+						"Failed to send fetch customer's cash request, refresh the page and try again",
+				);
 			}
 		};
 		cashReuqest();
@@ -511,11 +651,15 @@ const Page = () => {
 		status,
 		booking,
 		paymentStatus,
-		currRole: "driver",
+		currRole: "driver"
 	};
 
 	return (
-		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
+		<div className="absolute h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
+
 			{/* Map & Status Label */}
 			<div className="realtive flex-1 h-full z-0">
 				<LiveRideMap
