@@ -66,7 +66,7 @@ const PanleContent = ({
 
 	const getSuggestions = async () => {
 		if (!booking?._id) return;
-
+		
 		try {
 			setSuggestionErr("");
 			setSuggestionLoading(true);
@@ -77,14 +77,26 @@ const PanleContent = ({
 			if (res.status === 200) {
 				setChatSuggestions(res.data.suggestions || []);
 			}
-		} catch (error: any) {
-			console.log(
-				error.response?.data?.message || error.message || error,
-			);
-			setSuggestionErr(
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setSuggestionErr(
 				"Sorry!, unable to generate suggestions right now.",
 			);
-		} finally {
+			} finally {
 			setSuggestionLoading(false);
 		}
 	};
@@ -153,10 +165,21 @@ const PanleContent = ({
 				});
 				console.log("Chat data:", data);
 				setChat(data || []);
-			} catch (error: any) {
-				console.error(
-					"Error fetching chat:",
-					error?.response?.data || error.message || error,
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
 				);
 			}
 		};

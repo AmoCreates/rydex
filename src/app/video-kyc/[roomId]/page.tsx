@@ -54,7 +54,7 @@ const Page = () => {
 		};
 
 		init();
-	}, []);
+	}, [isCallStarted]);
 
 	const toggleCamera = () => {
 		if (!stream) return;
@@ -87,15 +87,24 @@ const Page = () => {
 
 			setAdminCheck(null);
 			setRejectionReason("");
-		} catch (error: any) {
-			const axiosError = error;
-			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				"Faild to approve/reject kyc",
-				axiosError?.response?.data || axiosError?.message || axiosError,
-			);
-			setErrorMsg(serverMessage || "Something went wrong");
-		} finally {
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrorMsg(serverMessage || "failed to cancel request, refresh the page and try again")
+			} finally {
 			setIsProcessing(false);
 			router.push("/");
 		}

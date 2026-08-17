@@ -30,9 +30,23 @@ const CompletedScreen = ({ booking, role }: { booking: any; role: string }) => {
 				review: reviewCount,
 			});
 			router.push('/');
-		} catch (error: any) {
-			console.log(error.response.data.message);
-		}
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+			}
 	};
 
 	return (

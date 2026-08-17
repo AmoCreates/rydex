@@ -13,12 +13,12 @@ const Map = dynamic(() => import("@/components/Map"), {
 });
 
 const VEHICE_META: any = {
-	bike: { label: "Bike" },
-	auto: { label: "Auto" },
-	car: { label: "Car" },
-	loading: { label: "Loading" },
-	truck: { label: "Truck" },
-	bus: { label: "Bus" },
+	bike: { label: "bike" },
+	auto: { label: "auto" },
+	car: { label: "car" },
+	loading: { label: "loading" },
+	truck: { label: "truck" },
+	bus: { label: "bus" },
 	all: { label: "All" },
 };
 
@@ -250,14 +250,14 @@ const SearchPageContent = () => {
 									Vehicles Not Found
 								</p>
 								<p className="text-zinc-400 text-sm max-w-xs leading-relaxed">
-									{meta.label || "Vehicle"} drivers are
+									No {meta.label || "Vehicle"} drivers are
 									available near your pickup right now.
 								</p>
 								<motion.button
 									whileTap={{ scale: 0.95 }}
 									onClick={handleRetry}
 									disabled={loading}
-									className="mt-5 flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+									className="mt-5 cursor-pointer flex items-center gap-2 bg-zinc-900 text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-zinc-800 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
 								>
 									<RefreshCcw size={16} /> Retry Search
 								</motion.button>

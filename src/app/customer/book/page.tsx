@@ -60,9 +60,11 @@ const Page = () => {
 	const [pickupSuggestion, setPickupSuggestion] = useState<place[]>([]);
 	const [dropSuggestion, setDropSuggestion] = useState<place[]>([]);
 	const [loading, setLoading] = useState(false);
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const [toFill, setToFill] = useState("Select a vehicle");
-	const isBusy = loading || isSubmitting;
+	const [pickupSelected, setPickupSelected] = useState(false);
+	const [dropSelected, setDropSelected] = useState(false);
+	const isBusy = loading
 	const progress = [
 		!!vehicle,
 		!!name,
@@ -74,8 +76,12 @@ const Page = () => {
 
 	const getCurrentLocation = async () => {
 		setLoading(true);
+		setErrMsg("");
 		if (!navigator.geolocation) {
 			console.log("cant find navigator");
+			setErrMsg(
+				"Missing Navigator!, please select location via suggestions",
+			);
 			return;
 		}
 		navigator.geolocation.getCurrentPosition(async ({ coords }) => {
@@ -93,10 +99,13 @@ const Page = () => {
 					setPickUpLatitude(data.features[0].geometry.coordinates[1]);
 					setPickUpCountry(data.features[0].properties.country);
 					setPickUp(currentLocation);
+					setPickupSelected(true);
 					setPickupSuggestion([]);
+					setErrMsg("");
 				}
 			} catch (error) {
 				console.log(error);
+				setErrMsg("Unable to fetch the location");
 			} finally {
 				setLoading(false);
 			}
@@ -452,15 +461,16 @@ const Page = () => {
 										<input
 											onClick={() => {
 												setToFill(
-													"Enter pickup location, either you can select or type manually",
+													"Either select pickup location via suggestions or use find me",
 												);
 												setPickupSuggestion([]);
 											}}
 											onChange={(e) => {
 												setToFill(
-													"Enter pickup location, either you can select or type manually",
+													"Either select pickup location via suggestions or use find me"
 												);
 												setPickUp(e.target.value);
+												setPickupSelected(false);
 												searchLocation(
 													e.target.value,
 													setPickupSuggestion,
@@ -536,6 +546,7 @@ const Page = () => {
 																	setPickUpLatitude(
 																		p.longitude!,
 																	);
+																	setPickupSelected(true);
 																}}
 																initial={{
 																	opacity: 0,
@@ -583,14 +594,15 @@ const Page = () => {
 										<input
 											onClick={() => {
 												setToFill(
-													"Enter drop location, either you can select or type manually",
+													"Please select drop location via suggestions only",
 												);
 											}}
 											onChange={(e) => {
 												setToFill(
-													"Enter drop location, either you can select or type manually",
+													"Please select drop location via suggestions only",
 												);
 												setDrop(e.target.value);
+												setDropSelected(false);
 												searchLocation(
 													e.target.value,
 													setDropSuggestion,
@@ -646,6 +658,7 @@ const Page = () => {
 															setDropLongitude(
 																p.longitude!,
 															);
+															setDropSelected(true);
 														}}
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
@@ -674,6 +687,10 @@ const Page = () => {
 							</div>
 						</motion.div>
 
+						{errMsg && (
+							<div className="text-red-500 text-sm -my-2 text-center ">*{errMsg}</div>
+						)}
+
 						{/* Continue */}
 						<motion.button
 							initial={{ y: 16 }}
@@ -683,14 +700,22 @@ const Page = () => {
 								mobile.length != 10 ||
 								!name ||
 								!vehicle ||
-								drop.length === 0 ||
-								pickUp.length === 0
+								!pickupSelected ||
+								!dropSelected
 							}
-							onClick={() =>
+							onClick={() => {
+								if (!pickupSelected) {
+									setErrMsg("Please select pickup location from suggestions");
+									return;
+								}
+								if (!dropSelected) {
+									setErrMsg("Please select drop location from suggestions");
+									return;
+								}
 								router.push(
 									`/customer/search?pickup=${encodeURIComponent(pickUp)}&drop=${encodeURIComponent(drop)}&vehicle=${vehicle}&mobile=${encodeURIComponent(mobile)}&name=${encodeURIComponent(name)}&pickuplat=${pickUpLatitude}&pickuplon=${pickUpLongitude}&droplat=${dropLatitude}&droplon=${dropLongitude}`,
-								)
-							}
+								);
+							}}
 						>
 							Continue <Bike size={16} />
 						</motion.button>

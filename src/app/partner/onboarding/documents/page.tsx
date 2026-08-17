@@ -71,15 +71,24 @@ const Page = () => {
 			} else {
 				setErr("Something went wrong");
 			}
-		} catch (error: any) {
-			const axiosError = error;
-			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				"vehicle submit error",
-				axiosError?.response?.data || axiosError?.message || axiosError,
-			);
-			setErr(serverMessage || "Something went wrong");
-		} finally {
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErr(serverMessage || "failed to sumbit docs, refresh the page and try again")
+			} finally {
 			setIsLoading(false);
 		}
 	};
