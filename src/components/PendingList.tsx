@@ -12,9 +12,23 @@ const PendingList = ({ list, type }: any) => {
 			await axios.get(`/api/admin/videoKyc/${id}`);
 			alert("Room Id Created Successfully, Join Call Now");
 			window.location.reload();
-		} catch (error) {
-			console.log(error);
-		}
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+			}
 	};
 
 	if (list?.length === 0) {
