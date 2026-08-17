@@ -11,7 +11,10 @@ export async function GET(
 	try {
 		const session = await auth();
 		if (!session || !session.user?.email || session.user.role !== "admin") {
-			return Response.json({ message: "Unauthorized" }, { status: 401 });
+			return Response.json(
+				{ success: false, message: "Unauthorized" },
+				{ status: 401 },
+			);
 		}
 
 		await dbConnect();
@@ -19,16 +22,26 @@ export async function GET(
 		const vehicleId = (await context.params).id;
 		const vehicle = await Vehicle.findById(vehicleId).populate("owner");
 		if (!vehicle) {
-			return Response.json({ message: "Vehicle not found" }, { status: 400 });
+			return Response.json(
+				{ success: false, message: "Vehicle not found" },
+				{ status: 400 },
+			);
 		}
 
 		const partner = await User.findById(vehicle.owner);
 		if (!partner) {
-			return Response.json({ message: "partner not found" }, { status: 400 });
+			return Response.json(
+				{
+					success: false,
+					message: "partner not found!, this may be a false sign",
+				},
+				{ status: 400 },
+			);
 		}
 
 		return Response.json(
 			{
+				success: true,
 				vehicle,
 				partner,
 			},
@@ -37,7 +50,11 @@ export async function GET(
 	} catch (error) {
 		console.log(error);
 		return Response.json(
-			{ message: "Partner pricing & vehicle get error" },
+			{
+				success: false,
+				message:
+					"server error: failed to fetch partner's pricing & vehicle details",
+			},
 			{ status: 500 },
 		);
 	}

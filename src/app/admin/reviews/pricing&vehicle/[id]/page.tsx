@@ -19,6 +19,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import ApiErrorBanner from "@/components/ApiErrorBanner";
 
 const Page = () => {
 	const { id } = useParams();
@@ -27,7 +28,7 @@ const Page = () => {
 	const [partnerData, setPartnerData] = useState<IUser>();
 	const [adminCheck, setAdminCheck] = useState<boolean | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [err, setErr] = useState("");
+	const [errMsg, setErrMsg] = useState("");
 	const [rejectionReason, setRejectionReason] = useState("");
 	const approved = "bg-green-100 text-green-700 border border-green-200";
 	const pending = "bg-amber-100 text-amber-700 border border-amber-200";
@@ -36,12 +37,36 @@ const Page = () => {
 	useEffect(() => {
 		const getData = async () => {
 			try {
-				const { data } = await axios.get(`/api/admin/reviews/vehicle/${id}`);
-				console.log(data);
-				setVehicleData(data.vehicle);
-				setPartnerData(data.partner);
-			} catch (error) {
-				console.log(error);
+				setErrMsg("");
+				const { data } = await axios.get(
+					`/api/admin/reviews/vehicle/${id}`,
+				);
+				if (data.success) {
+					console.log(data);
+					setVehicleData(data.vehicle);
+					setPartnerData(data.partner);
+					setErrMsg("");
+				}
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(
+					serverMessage ||
+						"failed to fetch pricing details, please refresh the page and try again",
+				);
 			}
 		};
 		getData();
@@ -50,14 +75,37 @@ const Page = () => {
 	const handleDecision = async () => {
 		setLoading(true);
 		try {
-			await axios.put(`/api/admin/reviews/vehicle/${id}/approve-reject`, {
-				vehicleStatus: adminCheck ? "approved" : "rejected",
-				reason: adminCheck ? "" : rejectionReason,
-			});
-			router.push("/");
-		} catch (error: any) {
-			setErr(error.response?.data?.message || "Something went wrong");
-			console.log(error.response?.data?.message);
+			const { data } = await axios.put(
+				`/api/admin/reviews/vehicle/${id}/approve-reject`,
+				{
+					vehicleStatus: adminCheck ? "approved" : "rejected",
+					reason: adminCheck ? "" : rejectionReason,
+				},
+			);
+			if (data.success) {
+				setErrMsg("");
+				router.push("/");
+			}
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"something went wrong!, refresh the page and try again",
+			);
 		} finally {
 			setLoading(false);
 			setAdminCheck(null);
@@ -66,7 +114,10 @@ const Page = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
+		<div className="relative min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			<header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 border-b">
 				<div className="max-w-7xl mx-auto px-4 h-16 flex items-center gap-4">
 					<button
@@ -76,8 +127,12 @@ const Page = () => {
 						<ArrowLeft />
 					</button>
 					<div className="flex-1 ">
-						<div className="font-semibold text-lg">{partnerData?.name}</div>
-						<div className="text-gray-500 text-xs">{partnerData?.email}</div>
+						<div className="font-semibold text-lg">
+							{partnerData?.name}
+						</div>
+						<div className="text-gray-500 text-xs">
+							{partnerData?.email}
+						</div>
 					</div>
 					<div
 						className={`${partnerData?.partnerStatus === "approved" ? approved : partnerData?.partnerStatus === "pending" ? pending : rejected} py-1 px-2 rounded-full font-semibold text-xs text-center capitalize flex items-center justify-center gap-2`}
@@ -101,7 +156,9 @@ const Page = () => {
 					className="h-[450px] w-full sm:row-span-2 lg:h-full relative flex items-center justify-center hover:-translate-y-1.5 bg-white overflow-hidden transition duration-300 rounded-2xl sm:rounded-4xl"
 				>
 					{!vehicleData?.imageUrl ? (
-						<span className="text-xs text-gray-400">Image Not Uploaded</span>
+						<span className="text-xs text-gray-400">
+							Image Not Uploaded
+						</span>
 					) : (
 						<>
 							<Image
@@ -130,10 +187,14 @@ const Page = () => {
 				<AnimatedCard title="Vehicle Details" icon={<Car size={18} />}>
 					<div className="flex justify-between items-center text-sm capitalize">
 						<span className="text-gray-500">Vehicle Type</span>
-						<span className="font-semibold">{vehicleData?.type || "N/A"}</span>
+						<span className="font-semibold">
+							{vehicleData?.type || "N/A"}
+						</span>
 					</div>
 					<div className="flex justify-between items-center text-sm capitalize">
-						<span className="text-gray-500">Registration Number</span>
+						<span className="text-gray-500">
+							Registration Number
+						</span>
 						<span className="font-semibold">
 							{vehicleData?.vehicleNumber || "N/A"}
 						</span>
@@ -235,7 +296,9 @@ const Page = () => {
 								</div>
 								<div>
 									<h3 className="text-xl font-bold">
-										{adminCheck ? "Approve Vehicle" : "Reject Vehicle"}
+										{adminCheck
+											? "Approve Vehicle"
+											: "Reject Vehicle"}
 									</h3>
 									<p className="text-sm text-gray-500">
 										{adminCheck
@@ -254,7 +317,9 @@ const Page = () => {
 										className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm outline-none focus:ring-2 ring-red-500/20 transition-all min-h-32"
 										placeholder="Explain why the documents were rejected..."
 										value={rejectionReason}
-										onChange={(e) => setRejectionReason(e.target.value)}
+										onChange={(e) =>
+											setRejectionReason(e.target.value)
+										}
 									/>
 								</div>
 							)}
@@ -267,7 +332,10 @@ const Page = () => {
 									Cancel
 								</button>
 								<button
-									disabled={loading || (!adminCheck && !rejectionReason)}
+									disabled={
+										loading ||
+										(!adminCheck && !rejectionReason)
+									}
 									className={`flex-1 py-3 rounded-xl font-semibold text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
 										adminCheck ? "bg-black" : "bg-red-600"
 									}`}

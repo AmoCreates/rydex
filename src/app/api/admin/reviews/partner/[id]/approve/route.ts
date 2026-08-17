@@ -12,7 +12,10 @@ export async function PUT(
 ) {
 	const session = await auth();
 	if (!session || !session.user?.email || session.user.role !== "admin") {
-		return Response.json({ message: "Unauthorized" }, { status: 401 });
+		return Response.json(
+			{ success: false, message: "Unauthorized" },
+			{ status: 401 },
+		);
 	}
 
 	try {
@@ -20,12 +23,15 @@ export async function PUT(
 
 		const { partnerStatus, reason } = await req.json();
 		if (!partnerStatus) {
-			return Response.json({ message: "Invalid request" }, { status: 400 });
+			return Response.json(
+				{ success: false, message: "Invalid request" },
+				{ status: 400 },
+			);
 		}
 
 		if (partnerStatus === "rejected" && !reason) {
 			return Response.json(
-				{ message: "Rejection reason is required" },
+				{ success: false, message: "Rejection reason is required" },
 				{ status: 400 },
 			);
 		}
@@ -34,13 +40,16 @@ export async function PUT(
 		const partner = await User.findById(partnerId);
 
 		if (!partner || partner.role !== "partner") {
-			return Response.json({ message: "Partner not found" }, { status: 400 });
+			return Response.json(
+				{ success: false, message: "Partner not found" },
+				{ status: 400 },
+			);
 		}
 
 		if (partnerStatus === "approved") {
 			if (partner.partnerStatus === "approved") {
 				return Response.json(
-					{ message: "Partner already approved" },
+					{ success: false, message: "Partner already approved" },
 					{ status: 400 },
 				);
 			}
@@ -50,7 +59,10 @@ export async function PUT(
 			const bank = await PartnerBank.findOne({ owner: partnerId });
 			if (!vehicle || !documents || !bank) {
 				return Response.json(
-					{ message: "Partner may not completed onboarding steps" },
+					{
+						success: false,
+						message: "Partner may not completed onboarding steps",
+					},
 					{ status: 400 },
 				);
 			}
@@ -68,26 +80,39 @@ export async function PUT(
 			partner.rejectionMsg = "";
 			await partner.save();
 
-			return Response.json({ message: "Partner approved" }, { status: 200 });
+			return Response.json(
+				{success: true, message: "Partner approved" },
+				{ status: 200 },
+			);
 		} else if (partnerStatus === "rejected") {
 			if (partner.partnerStatus === "rejected") {
 				return Response.json(
-					{ message: "Partner already rejected" },
+					{
+						success: false,
+						message:
+							"Partner already rejected, please go back to dashboard and refresh the page",
+					},
 					{ status: 400 },
 				);
 			}
 			partner.partnerStatus = "rejected";
 			partner.rejectionMsg = reason;
 			await partner.save();
-			return Response.json({ message: "Partner rejected" }, { status: 200 });
+			return Response.json(
+				{ success: true, message: "Partner rejected" },
+				{ status: 200 },
+			);
 		} else {
-			return Response.json({ message: "Invalid status" }, { status: 400 });
+			return Response.json(
+				{ success: false, message: "Invalid status" },
+				{ status: 400 },
+			);
 		}
 	} catch (error) {
 		console.log(error);
 		return Response.json(
 			{
-				message: "partner confirmation failed",
+				message: "server error: partner confirmation failed",
 			},
 			{ status: 500 },
 		);

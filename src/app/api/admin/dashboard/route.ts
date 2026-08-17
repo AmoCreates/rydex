@@ -10,12 +10,22 @@ export async function GET() {
 
 		const session = await auth();
 		if (!session || !session.user?.email || session.user.role !== "admin") {
-			return Response.json({ message: "unauthorized" }, { status: 401 });
+			return Response.json(
+				{ success: false, message: "unauthorized" },
+				{ status: 401 },
+			);
 		}
 
 		const admin = await User.findOne({ email: session.user.email });
 		if (!admin) {
-			return Response.json({ message: "Not an admin" }, { status: 401 });
+			return Response.json(
+				{
+					success: false,
+					message:
+						"Unauthorized!, Not an admin, you are not allowed to do any action",
+				},
+				{ status: 401 },
+			);
 		}
 
 		const totalPartners = await User.countDocuments({ role: "partner" });
@@ -75,12 +85,12 @@ export async function GET() {
 		);
 		const pendingPricing = await Vehicle.find({
 			owner: { $in: partnerPricingReview },
-			status: "pending"
-
+			status: "pending",
 		}).populate("owner");
 
 		return NextResponse.json(
 			{
+				success: true,
 				stats: {
 					totalPartners,
 					totalPendingPartners,
@@ -98,7 +108,10 @@ export async function GET() {
 	} catch (error) {
 		console.log(error);
 		return NextResponse.json(
-			{ message: "Admin Dashboard error", error },
+			{
+				success: false,
+				message: "server error: faile to fetch admin data",
+			},
 			{ status: 500 },
 		);
 	}

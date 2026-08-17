@@ -21,6 +21,8 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import AdminEarning from "./AdminEarning";
 import AdminStatusOverview from "./AdminStatusOverview";
+import { IUser } from "@/model/user.model";
+import ApiErrorBanner from "./ApiErrorBanner";
 
 type Stats = {
 	totalPartners: number;
@@ -36,27 +38,48 @@ type Tab = "Video KYC" | "Partner Reviews" | "Pricing & Images";
 const AdminDashboard = () => {
 	const [stats, setStats] = useState<Stats | null>(null);
 	const [totalPendingPartnerReviews, setTotalPendingPartnerReviews] =
-		useState<[]>();
-	const [pendingKyc, setPendingKyc] = useState<any>();
-	const [pendingPricing, setPendingPricing] = useState<any>();
+		useState<IUser[]>([]);
+	const [pendingKyc, setPendingKyc] = useState<IUser[]>([]);
+	const [pendingPricing, setPendingPricing] = useState<IUser[]>([]);
 	const [activeTab, setActiveTab] = useState<Tab>("Partner Reviews");
 	const [profileOpen, setProfileOpen] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const { userData } = useSelector((state: RootState) => state.user);
 	const dispatch = useDispatch<AppDispatch>();
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
+				setErrMsg("");
 				const { data } = await axios.get("/api/admin/dashboard");
 				console.log(data);
-				if (data) {
+				if (data.success) {
+					setErrMsg("");
 					setStats(data.stats);
 					setPendingKyc(data.pendingVideoKyc);
 					setPendingPricing(data.pendingPricing);
 					setTotalPendingPartnerReviews(data.pendingPartnerReviews);
 				}
-			} catch (error) {
-				console.log(error);
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(
+					serverMessage ||
+						"failed to fetch data, please refresh the page and try again",
+				);
 			}
 		};
 
@@ -70,7 +93,10 @@ const AdminDashboard = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
+		<div className="relative min-h-screen bg-linear-to-br from-gray-100 to-gray-200">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			<header className="sticky top-0 bg-white/80 backdrop-blur-lg border-b z-40">
 				<div className="max-w-7xl mx-auto h-16 px-6 flex items-center justify-between">
 					<div className="flex items-center gap-3">

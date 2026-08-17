@@ -10,20 +10,25 @@ export async function GET(
 	req: NextRequest,
 	context: { params: Promise<{ id: string }> },
 ) {
-	
 	try {
 		const session = await auth();
 		if (!session || !session.user?.email || session.user.role !== "admin") {
-			return Response.json({ message: "Unauthorized" }, { status: 401 });
+			return Response.json(
+				{ success: false, message: "Unauthorized" },
+				{ status: 401 },
+			);
 		}
-		
+
 		await dbConnect();
 
 		const partnerId = (await context.params).id;
 		const partner = await User.findById(partnerId);
 
 		if (!partner || partner.role !== "partner") {
-			return Response.json({ message: "Partner not found" }, { status: 400 });
+			return Response.json(
+				{ success: false, message: "Partner not found!, This may be a false sign" },
+				{ status: 400 },
+			);
 		}
 
 		const vehicle = await Vehicle.findOne({ owner: partnerId });
@@ -32,6 +37,7 @@ export async function GET(
 
 		return Response.json(
 			{
+				success: true,
 				partner,
 				vehicle: vehicle || null,
 				documents: documents || null,
@@ -40,7 +46,14 @@ export async function GET(
 			{ status: 200 },
 		);
 	} catch (error) {
-    console.log(error)
-		return Response.json({message: "Partner get error"}, {status: 500});
+		console.log(error);
+		return Response.json(
+			{
+				success: false,
+				message:
+					"server error: failed to load partner onboarding details",
+			},
+			{ status: 500 },
+		);
 	}
 }

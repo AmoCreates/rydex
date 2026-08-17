@@ -10,7 +10,10 @@ export async function PUT(
 ) {
 	const session = await auth();
 	if (!session || !session.user?.email || session.user.role !== "admin") {
-		return Response.json({ message: "Unauthorized" }, { status: 401 });
+		return Response.json(
+			{ success: false, message: "Unauthorized" },
+			{ status: 401 },
+		);
 	}
 
 	try {
@@ -19,14 +22,14 @@ export async function PUT(
 		const { vehicleStatus, reason } = await req.json();
 		if (!vehicleStatus) {
 			return Response.json(
-				{ message: "Invalid request" },
+				{ success: false, message: "Invalid request" },
 				{ status: 400 },
 			);
 		}
 
 		if (vehicleStatus === "rejected" && !reason) {
 			return Response.json(
-				{ message: "Rejection reason is required" },
+				{ success: false, message: "Rejection reason is required" },
 				{ status: 400 },
 			);
 		}
@@ -38,13 +41,16 @@ export async function PUT(
 
 		if (!vehicle) {
 			return Response.json(
-				{ message: "vehicle not found" },
+				{ success: false, message: "vehicle not found" },
 				{ status: 400 },
 			);
 		}
 		if (!partner) {
 			return Response.json(
-				{ message: "partner not found" },
+				{
+					success: false,
+					message: "partner not found!, this may be a false sign",
+				},
 				{ status: 400 },
 			);
 		}
@@ -52,7 +58,11 @@ export async function PUT(
 		if (vehicleStatus === "approved") {
 			if (vehicle.status === "approved") {
 				return Response.json(
-					{ message: "Vehicle already approved" },
+					{
+						success: false,
+						message:
+							"Vehicle already approved, please go back to dashboard and refresh the page",
+					},
 					{ status: 400 },
 				);
 			}
@@ -69,13 +79,17 @@ export async function PUT(
 			await partner.save();
 
 			return Response.json(
-				{ message: "Partner approved" },
+				{ success: true, message: "Partner approved" },
 				{ status: 200 },
 			);
 		} else if (vehicleStatus === "rejected") {
 			if (vehicle.status === "rejected") {
 				return Response.json(
-					{ message: "vehicle already rejected" },
+					{
+						success: false,
+						message:
+							"vehicle already rejected, please go back to dashboard and refresh the page",
+					},
 					{ status: 400 },
 				);
 			}
@@ -84,12 +98,12 @@ export async function PUT(
 			await vehicle.save();
 
 			return Response.json(
-				{ message: "Partner rejected" },
+				{ success: true, message: "Partner rejected" },
 				{ status: 200 },
 			);
 		} else {
 			return Response.json(
-				{ message: "Invalid status" },
+				{ success: false, message: "Invalid status" },
 				{ status: 400 },
 			);
 		}
@@ -97,7 +111,8 @@ export async function PUT(
 		console.log(error);
 		return Response.json(
 			{
-				message: "vehicle confirmation failed",
+				success: false,
+				message: "server error: vehicle confirmation failed",
 			},
 			{ status: 500 },
 		);
