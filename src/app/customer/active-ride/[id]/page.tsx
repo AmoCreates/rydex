@@ -10,9 +10,10 @@ import { useParams } from "next/navigation";
 import { getSocket } from "@/lib/socket";
 import CompletedScreen from "@/components/CompletedScreen";
 import dynamic from "next/dynamic";
-const LiveRideMap = dynamic(() => import ("@/components/LiveRideMap"), {
-	ssr: false
-})
+import ApiErrorBanner from "@/components/ApiErrorBanner";
+const LiveRideMap = dynamic(() => import("@/components/LiveRideMap"), {
+	ssr: false,
+});
 
 interface IBooking {
 	customer: IUser;
@@ -145,21 +146,42 @@ const Page = () => {
 	const [estDropTime, setEstDropTime] = useState(0);
 	const [expanded, setExpanded] = useState(false);
 	const [cashRequested, setCashRequested] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const { id } = useParams();
 
 	const hanldeCashRequest = async () => {
 		try {
+			setErrMsg("");
 			setCashRequested(true);
 			const { data } = await axios.post(
 				`/api/payment/${id}/cash-request`,
 			);
 			console.log(data);
 			if (data.success) {
+				setErrMsg("");
 				const socket = getSocket();
 				socket?.emit("cash-request", { bookingId: id });
 			}
-		} catch (error) {
-			console.log(error);
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
+			);
+			setErrMsg(
+				serverMessage ||
+					"Failed to send cash request, refresh the page and try again",
+			);
 		}
 	};
 
@@ -181,12 +203,22 @@ const Page = () => {
 						data.booking.dropLocation.coordinates.toReversed(),
 					);
 				}
-			} catch (error) {
-				if (axios.isAxiosError(error)) {
-					console.log(error.response?.data?.message);
-				} else {
-					console.log(error);
-				}
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
 			} finally {
 				setLoading(false);
 			}
@@ -231,16 +263,28 @@ const Page = () => {
 		socket?.on("cash-received", () => {
 			setStatus("completed");
 			setBooking((prev) =>
-				prev ? { ...prev, bookingStatus: "completed", paymentStatus: "paid" } : prev,
+				prev
+					? {
+							...prev,
+							bookingStatus: "completed",
+							paymentStatus: "paid",
+						}
+					: prev,
 			);
 		});
 
 		socket?.on("cash-declined", () => {
-			console.log("cash-declined socket")
+			console.log("cash-declined socket");
 			setStatus("awaiting payment");
-			setCashRequested(false)
+			setCashRequested(false);
 			setBooking((prev) =>
-				prev ? { ...prev, bookingStatus: "awaiting payment", paymentStatus: "pending" } : prev,
+				prev
+					? {
+							...prev,
+							bookingStatus: "awaiting payment",
+							paymentStatus: "pending",
+						}
+					: prev,
 			);
 		});
 
@@ -248,7 +292,6 @@ const Page = () => {
 			socket?.off("cash-received");
 			socket?.off("cash-declined");
 		};
-		
 	});
 
 	if (loading) {
@@ -285,7 +328,10 @@ const Page = () => {
 	};
 
 	return (
-		<div className="h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
+		<div className="relative h-screen w-full bg-zinc-100 flex flex-col lg:flex-row overflow-hidden">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			<div className="realtive flex-1 h-full z-0">
 				<LiveRideMap
 					driverLocation={driverPos}
