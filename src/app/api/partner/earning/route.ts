@@ -10,15 +10,16 @@ export async function GET() {
 			return Response.json({ message: "unauthorized" }, { status: 401 });
 		}
 
-		const admin = await User.findOne({ email: session.user.email });
-		if (!admin) {
-			return Response.json({ message: "Not an admin" }, { status: 401 });
+		const partner = await User.findOne({ email: session.user.email });
+		if (!partner) {
+			return Response.json({ message: "Not a partner" }, { status: 401 });
 		}
 
 		const sevenDaysAgo = new Date();
 		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
 		const bookings = await Booking.find({
+			driver: partner._id,
 			paymentStatus: "paid",
 			createdAt: { $gte: sevenDaysAgo },
 		}).select("partnerAmount createdAt");
