@@ -94,14 +94,21 @@ const Nav = ({ onOpen }: Props) => {
 				);
 				setPendingRequestCount(data.length || 0);
 			} catch (error: unknown) {
-				if (axios.isAxiosError(error)) {
-					console.log(
-						"count pending request error",
-						error.response?.data || error.message,
-					);
-					return;
-				}
-				console.log("count pending request error", error);
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
 			}
 		};
 
@@ -112,14 +119,21 @@ const Nav = ({ onOpen }: Props) => {
 				);
 				setIsActiveRide(data.success);
 			} catch (error: unknown) {
-				if (axios.isAxiosError(error)) {
-					console.log(
-						"count pending request error",
-						error.response?.data || error.message,
-					);
-					return;
-				}
-				console.log("count pending request error", error);
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
 			}
 		};
 
@@ -132,7 +146,7 @@ const Nav = ({ onOpen }: Props) => {
 					return;
 				}
 			} catch {
-				console.log("no customer active ride found");
+				console.log("no active ride found");
 			}
 			setActiveRideId(null);
 			setIsActiveRide(false);
