@@ -17,12 +17,23 @@ const RejectionCard = ({ rejectionMsg, step }: any) => {
 			const res = await axios.patch("/api/partner/request-video-kyc");
 			console.log(res);
 			setShowConfirmation(false); // Close popup on success
-		} catch (error) {
-			setRequestError(
-				(error as any).response?.data?.message ||
-					"Failed to send request. Please try again.",
-			);
-		} finally {
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+			} finally {
 			setIsRequesting(false);
 			window.location.reload(); // Reload page regardless of success/failure to reflect potential status change or clear error
 			alert("Video KYC Request Sent Successfully");

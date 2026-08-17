@@ -21,9 +21,21 @@ const PartnerEarning = () => {
 					? data.slice(-7)
 					: [];
 				setEarningData(SevenDayEarnings);
-			} catch (error: any) {
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
 				console.log(
-					error?.response?.data?.message || error?.message || error,
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
 				);
 			}
 		};
