@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import L from "leaflet";
 import {
 	MapContainer,
@@ -124,6 +124,7 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 	const [route, setRoute] = useState<[number, number][]>([]);
 	const [km, setKm] = useState<number>(0);
 	const [loading, setLoading] = useState(false);
+	const [mounted, setMounted] = useState(false);
 
 	const geoCoding = async (q: string): Promise<[number, number] | null> => {
 		try {
@@ -141,10 +142,10 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 		}
 	};
 
-	async function loadRoute(
+	const loadRoute = useCallback(async (
 		start: [number, number] | null,
 		end: [number, number] | null,
-	) {
+	) => {
 		// start and end should be "lon,lat" strings
 
 		if (!start || !end) {
@@ -175,7 +176,7 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 			console.error('error: "Failed to fetch route');
 			console.error(err);
 		}
-	}
+	}, [setDistance]);
 
 	const updateLocation = async (lat: number, lon: number) => {
 		if (!lat || !lon) {
@@ -216,6 +217,12 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 		setPickUpDrop?.(pickUp, d!);
 	};
 
+	// Prevents Leaflet initialization errors during SSR/HMR
+	// Safe pattern: mounting flag prevents MapContainer from rendering during hydration
+	useLayoutEffect(() => {
+		setMounted(true);
+	}, []);
+
 	useEffect(() => {
 		if (!pickUp || !drop) {
 			return;
@@ -232,63 +239,65 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 			setP2(b);
 			setLoading(false);
 		})();
-	}, [pickUp, drop]);
+	}, [pickUp, drop, loadRoute]);
 
 	return (
 		<div className="relative h-full w-full bg-zinc-100">
-			<MapContainer
-				style={{ width: "100%", height: "100%" }}
-				center={p1 ?? [0, 0]}
-				zoom={13}
-				zoomControl={false}
-			>
-				<TileLayer
-					attribution='&copy; <a href="https://carto.com/">"CARTO"</a> contributors'
-					url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-				/>
-				{p1 && p2 && <FitBounds p1={p1} p2={p2} />}
-
-				{p1 && (
-					<Marker
-						position={p1}
-						icon={pickUpIcon}
-						draggable
-						eventHandlers={{
-							dragend: (e) => {
-								const m = e.target.getLatLng();
-								dragPickUP(m.lat, m.lng);
-							},
-						}}
+			{mounted && (
+				<MapContainer
+					style={{ width: "100%", height: "100%" }}
+					center={p1 ?? [0, 0]}
+					zoom={13}
+					zoomControl={false}
+				>
+					<TileLayer
+						attribution='&copy; <a href="https://carto.com/">"CARTO"</a> contributors'
+						url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
 					/>
-				)}
-				{p2 && (
-					<Marker
-						position={p2}
-						icon={dropIcon}
-						draggable
-						eventHandlers={{
-							dragend: (e) => {
-								const m = e.target.getLatLng();
-								dragDrop(m.lat, m.lng);
-							},
-						}}
-					/>
-				)}
+					{p1 && p2 && <FitBounds p1={p1} p2={p2} />}
 
-				{route.length !== 0 && (
-					<>
-						<Polyline
-							positions={route}
-							pathOptions={{
-								color: "#0a0a0a",
-								weight: 4,
-								lineCap: "round",
-								lineJoin: "round",
+					{p1 && (
+						<Marker
+							position={p1}
+							icon={pickUpIcon}
+							draggable
+							eventHandlers={{
+								dragend: (e) => {
+									const m = e.target.getLatLng();
+									dragPickUP(m.lat, m.lng);
+								},
 							}}
 						/>
-					</>
-				)}
-			</MapContainer>
+					)}
+					{p2 && (
+						<Marker
+							position={p2}
+							icon={dropIcon}
+							draggable
+							eventHandlers={{
+								dragend: (e) => {
+									const m = e.target.getLatLng();
+									dragDrop(m.lat, m.lng);
+								},
+							}}
+						/>
+					)}
+
+					{route.length !== 0 && (
+						<>
+							<Polyline
+								positions={route}
+								pathOptions={{
+									color: "#0a0a0a",
+									weight: 4,
+									lineCap: "round",
+									lineJoin: "round",
+								}}
+							/>
+						</>
+					)}
+				</MapContainer>
+			)}
 
 			{/*Map Loading*/}
 			<AnimatePresence>

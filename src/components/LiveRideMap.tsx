@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
 	MapContainer,
 	Marker,
@@ -45,12 +45,19 @@ const LiveRideMap = ({
 
 	const [driverToPickupRoute, setDriverToPickupRoute] = useState<[number, number][]>([]);
 	const [mainRoute, setMainRoute] = useState<[number, number][]>([]);
+	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
 		import("leaflet").then((leafletModule) => {
 			L = leafletModule;
 			setLeaflet(leafletModule);
 		});
+	}, []);
+
+	// Prevents Leaflet initialization errors during SSR/HMR
+	// Safe pattern: mounting flag prevents MapContainer from rendering during hydration
+	useLayoutEffect(() => {
+		setMounted(true);
 	}, []);
 
 	const formattedStatus = status?.toLowerCase();
@@ -281,60 +288,62 @@ const LiveRideMap = ({
 
 	return (
 		<div className="relative h-full w-full bg-zinc-100">
-			<MapContainer
-				style={{ width: "100%", height: "100%" }}
-				center={mapCenter ?? [0, 0]}
-				zoom={14}
-				zoomControl={false}
-			>
-				<TileLayer
-					attribution='&copy; <a href="https://carto.com/">"CARTO"</a> contributors'
-					url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-				/>
-
-				<MapRecenter center={mapCenter} />
-
-				{driverToPickupRoute.length >= 2 && (
-					<Polyline
-						positions={driverToPickupRoute}
-						pathOptions={{
-							color: "#5c5d67",
-							weight: 3.5,
-							dashArray: "8, 8",
-							lineCap: "round",
-							lineJoin: "round",
-						}}
+			{mounted && (
+				<MapContainer
+					style={{ width: "100%", height: "100%" }}
+					center={mapCenter ?? [0, 0]}
+					zoom={14}
+					zoomControl={false}
+				>
+					<TileLayer
+						attribution='&copy; <a href="https://carto.com/">"CARTO"</a> contributors'
+						url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
 					/>
-				)}
 
-				{mainRoute.length >= 2 && (
-					<Polyline
-						positions={mainRoute}
-						pathOptions={{
-							color: "#0a0a0a",
-							weight: 3.5,
-							lineCap: "round",
-							lineJoin: "round",
-						}}
-					/>
-				)}
+					<MapRecenter center={mapCenter} />
 
-				{!isCompleted && driverLocation && (
-					<Marker position={driverLocation} icon={driverIcon} />
-				)}
-				{!isCompleted &&
-					pickUpLocation &&
-					formattedStatus !== "started" && (
-						<Marker position={pickUpLocation} icon={pickUpIcon} />
+					{driverToPickupRoute.length >= 2 && (
+						<Polyline
+							positions={driverToPickupRoute}
+							pathOptions={{
+								color: "#5c5d67",
+								weight: 3.5,
+								dashArray: "8, 8",
+								lineCap: "round",
+								lineJoin: "round",
+							}}
+						/>
 					)}
-				{!isCompleted && dropLocation && (
-					<Marker position={dropLocation} icon={dropIcon} />
-				)}
 
-				{isCompleted && dropLocation && (
-					<Marker position={dropLocation} icon={completedIcon} />
-				)}
-			</MapContainer>
+					{mainRoute.length >= 2 && (
+						<Polyline
+							positions={mainRoute}
+							pathOptions={{
+								color: "#0a0a0a",
+								weight: 3.5,
+								lineCap: "round",
+								lineJoin: "round",
+							}}
+						/>
+					)}
+
+					{!isCompleted && driverLocation && (
+						<Marker position={driverLocation} icon={driverIcon} />
+					)}
+					{!isCompleted &&
+						pickUpLocation &&
+						formattedStatus !== "started" && (
+							<Marker position={pickUpLocation} icon={pickUpIcon} />
+						)}
+					{!isCompleted && dropLocation && (
+						<Marker position={dropLocation} icon={dropIcon} />
+					)}
+
+					{isCompleted && dropLocation && (
+						<Marker position={dropLocation} icon={completedIcon} />
+					)}
+				</MapContainer>
+			)}
 		</div>
 	);
 };
