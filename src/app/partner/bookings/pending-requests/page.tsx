@@ -16,6 +16,7 @@ import {
 import { RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
 import { getSocket } from "@/lib/socket";
+import ApiErrorBanner from "@/components/ApiErrorBanner";
 
 type ConfirmationModalType = null | "accept" | "reject";
 
@@ -23,6 +24,7 @@ const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [confirm, setConfirm] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const [confirmationModal, setConfirmationModal] =
 		useState<ConfirmationModalType>(null);
 	const [currBooking, setCurrBooking] = useState<IBooking | null>(null);
@@ -30,6 +32,7 @@ const Page = () => {
 
 	useEffect(() => {
 		const fetchPendingRequest = async () => {
+			setErrMsg("");
 			try {
 				setLoading(true);
 				const { data } = await axios.get(
@@ -48,12 +51,12 @@ const Page = () => {
 				};
 				const serverMessage = axiosError?.response?.data?.message;
 				console.log(
-					"count pending request error",
 					serverMessage ||
 						axiosError?.response?.data ||
 						axiosError?.message ||
 						error,
 				);
+				setErrMsg(serverMessage || "Failed to find pending requestes");
 			} finally {
 				setLoading(false);
 			}
@@ -63,38 +66,38 @@ const Page = () => {
 
 	useEffect(() => {
 		const socket = getSocket();
-		socket?.on('new-booking', (data) => {
-			console.log("socket data",data);
-			setBookings((prev) => [...prev, data]);
-		})
-		return () => {
-			socket?.off('new-booking')
-		}
-	})
 
-	useEffect(() => {
-		const socket = getSocket();
-		socket?.on('cancel-booking', (data) => {
-			console.log("socket data",data);
+		socket?.on("new-booking", (data) => {
+			console.log("socket data", data);
+			setBookings((prev) => [...prev, data]);
+		});
+
+		socket?.on("cancel-booking", (data) => {
+			console.log("socket data", data);
 			setBookings((prevBookings) =>
-					prevBookings.filter((b) => b._id.toString() !== data)
-				);
-		})
+				prevBookings.filter((b) => b._id.toString() !== data),
+			);
+		});
+
 		return () => {
-			socket?.off('cancel-booking')
-		}
-	})
+			socket?.off("new-booking");
+			socket?.off("cancel-booking");
+		};
+	});
+
 
 	const handleAccept = async (id: string) => {
 		try {
+			setErrMsg("")
 			setConfirm(true);
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
 				console.log("ride accepted");
+				setErrMsg("")
 				setBookings((prevBookings) =>
-					prevBookings.filter((b) => b._id.toString() !== id)
+					prevBookings.filter((b) => b._id.toString() !== id),
 				);
-				router.push('/partner/bookings/active-ride')
+				router.push("/partner/bookings/active-ride");
 			}
 		} catch (error: unknown) {
 			const axiosError = error as {
@@ -107,12 +110,12 @@ const Page = () => {
 			};
 			const serverMessage = axiosError?.response?.data?.message;
 			console.log(
-				"count pending request error",
 				serverMessage ||
 					axiosError?.response?.data ||
 					axiosError?.message ||
 					error,
 			);
+			setErrMsg(serverMessage || "Failed to accept the ride, refresh the page and try agian")
 		} finally {
 			setConfirm(false);
 			setConfirmationModal(null);
@@ -122,11 +125,13 @@ const Page = () => {
 	const handleReject = async (id: string) => {
 		try {
 			setConfirm(true);
+			setErrMsg("");
 			const res = await axios.post(`/api/partner/bookings/${id}/reject`);
 			if (res.status === 200) {
 				console.log("ride rejected");
+				setErrMsg("")
 				setBookings((prevBookings) =>
-					prevBookings.filter((b) => b._id.toString() !== id)
+					prevBookings.filter((b) => b._id.toString() !== id),
 				);
 			}
 		} catch (error: unknown) {
@@ -140,12 +145,12 @@ const Page = () => {
 			};
 			const serverMessage = axiosError?.response?.data?.message;
 			console.log(
-				"count pending request error",
 				serverMessage ||
 					axiosError?.response?.data ||
 					axiosError?.message ||
 					error,
 			);
+			setErrMsg(serverMessage || "Failed to reject booking, refresh the page and try again")
 		} finally {
 			setConfirm(false);
 			setConfirmationModal(null);
@@ -161,7 +166,10 @@ const Page = () => {
 	}
 
 	return (
-		<div className="min-h-screen bg-[#f4f5f7]">
+		<div className="relative min-h-screen bg-[#f4f5f7]">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			{/* Header */}
 			<div className="bg-white border-b border-gray-200">
 				<div className="max-w-6xl mx-auto px-6 py-16">
@@ -209,10 +217,8 @@ const Page = () => {
 								<div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
 									{/* Left: Pickup & Drop Address & Time*/}
 									<div className="flex-1 space-y-6">
-
 										{/* Customer Name and Mobile */}
 										<div className="flex flex-wrap gap-5 px-5 bg-gray-100 p-2 rounded-2xl">
-
 											{/* Customer Name */}
 											<div className="flex gap-4">
 												<div className="bg-blue-100 p-3 rounded-lg flex items-center justify-center">
@@ -243,7 +249,7 @@ const Page = () => {
 												</div>
 											</div>
 										</div>
-										
+
 										{/* Pickup Address */}
 										<div className="flex gap-4">
 											<div className="bg-gray-100 p-3 rounded-lg flex items-center justify-center">

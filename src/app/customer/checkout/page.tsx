@@ -30,6 +30,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import { getSocket } from "@/lib/socket";
+import ApiErrorBanner from "@/components/ApiErrorBanner";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -78,9 +79,11 @@ const CheckoutPageContent = () => {
 	const [payMode, setPayMode] = useState<"cash" | "online">("cash");
 	const { userData } = useSelector((state: RootState) => state.user);
 	const [bar, setBar] = useState(true);
+	const [errMsg, setErrMsg] = useState("");
 
 	const handleBookRequest = async () => {
 		try {
+			setErrMsg("");
 			setLoading(true);
 			const res = await axios.post("/api/bookings/create", {
 				driverId,
@@ -104,10 +107,26 @@ const CheckoutPageContent = () => {
 			if (res.status === 201) {
 				setCurrBookingId(res.data._id.toString());
 				setStatus("requested");
+				setErrMsg("");
 			}
-		} catch (error: any) {
-			console.log(error?.response.data.message);
-		} finally {
+		}  catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(serverMessage || "failed to create request, refresh the page and try again")
+			} finally {
 			setLoading(false);
 		}
 	};
@@ -115,16 +134,33 @@ const CheckoutPageContent = () => {
 	const handleCancelRequest = async () => {
 		try {
 			setLoading(true);
+			setErrMsg("");
 			const res = await axios.post(
 				`/api/bookings/${currBookingId}/cancel-ride`,
 			);
 
 			if (res.status === 200) {
 				setStatus("idle");
+				setErrMsg("");
 			}
-		} catch (error: any) {
-			console.log(error?.response.data.message);
-		} finally {
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(serverMessage || "failed to cancel request, refresh the page and try again")
+			} finally {
 			setLoading(false);
 		}
 	};
@@ -150,12 +186,13 @@ const CheckoutPageContent = () => {
 	const handleOnlinePayment = async () => {
 		if (!currBookingId || !payMode || payMode === "cash") return;
 		setLoading(true);
+		setErrMsg("")
 		try {
 			if (payMode == "online") {
 				const razorpayLoaded = await loadRazorPayScript();
 				if (!razorpayLoaded) {
-					alert("razorypay script load faild");
-					return
+					setErrMsg("Failed to load razor payment gateway, either try again or choose cash method")
+					return;
 				}
 			}
 
@@ -168,6 +205,7 @@ const CheckoutPageContent = () => {
 				alert(
 					"Failed to create payment order - " + (data.message || ""),
 				);
+				setErrMsg("Failed to load razor payment gateway, either try again or choose cash method")
 				return;
 			}
 			console.log(data);
@@ -210,16 +248,16 @@ const CheckoutPageContent = () => {
 							window.location.href = `/customer/active-ride/${currBookingId}`;
 							setStatus("confirmed");
 						} else {
-							alert("Payment verification failed");
+							setErrMsg("Payment verification failed");
 						}
-					} catch (err) {
+					} catch (err: unknown) {
 						console.error(err);
-						alert("Payment verification failed");
+						setErrMsg("Payment verification failed");
 					}
 				},
 			});
 			paymentObject.open();
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.log(error);
 		} finally {
 			setLoading(false);
@@ -235,11 +273,26 @@ const CheckoutPageContent = () => {
 			console.log(data);
 			if (data.success) {
 				window.location.href = `/customer/active-ride/${currBookingId}`;
-				setStatus("confirmed")
+				setStatus("confirmed");
 			}
-		} catch (error: any) {
-			console.log(error.response.data.message);
-		}
+		} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(serverMessage || "failed to make cash ride, refresh the page and try again")
+			}
 	};
 
 	useEffect(() => {
@@ -266,8 +319,23 @@ const CheckoutPageContent = () => {
 				console.log(data);
 				setCurrBookingId(data._id.toString());
 				setStatus(data.bookingStatus);
-			} catch (error: unknown) {
-				console.log(error);
+			}catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(serverMessage || "failed to fetch the active ride, refresh the page and try again")
 			}
 		};
 
@@ -295,7 +363,10 @@ const CheckoutPageContent = () => {
 	}, [status]);
 
 	return (
-		<div className="min-h-screen bg-zinc-100 px-4 py-12">
+		<div className="relative min-h-screen bg-zinc-100 px-4 py-12">
+			<div className=" absolute left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			<div className="relative max-w-6xl mx-auto z-10">
 				{/* Header */}
 				<motion.div

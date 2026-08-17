@@ -23,6 +23,7 @@ import { IVehicle } from "@/model/vehicle.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
+import ApiErrorBanner from "@/components/ApiErrorBanner";
 
 interface IBooking {
 	_id: string;
@@ -124,10 +125,12 @@ const Page = () => {
 	const [selectStatus, setSelectStatus] = useState("All");
 	const [loading, setLoading] = useState(false);
 	const [cancle, setCancel] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const router = useRouter();
 
 	useEffect(() => {
-		const getActiveRides = async () => {
+		const getAllBookings = async () => {
+			setErrMsg("");
 			try {
 				setLoading(true);
 				const { data } = await axios.get("/api/user/bookings");
@@ -135,18 +138,29 @@ const Page = () => {
 				if (data.success) {
 					setBookings(data.bookings);
 				}
-			} catch (error) {
-				if (axios.isAxiosError(error)) {
-					console.log(error.response?.data?.message);
-				} else {
-					console.log(error);
-				}
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(serverMessage || "");
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		getActiveRides();
+		getAllBookings();
 	}, []);
 
 	const filterBookings: IBooking[] =
@@ -172,11 +186,27 @@ const Page = () => {
 		setCancel(true);
 		try {
 			setLoading(true);
-			await axios.post(
-				`/api/bookings/${currBookingId}/cancel-ride`,
+			await axios.post(`/api/bookings/${currBookingId}/cancel-ride`);
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
+					};
+				};
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			console.log(
+				serverMessage ||
+					axiosError?.response?.data ||
+					axiosError?.message ||
+					error,
 			);
-		} catch (error: any) {
-			console.log(error?.response.data.message);
+			setErrMsg(
+				serverMessage ||
+					"booking cancellation failed, refresh the page and try again",
+			);
 		} finally {
 			setLoading(false);
 			setCancel(false);
@@ -184,7 +214,11 @@ const Page = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="relative min-h-screen bg-gray-50">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
+
 			<header className="relative bg-white border-b border-gray-200">
 				<motion.button
 					whileTap={{ scale: 0.88 }}
@@ -245,18 +279,20 @@ const Page = () => {
 						</div>
 					)}
 
-					{!loading && filterBookings.length === 0 && (
-						<div className="bg-white rounded-2xl p-12 text-center shadow-sm">
-							<Car className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-							<h1 className="text-lg font-medium text-gray-900">
-								No bookings yet.
-							</h1>
-							<p className="text-gray-500 text-sm mt-1">
-								When a customer books a ride, it will appear
-								here.
-							</p>
-						</div>
-					)}
+					{!loading &&
+						filterBookings.length === 0 &&
+						errMsg === "" && (
+							<div className="bg-white rounded-2xl p-12 text-center shadow-sm">
+								<Car className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+								<h1 className="text-lg font-medium text-gray-900">
+									No bookings yet.
+								</h1>
+								<p className="text-gray-500 text-sm mt-1">
+									When a customer books a ride, it will appear
+									here.
+								</p>
+							</div>
+						)}
 
 					{!loading && filterBookings.length > 0 && (
 						<div>
@@ -409,11 +445,17 @@ const Page = () => {
 													<div className="flex items-center gap-2">
 														<button
 															onClick={() =>
-																handleCancelRequest(b._id)
+																handleCancelRequest(
+																	b._id,
+																)
 															}
 															className="flex items-center gap-1 text-sm font-medium text-white  bg-zinc-800 hover:bg-zinc-900 px-4 py-1.5 rounded-lg active:scale-97 transtiion-colors cursor-pointer "
 														>
-															<span>{cancle ? "Cancelling..." : "Cancel"}</span>
+															<span>
+																{cancle
+																	? "Cancelling..."
+																	: "Cancel"}
+															</span>
 															<X className="w-4 h-4" />
 														</button>
 													</div>

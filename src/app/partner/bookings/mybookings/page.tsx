@@ -23,6 +23,7 @@ import { IVehicle } from "@/model/vehicle.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { RiCheckDoubleLine, RiSendPlaneFill } from "@remixicon/react";
 import { useRouter } from "next/navigation";
+import ApiErrorBanner from "@/components/ApiErrorBanner";
 
 interface IBooking {
 	customer: IUser;
@@ -122,10 +123,11 @@ const Page = () => {
 	const [bookings, setBookings] = useState<IBooking[]>([]);
 	const [selectStatus, setSelectStatus] = useState("All");
 	const [loading, setLoading] = useState(false);
+	const [errMsg, setErrMsg] = useState("");
 	const router = useRouter();
 
 	useEffect(() => {
-		const getActiveRides = async () => {
+		const getAllBookings = async () => {
 			try {
 				setLoading(true);
 				const { data } = await axios.get(
@@ -135,18 +137,32 @@ const Page = () => {
 				if (data.success) {
 					setBookings(data.bookings);
 				}
-			} catch (error) {
-				if (axios.isAxiosError(error)) {
-					console.log(error.response?.data?.message);
-				} else {
-					console.log(error);
-				}
+			} catch (error: unknown) {
+				const axiosError = error as {
+					response?: {
+						data?: {
+							message?: string;
+						};
+					};
+					message?: string;
+				};
+				const serverMessage = axiosError?.response?.data?.message;
+				console.log(
+					serverMessage ||
+						axiosError?.response?.data ||
+						axiosError?.message ||
+						error,
+				);
+				setErrMsg(
+					serverMessage ||
+						"failed to cancel request, refresh the page and try again",
+				);
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		getActiveRides();
+		getAllBookings();
 	}, []);
 
 	const filterBookings: IBooking[] =
@@ -169,7 +185,10 @@ const Page = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="relative min-h-screen bg-gray-50">
+			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+				<ApiErrorBanner message={errMsg} />
+			</div>
 			<header className="reltive bg-white border-b border-gray-200">
 				<motion.button
 					whileTap={{ scale: 0.88 }}
