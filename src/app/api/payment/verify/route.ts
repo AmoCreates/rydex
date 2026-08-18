@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				success: false,
-				message: `payment verifcation faild err, ${error}`,
+				message: `payment verifcation faild`
 			},
 			{ status: 500 },
 		);
