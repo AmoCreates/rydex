@@ -70,8 +70,7 @@ export async function POST(req: NextRequest) {
 		}
 
     const customerName = booking.customer.name
-		// const email = booking.customer.email;
-		const email = "AmoCreates@outlook.com"
+		const email = booking.customer.email;
 		const driverName = booking.driver.name;
 		const dropAddress = booking.dropAddress;
 		const vehicleDetails = `${booking.vehicle.type}, ${booking.vehicle.vehicleModel}, ${booking.vehicle.vehicleNumber}`;
