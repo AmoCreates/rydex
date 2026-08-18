@@ -102,7 +102,8 @@ const AuthModel = ({ open, onClose }: Props) => {
 
 			if (res?.error) {
 				const normalizedError =
-					res.error === "CredentialsSignin" || res.error === "Configuration"
+					res.error === "CredentialsSignin" ||
+					res.error === "Configuration"
 						? "Invalid email or password"
 						: res.error.replace(/[-_]/g, " ") || "Login failed";
 
@@ -205,7 +206,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 								<h1 className="text-3xl font-extrabold tracking-widest">
 									RYDEX
 								</h1>
-								<p className="text-sm text-gray-500">Premium Vehicle Booking</p>
+								<p className="text-sm text-gray-500">
+									Premium Vehicle Booking
+								</p>
 							</div>
 
 							<button
@@ -213,7 +216,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 								disabled={loading}
 								onClick={async () => {
 									setLoading(true);
-									await signIn("google", { callbackUrl: "/" });
+									await signIn("google", {
+										callbackUrl: "/",
+									});
 									setLoading(false);
 								}}
 							>
@@ -239,16 +244,31 @@ const AuthModel = ({ open, onClose }: Props) => {
 								<hr className="grow border-black/20" />
 							</div>
 
+							<p className="text-[12px] text-zinc-400 -mt-3 text-center">
+								dummy admin email | pass ::{" "}
+								<span className="font-bold text-zinc-500">
+									admin@mail.com | 123456
+								</span>
+							</p>
+
 							{step === "login" && (
 								<motion.div
 									initial={{ opacity: 0, x: 20 }}
 									animate={{ opacity: 1, x: 0 }}
 								>
-									<h1 className="text-xl font-semibold">Welcome Back</h1>
-									<form onSubmit={handleSubmit} className="mt-5 space-y-4">
+									<h1 className="text-xl font-semibold">
+										Welcome Back
+									</h1>
+									<form
+										onSubmit={handleSubmit}
+										className="mt-5 space-y-4"
+									>
 										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
 											<label htmlFor="email">
-												<Mail size={18} className="text-gray-500" />
+												<Mail
+													size={18}
+													className="text-gray-500"
+												/>
 											</label>
 											<input
 												type="email"
@@ -260,7 +280,10 @@ const AuthModel = ({ open, onClose }: Props) => {
 										</div>
 										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
 											<label htmlFor="pass">
-												<Lock size={18} className="text-gray-500" />
+												<Lock
+													size={18}
+													className="text-gray-500"
+												/>
 											</label>
 											<input
 												type="password"
@@ -283,11 +306,15 @@ const AuthModel = ({ open, onClose }: Props) => {
 											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 transition flex justify-center items-center gap-3 ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
-											{loading ? "Logging in..." : "Login"}
+											{loading
+												? "Logging in..."
+												: "Login"}
 										</button>
 									</form>
 									<div className="flex mt-5 items-center flex-col text-[15px]">
-										<p className="text-gray-500">Don&#39;t have an account?</p>
+										<p className="text-gray-500">
+											Don&#39;t have an account?
+										</p>
 										<button
 											onClick={() => {
 												setStep("signup");
@@ -306,11 +333,19 @@ const AuthModel = ({ open, onClose }: Props) => {
 									initial={{ opacity: 0, x: 20 }}
 									animate={{ opacity: 1, x: 0 }}
 								>
-									<h1 className="text-xl font-semibold">Create Account</h1>
-									<form onSubmit={handleSubmit} className="mt-5 space-y-4">
+									<h1 className="text-xl font-semibold">
+										Create Account
+									</h1>
+									<form
+										onSubmit={handleSubmit}
+										className="mt-5 space-y-4"
+									>
 										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
 											<label htmlFor="name">
-												<UserRound size={18} className="text-gray-500" />
+												<UserRound
+													size={18}
+													className="text-gray-500"
+												/>
 											</label>
 											<input
 												type="name"
@@ -323,7 +358,10 @@ const AuthModel = ({ open, onClose }: Props) => {
 										</div>
 										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
 											<label htmlFor="email">
-												<Mail size={18} className="text-gray-500" />
+												<Mail
+													size={18}
+													className="text-gray-500"
+												/>
 											</label>
 											<input
 												type="email"
@@ -335,7 +373,10 @@ const AuthModel = ({ open, onClose }: Props) => {
 										</div>
 										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
 											<label htmlFor="pass">
-												<Lock size={18} className="text-gray-500" />
+												<Lock
+													size={18}
+													className="text-gray-500"
+												/>
 											</label>
 											<input
 												type="password"
@@ -347,16 +388,24 @@ const AuthModel = ({ open, onClose }: Props) => {
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
-										{err && <div className="text-red-500">*{err}</div>}
+										{err && (
+											<div className="text-red-500">
+												*{err}
+											</div>
+										)}
 										<button
 											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900  flex justify-center items-center transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
-											{loading ? "Sending OTP..." : "Send OTP"}
+											{loading
+												? "Sending OTP..."
+												: "Send OTP"}
 										</button>
 									</form>
 									<div className="flex mt-5 items-center flex-col text-[15px]">
-										<p className="text-gray-500">Already have an account?</p>
+										<p className="text-gray-500">
+											Already have an account?
+										</p>
 										<button
 											className="font-semibold hover:underline cursor-pointer"
 											onClick={() => {
@@ -377,10 +426,14 @@ const AuthModel = ({ open, onClose }: Props) => {
 									animate={{ opacity: 1, x: 0 }}
 									exit={{ opacity: 0, x: -20 }}
 								>
-									<h1 className="text-xl font-semibold">Enter OTP</h1>
+									<h1 className="text-xl font-semibold">
+										Enter OTP
+									</h1>
 									<p className="text-gray-500 text-sm">
 										Sent to{" "}
-										<span className="text-green-600 font-medium">{email}</span>
+										<span className="text-green-600 font-medium">
+											{email}
+										</span>
 									</p>
 									<div className="mt-5 space-y-4 flex justify-between gap-2">
 										{otp.map((digit, idx) => (
@@ -390,7 +443,12 @@ const AuthModel = ({ open, onClose }: Props) => {
 												value={digit}
 												name={`otp-${idx}`}
 												maxLength={1}
-												onChange={(e) => handleChangeOtp(idx, e.target.value)}
+												onChange={(e) =>
+													handleChangeOtp(
+														idx,
+														e.target.value,
+													)
+												}
 												className="w-10 h-10 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outline-none"
 											/>
 										))}
@@ -407,7 +465,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 										onClick={verifyEmail}
 										disabled={loading}
 									>
-										{loading ? "Verifying OTP..." : "Verify Email"}
+										{loading
+											? "Verifying OTP..."
+											: "Verify Email"}
 									</button>
 									<div className="flex mt-2 items-center flex-col text-[15px]">
 										<button
@@ -417,7 +477,9 @@ const AuthModel = ({ open, onClose }: Props) => {
 											}}
 											disabled={loading}
 											className="font-semibold hover:underline cursor-pointer text-gray-500 disabled:no-underline disabled:cursor-not-allowed"
-										>Re-Enter Email</button>
+										>
+											Re-Enter Email
+										</button>
 									</div>
 								</motion.div>
 							)}
