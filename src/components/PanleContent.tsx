@@ -48,9 +48,7 @@ type message = {
 
 const PanleContent = ({
 	isActive,
-	displayDistance,
 	displayTime,
-	cfg,
 	status,
 	booking,
 	paymentStatus,
@@ -150,7 +148,7 @@ const PanleContent = ({
 			getSuggestions();
 		};
 
-		// controlGetSuggestion();
+		controlGetSuggestion();
 	}, [booking?._id]);
 
 	useEffect(() => {
