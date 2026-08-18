@@ -50,7 +50,6 @@ const PartnerDashboard = () => {
 	const [errMsg, setErrMsg] = useState("");
 	const [cashRequestedBooking, setCashRequestedBooking] =
 		useState<IBooking | null>(null);
-
 	const { userData } = useSelector((state: RootState) => state.user);
 	const router = useRouter();
 
@@ -325,6 +324,7 @@ const PartnerDashboard = () => {
 						/>
 					)}
 
+				{/* Approve Card */}
 				{vehicleData?.status === "approved" &&
 					userData?.partnerOnBoardingStep === 7 && (
 						<motion.div
