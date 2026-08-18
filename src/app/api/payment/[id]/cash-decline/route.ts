@@ -62,8 +62,7 @@ export async function POST(
 			{ success: true, message: "declined cash confirmation" },
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{
 				success: false,

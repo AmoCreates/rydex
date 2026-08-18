@@ -68,8 +68,7 @@ export async function POST(req: NextRequest) {
 			},
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{
 				success: false,

@@ -176,8 +176,7 @@ export async function POST(req: NextRequest) {
 			{ success: true, message: "pickup otp sent successfully" },
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{ success: false, message: "pickup OTP generation failed" },
 			{ status: 500 },

@@ -134,12 +134,9 @@ export async function POST(req: Request) {
 		await user.save();
 
 		return Response.json(partnerDocs, { status: 200 });
-	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : "Unknown error occurred";
-		console.error("Partner documents upload error details:", error);
+	} catch  {
 		return Response.json(
-			{ message: "Upload documents error", error: errorMessage },
+			{ message: "server error: failed to upload documents" },
 			{ status: 500 },
 		);
 	}

@@ -83,7 +83,6 @@ const Page = () => {
 					reason: rejectionReason,
 				},
 			);
-			console.log(res);
 
 			setAdminCheck(null);
 			setRejectionReason("");
@@ -97,12 +96,6 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrorMsg(serverMessage || "failed to cancel request, refresh the page and try again")
 			} finally {
 			setIsProcessing(false);

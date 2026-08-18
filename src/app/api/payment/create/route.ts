@@ -55,8 +55,7 @@ export async function POST(req: NextRequest) {
 			{ success: true, orderId: order.id, amount: order.amount, currency: order.currency },
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log("Checkout Failed Error: ", error);
+	} catch {
 		return NextResponse.json(
 			{
 				success: false,

@@ -179,7 +179,6 @@ const Page = () => {
 		if (status !== "confirmed" || otpVerified) return;
 		try {
 			setErrMsg("");
-			console.log("sending");
 			setLoadingOtp(true);
 			clearOtpDigits();
 			const { data } = await axios.post(
@@ -187,7 +186,6 @@ const Page = () => {
 				{ bookingId: booking?._id },
 			);
 			if (data.success) {
-				console.log(data);
 				setErrMsg("");
 				setOtpMode(true);
 			}
@@ -201,12 +199,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to send pickup OTP, refresh the page and try again",
@@ -219,7 +211,6 @@ const Page = () => {
 		if (status !== "started") return;
 		try {
 			setErrMsg("");
-			console.log("sending");
 			setLoadingOtp(true);
 			setOtpErr("");
 			clearOtpDigits();
@@ -228,7 +219,6 @@ const Page = () => {
 				{ bookingId: booking?._id },
 			);
 			if (data.success) {
-				console.log(data);
 				setOtpMode(true);
 				setOtpVerified(false);
 				setErrMsg("");
@@ -243,12 +233,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to send drop OTP, refresh the page and try again",
@@ -304,12 +288,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to verify pickup OTP, refresh the page and try again",
@@ -335,7 +313,6 @@ const Page = () => {
 			);
 
 			if (data.success) {
-				console.log(data);
 				setOtpVerified(true);
 				setStatus(data.booking.bookingStatus);
 				setBooking((prev) =>
@@ -368,12 +345,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to verify drop OTP, refresh the page and try again",
@@ -392,7 +363,6 @@ const Page = () => {
 		try {
 			setErrMsg("");
 			const { data } = await axios.post("/api/payment/cash");
-			console.log(data);
 			if (data.success) {
 				setErrMsg("");
 				setCashRequested(false);
@@ -411,12 +381,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to accept cash, refresh the page and try again",
@@ -431,7 +395,6 @@ const Page = () => {
 				`/api/payment/${booking!._id}/cash-decline`,
 			);
 			if (data.success) {
-				console.log(data);
 				setCashRequested(false);
 				setErrMsg("");
 				const socket = getSocket();
@@ -447,12 +410,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to decline the cash, refresh the page and try again",
@@ -469,8 +426,6 @@ const Page = () => {
 				const { data } = await axios.get(
 					"/api/partner/bookings/active-ride",
 				);
-				console.log(data);
-				console.log(data.booking);
 				if (data.success) {
 					setBooking(data.booking);
 					setStatus(data.booking.bookingStatus);
@@ -521,7 +476,6 @@ const Page = () => {
 					const lon = coords.longitude;
 					const lat = coords.latitude;
 					setDriverPos([lat, lon]);
-					console.log("Sending status", status);
 					socket?.emit("driver-location-update", {
 						bookingId: booking?._id,
 						status: status,
@@ -579,7 +533,6 @@ const Page = () => {
 			try {
 				setErrMsg("");
 				const { data } = await axios.get("/api/payment/cash");
-				console.log(data);
 				if (data.success) {
 					setErrMsg("");
 					setCashRequested(true);
@@ -594,12 +547,6 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrMsg(
 					serverMessage ||
 						"Failed to send fetch customer's cash request, refresh the page and try again",
@@ -612,7 +559,6 @@ const Page = () => {
 	useEffect(() => {
 		const socket = getSocket();
 		socket?.on("cash-requested", () => {
-			console.log("requested");
 			setCashRequested(true);
 		});
 
@@ -903,7 +849,6 @@ const Page = () => {
 									{/* Verify OTP: Pickup/Drop  */}
 									<button
 										onClick={() => {
-											console.log(status);
 											if (status === "confirmed") {
 												verifyPickupOtp();
 											} else {
@@ -1200,7 +1145,6 @@ const Page = () => {
 									{/* Verify OTP: Pickup/Drop */}
 									<button
 										onClick={() => {
-											console.log(status);
 											if (status === "confirmed") {
 												verifyPickupOtp();
 											} else {

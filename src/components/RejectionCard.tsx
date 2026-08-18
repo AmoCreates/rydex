@@ -15,7 +15,6 @@ const RejectionCard = ({ rejectionMsg, step }: any) => {
 		setRequestError("");
 		try {
 			const res = await axios.patch("/api/partner/request-video-kyc");
-			console.log(res);
 			setShowConfirmation(false); // Close popup on success
 		} catch (error: unknown) {
 				const axiosError = error as {

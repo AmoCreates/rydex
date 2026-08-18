@@ -47,10 +47,9 @@ export async function GET() {
 		return NextResponse.json(earnings, {
 			status: 200,
 		});
-	} catch (error) {
-		console.log(error);
+	} catch  {
 		return NextResponse.json(
-			{ message: "Admin earning error" },
+			{ message: "server error: failed to fetch Admin earning" },
 			{ status: 500 },
 		);
 	}

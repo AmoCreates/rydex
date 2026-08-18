@@ -32,11 +32,10 @@ export async function POST(req: NextRequest) {
 		const chat = await Chat.find({ bookingId }).sort({ createdAt: 1 });
 
 		return NextResponse.json(chat, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} catch  {
 		return NextResponse.json(
 			{
-				message: "get messages error",
+				message: "server error: failed to load chat messages",
 			},
 			{ status: 500 },
 		);

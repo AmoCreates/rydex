@@ -146,7 +146,6 @@ const AuthModel = ({ open, onClose }: Props) => {
 				email,
 				otp: otp.join(""),
 			});
-			console.log(data);
 			setTimeout(() => {
 				setStep("login");
 			}, 600);

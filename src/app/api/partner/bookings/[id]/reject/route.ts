@@ -63,8 +63,7 @@ export async function POST(
 		});
 
 		return NextResponse.json({ success: true }, { status: 200 });
-	} catch (error) {
-		console.log("reject booking error: err", error);
+	} catch {
 		return NextResponse.json(
 			{ message: "server error: failed to reject booking" },
 			{ status: 500 },

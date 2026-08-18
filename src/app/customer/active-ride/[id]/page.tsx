@@ -156,7 +156,6 @@ const Page = () => {
 			const { data } = await axios.post(
 				`/api/payment/${id}/cash-request`,
 			);
-			console.log(data);
 			if (data.success) {
 				setErrMsg("");
 				const socket = getSocket();
@@ -172,12 +171,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"Failed to send cash request, refresh the page and try again",
@@ -192,7 +185,6 @@ const Page = () => {
 				const { data } = await axios.post("/api/bookings/active-ride", {
 					bookingId: id,
 				});
-				console.log(data);
 				if (data.success) {
 					setBooking(data.booking);
 					setStatus(data.booking.bookingStatus);

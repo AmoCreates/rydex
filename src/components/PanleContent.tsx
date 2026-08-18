@@ -123,9 +123,7 @@ const PanleContent = ({
 				sender: senderRole,
 				msg: messageText.trim(),
 			});
-			console.log(res);
 			if (res.status === 200) {
-				console.log("message success");
 				socket?.emit("new-message", res.data.chat);
 			}
 		} catch (error: any) {

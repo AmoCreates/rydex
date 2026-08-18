@@ -105,12 +105,11 @@ export async function GET() {
 			},
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{
 				success: false,
-				message: "server error: faile to fetch admin data",
+				message: "server error: failed to fetch admin data",
 			},
 			{ status: 500 },
 		);

@@ -75,10 +75,9 @@ export async function POST(req: Request) {
 		await user.save();
 
 		return Response.json(partnerBank, { status: 200 });
-	} catch (error) {
-		console.log("partner bank details error, err: ", error);
+	} catch {
 		return Response.json(
-			{ message: "partner bank details error, err: ", error },
+			{ message: "server error: failed partner bank details" },
 			{ status: 500 },
 		);
 	}
@@ -107,10 +106,9 @@ export async function GET() {
 		} else {
 			return Response.json(null);
 		}
-	} catch (error) {
-		console.log("Get partner bank details error, err: ", error);
+	} catch {
 		return Response.json(
-			{ message: "Get partner bank details error, err: ", error },
+			{ message: "server error: failed to get partner bank details"},
 			{ status: 500 },
 		);
 	}

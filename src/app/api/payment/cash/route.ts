@@ -54,8 +54,7 @@ export async function POST() {
 			},
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{
 				success: false,
@@ -101,8 +100,7 @@ export async function GET() {
 		}
 
 		return NextResponse.json({ success: true, booking }, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} catch  {
 		return NextResponse.json(
 			{ success: false, message: "fetching cash request failed" },
 			{ status: 500 },

@@ -56,12 +56,12 @@ const PartnerDashboard = () => {
 	useEffect(() => {
 		const getData = async () => {
 			try {
-				setErrMsg("")
+				setErrMsg("");
 				const { data } = await axios.get(
 					"/api/partner/onboarding/vehicle",
 				);
-				if(data.success) {
-					setErrMsg("")
+				if (data.success) {
+					setErrMsg("");
 					setVehicleData(data);
 				}
 			} catch (error: unknown) {
@@ -74,13 +74,10 @@ const PartnerDashboard = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
+				setErrMsg(
 					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
+						"failed to get vechile details, please refresh the page to try again",
 				);
-				setErrMsg(serverMessage || "failed to get vechile details, please refresh the page to try again")
 			}
 		};
 		getData();
@@ -90,7 +87,6 @@ const PartnerDashboard = () => {
 		const cashReuqest = async () => {
 			try {
 				const { data } = await axios.get("/api/payment/cash");
-				console.log(data);
 				if (data.success) {
 					setCashRequested(true);
 					setCashRequestedBooking(data.booking);
@@ -119,11 +115,10 @@ const PartnerDashboard = () => {
 	const handleCashPayment = async () => {
 		if (!cashRequested) return;
 		try {
-			setErrMsg("")
+			setErrMsg("");
 			const { data } = await axios.post("/api/payment/cash");
-			console.log(data);
 			if (data.success) {
-				setErrMsg("")
+				setErrMsg("");
 				setCashRequested(false);
 			}
 		} catch (error: unknown) {
@@ -142,19 +137,21 @@ const PartnerDashboard = () => {
 					axiosError?.message ||
 					error,
 			);
-			setErrMsg(serverMessage || "failed to accept cash request, refresh the page and try again")
+			setErrMsg(
+				serverMessage ||
+					"failed to accept cash request, refresh the page and try again",
+			);
 		}
 	};
 
 	const cashRequestedDeclined = async () => {
 		try {
-			setErrMsg("")
+			setErrMsg("");
 			const { data } = await axios.post(
 				`/api/payment/${cashRequestedBooking!._id}/cash-decline`,
 			);
 			if (data.success) {
-				console.log(data);
-				setErrMsg("")
+				setErrMsg("");
 				setCashRequested(false);
 				const socket = getSocket();
 				socket?.emit("cash-declined", {
@@ -171,13 +168,10 @@ const PartnerDashboard = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
+			setErrMsg(
 				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
+					"failed to decline cash, please refresh the page and try again",
 			);
-			setErrMsg(serverMessage || "failed to decline cash, please refresh the page and try again")
 		}
 	};
 
@@ -325,8 +319,10 @@ const PartnerDashboard = () => {
 					)}
 
 				{/* Approve Card */}
-				{vehicleData?.status === "approved" &&
-					userData?.partnerOnBoardingStep === 7 && (
+				{(vehicleData?.status === "approved" ||
+					userData?.partnerStatus === "approved") &&
+					(userData?.partnerOnBoardingStep === 7 ||
+						userData?.partnerOnBoardingStep === 8) && (
 						<motion.div
 							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}

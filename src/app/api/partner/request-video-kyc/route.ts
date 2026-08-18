@@ -25,10 +25,9 @@ export async function PATCH() {
 			{ message: "Video KYC Request sent successfully" },
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return Response.json(
-			{ message: "Video KYC Request error, err: ", error },
+			{ message: "server error: failed Video KYC Request" },
 			{ status: 500 },
 		);
 	}

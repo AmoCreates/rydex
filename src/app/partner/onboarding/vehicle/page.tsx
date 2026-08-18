@@ -103,12 +103,6 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErr(serverMessage || "failed to save details, refresh the page and try again")
 			} finally {
 			setIsSubmitting(false);

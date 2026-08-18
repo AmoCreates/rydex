@@ -47,8 +47,7 @@ export async function GET() {
 		}
 
 		return NextResponse.json({ success: true, bookings }, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{ message: "partner bookings find error" },
 			{ status: 500 },

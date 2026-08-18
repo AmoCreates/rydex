@@ -91,12 +91,9 @@ export async function POST(req: Request) {
 		}
 
 		return Response.json(vehicle, { status: 201 });
-	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : "Unknown error";
-		console.error("Vehicle add/update error:", error);
+	} catch  {
 		return Response.json(
-			{ message: "Vehicle add/update error", error: errorMessage },
+			{ message: "server error : Vehicle add/update error"},
 			{ status: 500 },
 		);
 	}

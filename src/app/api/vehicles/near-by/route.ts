@@ -76,10 +76,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(vehicles, { status: 200 });
-  } catch (err) {
-    console.log(err);
+  } catch {
     return NextResponse.json(
-      { message: "near by vehicles found error", error: err },
+      { message: "server error: near by vehicles found error" },
       { status: 500 },
     );
   }

@@ -165,7 +165,6 @@ const Nav = ({ onOpen }: Props) => {
 	useEffect(() => {
 		const socket = getSocket();
 		socket?.on("new-booking", (data) => {
-			console.log("socket data", data);
 			setPendingRequestCount((prev) => prev+1);
 		});
 		return () => {

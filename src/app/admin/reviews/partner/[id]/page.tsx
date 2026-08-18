@@ -64,12 +64,7 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
+				
 				setErrMsg(
 					serverMessage ||
 						"failed to load onboarding details, refresh the page and try again",

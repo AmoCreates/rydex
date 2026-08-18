@@ -98,10 +98,9 @@ export async function POST(req: NextRequest) {
 		);
 
 		return NextResponse.json({ suggestions }, { status: 200 });
-	} catch (error) {
-		console.error("Get chat suggestions error:",error);
+	} catch {
 		return NextResponse.json(
-			{ message: "get chat suggestions error" },
+			{ message: "server error: failed to load chat suggestions" },
 			{ status: 500 },
 		);
 	}

@@ -78,11 +78,10 @@ export async function POST(req: NextRequest) {
 			{ message: "thanks for review" },
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{
-				message: "review error",
+				message: "server error: review error",
 			},
 			{ status: 500 },
 		);

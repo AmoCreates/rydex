@@ -119,12 +119,7 @@ const CheckoutPageContent = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
+
 				setErrMsg(serverMessage || "failed to create request, refresh the page and try again")
 			} finally {
 			setLoading(false);
@@ -153,12 +148,7 @@ const CheckoutPageContent = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
+
 				setErrMsg(serverMessage || "failed to cancel request, refresh the page and try again")
 			} finally {
 			setLoading(false);
@@ -208,7 +198,6 @@ const CheckoutPageContent = () => {
 				setErrMsg("Failed to load razor payment gateway, either try again or choose cash method")
 				return;
 			}
-			console.log(data);
 
 			const paymentObject = new (window as any).Razorpay({
 				key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -270,7 +259,6 @@ const CheckoutPageContent = () => {
 			const { data } = await axios.post(
 				`/api/payment/${currBookingId}/cash-ride`,
 			);
-			console.log(data);
 			if (data.success) {
 				window.location.href = `/customer/active-ride/${currBookingId}`;
 				setStatus("confirmed");
@@ -285,12 +273,6 @@ const CheckoutPageContent = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrMsg(serverMessage || "failed to make cash ride, refresh the page and try again")
 			}
 	};
@@ -298,12 +280,10 @@ const CheckoutPageContent = () => {
 	useEffect(() => {
 		const socket = getSocket();
 		socket?.on("accept-booking", (data) => {
-			console.log("socket data", data);
 			setStatus(data);
 		});
 
 		socket?.on("reject-booking", (data) => {
-			console.log("socket data", data);
 			setStatus(data);
 		});
 		return () => {

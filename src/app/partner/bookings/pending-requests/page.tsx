@@ -38,7 +38,6 @@ const Page = () => {
 				const { data } = await axios.get(
 					"/api/partner/bookings/pending-requests",
 				);
-				console.log(data);
 				setBookings(data);
 			} catch (error: unknown) {
 				const axiosError = error as {
@@ -50,12 +49,6 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrMsg(serverMessage || "Failed to find pending requestes");
 			} finally {
 				setLoading(false);
@@ -68,12 +61,10 @@ const Page = () => {
 		const socket = getSocket();
 
 		socket?.on("new-booking", (data) => {
-			console.log("socket data", data);
 			setBookings((prev) => [...prev, data]);
 		});
 
 		socket?.on("cancel-booking", (data) => {
-			console.log("socket data", data);
 			setBookings((prevBookings) =>
 				prevBookings.filter((b) => b._id.toString() !== data),
 			);
@@ -92,7 +83,6 @@ const Page = () => {
 			setConfirm(true);
 			const res = await axios.post(`/api/partner/bookings/${id}/accept`);
 			if (res.status === 200) {
-				console.log("ride accepted");
 				setErrMsg("")
 				setBookings((prevBookings) =>
 					prevBookings.filter((b) => b._id.toString() !== id),
@@ -109,12 +99,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(serverMessage || "Failed to accept the ride, refresh the page and try agian")
 		} finally {
 			setConfirm(false);
@@ -128,7 +112,6 @@ const Page = () => {
 			setErrMsg("");
 			const res = await axios.post(`/api/partner/bookings/${id}/reject`);
 			if (res.status === 200) {
-				console.log("ride rejected");
 				setErrMsg("")
 				setBookings((prevBookings) =>
 					prevBookings.filter((b) => b._id.toString() !== id),
@@ -144,12 +127,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(serverMessage || "Failed to reject booking, refresh the page and try again")
 		} finally {
 			setConfirm(false);

@@ -14,7 +14,6 @@ export async function POST(req: Request) {
 
     const user = await User.findOne({email});
     if(!user) {
-      console.log("user not found");
       return Response.json(
         {message: "user not found"},
         {status: 404}
@@ -52,9 +51,9 @@ export async function POST(req: Request) {
       {status: 200}
     )
     
-  } catch (error) {
+  } catch {
     return Response.json(
-      {message: "something went wrong, please try again later", error},
+      {message: "something went wrong, please try again later"},
       {status: 500}
     )
   }

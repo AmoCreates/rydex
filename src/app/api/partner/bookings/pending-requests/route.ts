@@ -33,8 +33,7 @@ export async function GET() {
       bookingStatus: "requested",
     });
 		return NextResponse.json(bookings, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{ message: "server error: failed to fetch pending bookings" },
 			{ status: 500 }

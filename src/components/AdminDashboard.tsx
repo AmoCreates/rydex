@@ -52,7 +52,6 @@ const AdminDashboard = () => {
 			try {
 				setErrMsg("");
 				const { data } = await axios.get("/api/admin/dashboard");
-				console.log(data);
 				if (data.success) {
 					setErrMsg("");
 					setStats(data.stats);
@@ -70,12 +69,6 @@ const AdminDashboard = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrMsg(
 					serverMessage ||
 						"failed to fetch data, please refresh the page and try again",

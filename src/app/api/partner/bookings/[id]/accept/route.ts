@@ -62,8 +62,7 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
       {status: 200}
     )
 
-	} catch (error) {
-		console.log("accept booking error: err", error);
+	} catch  {
 		return NextResponse.json(
 			{ message: "server error: failed to accept booking" },
 			{ status: 500 },

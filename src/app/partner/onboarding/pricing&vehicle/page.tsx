@@ -127,12 +127,6 @@ const Page = () => {
 				response?: { data?: { message?: string } };
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				"vehicle submit error",
-				axiosError?.response?.data ||
-					(axiosError as { message?: string })?.message ||
-					axiosError,
-			);
 			setResErr(serverMessage || "Something went wrong");
 		} finally {
 			setIsLoading(false);

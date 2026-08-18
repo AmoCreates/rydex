@@ -107,8 +107,7 @@ export async function PUT(
 				{ status: 400 },
 			);
 		}
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return Response.json(
 			{
 				success: false,

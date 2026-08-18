@@ -28,8 +28,7 @@ export async function GET(
     await partner.save()
 
 		return Response.json({ roomId }, { status: 200 });
-	} catch (error) {
-    console.log(error)
+	} catch  {
 		return Response.json({message: "video kyc start error"}, {status: 500});
   }
 }

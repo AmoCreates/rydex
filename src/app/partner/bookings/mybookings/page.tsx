@@ -133,7 +133,6 @@ const Page = () => {
 				const { data } = await axios.get(
 					"/api/partner/bookings/mybookings",
 				);
-				console.log(data.bookings);
 				if (data.success) {
 					setBookings(data.bookings);
 				}
@@ -147,12 +146,6 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrMsg(
 					serverMessage ||
 						"failed to cancel request, refresh the page and try again",

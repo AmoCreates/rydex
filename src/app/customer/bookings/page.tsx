@@ -134,7 +134,6 @@ const Page = () => {
 			try {
 				setLoading(true);
 				const { data } = await axios.get("/api/user/bookings");
-				console.log(data.bookings);
 				if (data.success) {
 					setBookings(data.bookings);
 				}
@@ -148,12 +147,6 @@ const Page = () => {
 					message?: string;
 				};
 				const serverMessage = axiosError?.response?.data?.message;
-				console.log(
-					serverMessage ||
-						axiosError?.response?.data ||
-						axiosError?.message ||
-						error,
-				);
 				setErrMsg(serverMessage || "");
 			} finally {
 				setLoading(false);
@@ -197,12 +190,6 @@ const Page = () => {
 				message?: string;
 			};
 			const serverMessage = axiosError?.response?.data?.message;
-			console.log(
-				serverMessage ||
-					axiosError?.response?.data ||
-					axiosError?.message ||
-					error,
-			);
 			setErrMsg(
 				serverMessage ||
 					"booking cancellation failed, refresh the page and try again",

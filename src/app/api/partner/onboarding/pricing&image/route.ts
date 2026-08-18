@@ -110,12 +110,9 @@ export async function POST(req: Request) {
 		await partner.save();
 
 		return Response.json(vehicle, { status: 200 });
-	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : "Unknown error occurred";
-		console.error("Vehicle upload error details:", error);
+	} catch {
 		return Response.json(
-			{ message: "Upload vehicle error", error: errorMessage },
+			{ message: "server error: failed to upload details"},
 			{ status: 500 },
 		);
 	}
@@ -166,12 +163,9 @@ export async function GET() {
 		}
 
 		return Response.json(vehicle, { status: 200 });
-	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : "Unknown error occurred";
-		console.error("Get vehicle details err :", error);
+	} catch {
 		return Response.json(
-			{ message: "Get vehicle error", error: errorMessage },
+			{ message: "server error: failed to fetch vehicle" },
 			{ status: 500 },
 		);
 	}

@@ -53,8 +53,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		return NextResponse.json({ success: true, booking }, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} catch  {
 		return NextResponse.json(
 			{ message: "get active ride for customer error" },
 			{ status: 500 },
@@ -107,8 +106,7 @@ export async function GET() {
 		}
 
 		return NextResponse.json(booking, { status: 200 });
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{ message: "find customer's acitve booking error" },
 			{ status: 500 },

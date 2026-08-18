@@ -75,7 +75,6 @@ const SearchPageContent = () => {
 				lon: pickupLon,
 				vehicleType: vehicle,
 			});
-			console.log(data);
 
 			setVehicles(Array.isArray(data) ? data : []);
 		} catch (error) {

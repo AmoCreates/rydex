@@ -78,8 +78,8 @@ export async function PATCH(req: Request) {
 				{ status: 400 },
 			);
 		}
-	} catch (error) {
-		console.log(error);
+	} catch {
+
 		return Response.json({ message: "Admin action error" }, { status: 500 });
 	}
 }

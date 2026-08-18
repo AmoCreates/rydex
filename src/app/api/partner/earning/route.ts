@@ -47,8 +47,7 @@ export async function GET() {
 		return NextResponse.json(earnings, {
 			status: 200,
 		});
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{ message: "Partner earning error" },
 			{ status: 500 },

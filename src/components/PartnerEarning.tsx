@@ -16,7 +16,6 @@ const PartnerEarning = () => {
 		const fetchEarning = async () => {
 			try {
 				const { data } = await axios.get("/api/partner/earning");
-				console.log(data);
 				const SevenDayEarnings: Earning[] = Array.isArray(data)
 					? data.slice(-7)
 					: [];

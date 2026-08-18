@@ -58,8 +58,7 @@ export async function POST(
 			{ success: true, message: "cash ride confirmed" },
 			{ status: 200 },
 		);
-	} catch (error) {
-		console.log(error);
+	} catch {
 		return NextResponse.json(
 			{
 				success: false,

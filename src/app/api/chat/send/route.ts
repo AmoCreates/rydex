@@ -39,11 +39,10 @@ export async function POST(req: NextRequest) {
 			{ chat, message: "message sent successfully" },
 			{ status: 200 },
 		);
-	} catch (error) {
-    console.log(error);
+	} catch  {;
 		return NextResponse.json(
 			{
-				message: "send message error",
+				message: "server error: failed to send message",
 			},
 			{ status: 500 },
 		);
