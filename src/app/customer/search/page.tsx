@@ -280,6 +280,12 @@ const SearchPageContent = () => {
 									vehicle={v}
 									distance={distance}
 									onBook={() => {
+										if (!distance || distance <= 0) return;
+
+										const calculatedFare = Math.round(
+											(v.baseFare || 0) +
+												(v.pricePerKM || 0) * distance,
+										);
 										const url = new URLSearchParams({
 											pickUp,
 											drop,
@@ -288,10 +294,7 @@ const SearchPageContent = () => {
 											vehicleId: String(v._id),
 											name,
 											mobile: String(mobile),
-											fare: String(
-												v.baseFare! +
-													v.pricePerKM! * distance,
-											),
+											fare: String(calculatedFare),
 											pickupLat: String(pickupLat),
 											pickupLon: String(pickupLon),
 											dropLat: String(dropLat),

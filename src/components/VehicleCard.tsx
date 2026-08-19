@@ -56,11 +56,10 @@ const VehicleCard = ({
 	onBook: () => void;
 }) => {
 	const { Icon, label } = TYPE_CONFIG[vehicle.type];
+	const isDistanceReady = typeof distance === "number" && distance > 0;
 	let estPrice: number = 0;
-	if (vehicle.baseFare && vehicle.pricePerKM && distance) {
-		estPrice = Math.round(
-			vehicle.baseFare! + distance * vehicle.pricePerKM!,
-		);
+	if (vehicle.baseFare && vehicle.pricePerKM && isDistanceReady) {
+		estPrice = Math.round(vehicle.baseFare + distance * vehicle.pricePerKM);
 	}
 	return (
 		<motion.div
@@ -106,7 +105,7 @@ const VehicleCard = ({
 					{!vehicle.rating || vehicle.rating === 0
 						? "New"
 						: vehicle.rating?.toFixed(1)}{" "}
-						|
+					|
 					<span className="flex items-center">
 						<RiGroupFill
 							size={10}
@@ -215,11 +214,17 @@ const VehicleCard = ({
 							className="flex items-center gap-1.5 bg-zinc-900 hover:bg-black text-white text-sm font-black px-6 py-3 rounded-2xl transition-colors shadow-md cursor-pointer group"
 							onClick={onBook}
 						>
-							Book
-							<Icon
-								size={16}
-								className="group-hover:translate-x-2 group-focus:translate-x-10 transition-transform"
-							/>
+							{isDistanceReady ? (
+								<>
+									Book
+									<Icon
+										size={16}
+										className="group-hover:translate-x-2 group-focus:translate-x-10 transition-transform"
+									/>
+								</>
+							) : (
+								"Calculating..."
+							)}
 						</motion.button>
 					</div>
 				</div>
