@@ -14,6 +14,7 @@ import {
 	Video,
 	VideoOff,
 	XCircle,
+	AlertTriangle,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -32,6 +33,7 @@ const Page = () => {
 	const [rejectionReason, setRejectionReason] = useState("");
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [errorMsg, setErrorMsg] = useState("");
+	const [popup, setPopup] = useState(true);
 	const router = useRouter();
 	const { roomId } = useParams();
 
@@ -87,17 +89,20 @@ const Page = () => {
 			setAdminCheck(null);
 			setRejectionReason("");
 		} catch (error: unknown) {
-				const axiosError = error as {
-					response?: {
-						data?: {
-							message?: string;
-						};
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
 					};
-					message?: string;
 				};
-				const serverMessage = axiosError?.response?.data?.message;
-				setErrorMsg(serverMessage || "failed to cancel request, refresh the page and try again")
-			} finally {
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			setErrorMsg(
+				serverMessage ||
+					"failed to cancel request, refresh the page and try again",
+			);
+		} finally {
 			setIsProcessing(false);
 			router.push("/");
 		}
@@ -141,6 +146,16 @@ const Page = () => {
 		}
 	};
 
+	useEffect(() => {
+		const t = setTimeout(() => {
+			setPopup(false);
+		}, 5000);
+
+		return () => {
+			clearTimeout(t);
+		};
+	}, []);
+
 	if (isLoading) {
 		return (
 			<div className="h-screen bg-zinc-950 flex flex-col items-center justify-center gap-4">
@@ -152,7 +167,36 @@ const Page = () => {
 		);
 	}
 	return (
-		<div className="h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+		<div className="relative h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+			{popup && (
+				<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
+					<AnimatePresence>
+						<motion.div
+							initial={{ opacity: 0, y: -15 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -15 }}
+							className="rounded-2xl border border-red-200 bg-red-50 p-3 sm:p-4 text-red-700 shadow-sm"
+						>
+							<div className="flex items-start gap-3">
+								<div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-xl bg-red-100 text-red-600">
+									<AlertTriangle className="h-4 w-4" />
+								</div>
+								<div className="flex-1">
+									<p className="text-sm font-semibold text-red-800">
+										Something went wrong
+									</p>
+									<p className="mt-0.5 text-sm text-red-700">
+										If you are automatically leaving the
+										room, or facing other issues with the
+										video call, it likely means that my
+										FREE-API key has expired. No Money😅
+									</p>
+								</div>
+							</div>
+						</motion.div>
+					</AnimatePresence>
+				</div>
+			)}
 			<header className="px-6 py-4 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 				<div>
 					<Image
@@ -192,7 +236,7 @@ const Page = () => {
 						)}
 						<button
 							onClick={() => {
-								router.push('/')
+								router.push("/");
 							}}
 							className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full shadow-lg transition-all active:scale-95"
 						>
@@ -212,10 +256,17 @@ const Page = () => {
 					<div className="h-full flex items-center justify-center px-4 py-10">
 						<div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 							<div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/5">
-								<video ref={previewRef} className="w-full h-full" autoPlay />
+								<video
+									ref={previewRef}
+									className="w-full h-full"
+									autoPlay
+								/>
 								{!camera && (
 									<div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-										<VideoOff size={40} className="text-white" />
+										<VideoOff
+											size={40}
+											className="text-white"
+										/>
 									</div>
 								)}
 							</div>
@@ -281,7 +332,9 @@ const Page = () => {
 								</div>
 								<div>
 									<h3 className="text-xl font-bold text-zinc-100">
-										{adminCheck ? "Approve Video KYC" : "Reject Video KYC"}
+										{adminCheck
+											? "Approve Video KYC"
+											: "Reject Video KYC"}
 									</h3>
 									<p className="text-sm text-zinc-400">
 										{adminCheck
@@ -300,7 +353,9 @@ const Page = () => {
 										className="w-full bg-zinc-800 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:ring-2 ring-red-500/20 transition-all min-h-32 text-zinc-100 placeholder:text-zinc-600"
 										placeholder="e.g. Identity documents not visible, Poor network, or Mismatched details..."
 										value={rejectionReason}
-										onChange={(e) => setRejectionReason(e.target.value)}
+										onChange={(e) =>
+											setRejectionReason(e.target.value)
+										}
 									/>
 								</div>
 							)}
@@ -323,9 +378,14 @@ const Page = () => {
 									Cancel
 								</button>
 								<button
-									disabled={isProcessing || (!adminCheck && !rejectionReason)}
+									disabled={
+										isProcessing ||
+										(!adminCheck && !rejectionReason)
+									}
 									className={`flex-1 py-3 rounded-xl font-semibold text-white transition-all active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-										adminCheck ? "bg-green-600" : "bg-red-600"
+										adminCheck
+											? "bg-green-600"
+											: "bg-red-600"
 									}`}
 									onClick={handleDecision}
 								>
