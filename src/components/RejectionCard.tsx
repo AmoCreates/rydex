@@ -1,4 +1,4 @@
-import { TriangleAlert, Info, Video } from "lucide-react";
+import { TriangleAlert, Video } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import axios from "axios";

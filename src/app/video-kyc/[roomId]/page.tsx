@@ -75,7 +75,7 @@ const Page = () => {
 		setErrorMsg("");
 		try {
 			// Placeholder: Implement actual API logic here
-			const res = await axios.patch(
+			await axios.patch(
 				`/api/admin/videoKyc/${roomId}/Kyc-approve-reject`,
 				{
 					roomId,

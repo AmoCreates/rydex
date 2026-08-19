@@ -1,9 +1,7 @@
 "use client";
 import { RiSendPlaneFill, RiSparkling2Fill } from "@remixicon/react";
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Bike, UserRound } from "lucide-react";
 
 type message = {
 	bookingId: string;
@@ -39,7 +37,6 @@ const RideChat = ({
 	onRefreshSuggestions,
 }: Props) => {
 	const otherName = currentRole === "driver" ? customerName : driverName;
-	const myName = currentRole === "driver" ? driverName : customerName;
 	const bottomRef = useRef<HTMLDivElement>(null);
 	const [msg, setMsg] = useState("");
 	const [loading, setLoading] = useState(false);

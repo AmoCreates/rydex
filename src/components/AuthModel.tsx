@@ -143,7 +143,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 		setLoading(true);
 
 		try {
-			const { data } = await axios.post("/api/auth/verify-email", {
+			await axios.post("/api/auth/verify-email", {
 				email,
 				otp: otp.join(""),
 			});

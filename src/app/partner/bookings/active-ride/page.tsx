@@ -18,7 +18,7 @@ import { IUser } from "@/model/user.model";
 import { BookingStatus, PaymentStatus } from "@/model/booking.model";
 import { getSocket } from "@/lib/socket";
 import CompletedScreen from "@/components/CompletedScreen";
-import { RiSendPlane2Fill, RiSendPlaneFill } from "@remixicon/react";
+import { RiSendPlaneFill } from "@remixicon/react";
 import dynamic from "next/dynamic";
 import ApiErrorBanner from "@/components/ApiErrorBanner";
 const LiveRideMap = dynamic(() => import("@/components/LiveRideMap"), {
