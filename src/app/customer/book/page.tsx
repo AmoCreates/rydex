@@ -64,7 +64,7 @@ const Page = () => {
 	const [toFill, setToFill] = useState("Select a vehicle");
 	const [pickupSelected, setPickupSelected] = useState(false);
 	const [dropSelected, setDropSelected] = useState(false);
-	const isBusy = loading
+	const isBusy = loading;
 	const progress = [
 		!!vehicle,
 		!!name,
@@ -77,6 +77,7 @@ const Page = () => {
 	const getCurrentLocation = async () => {
 		setLoading(true);
 		setErrMsg("");
+
 		if (!navigator.geolocation) {
 			console.log("cant find navigator");
 			setErrMsg(
@@ -84,24 +85,39 @@ const Page = () => {
 			);
 			return;
 		}
+
 		navigator.geolocation.getCurrentPosition(async ({ coords }) => {
 			try {
-				const { data } = await axios.get(
-					`https://photon.komoot.io/reverse?lon=${coords.longitude}&lat=${coords.latitude}`,
-				);
-				console.log(data);
-				if (data.features.length) {
-					const currentLocation = `${data.features[0].properties.name}, ${data.features[0].properties.city}, ${data.features[0].properties.state}, ${data.features[0].properties.country}`;
+				const API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY;
 
-					setPickUpLongitude(
-						data.features[0].geometry.coordinates[0],
-					);
-					setPickUpLatitude(data.features[0].geometry.coordinates[1]);
-					setPickUpCountry(data.features[0].properties.country);
+				const { data } = await axios.get(
+					`https://api.geoapify.com/v1/geocode/reverse?lat=${coords.latitude}&lon=${coords.longitude}&filter=countrycode:in&apiKey=${API_KEY}`,
+				);
+
+				console.log(data);
+
+				// 2. Properly check array existence and length
+				if (data && data.features && data.features.length > 0) {
+					// 3. Extract the first location result from the features array
+					const firstFeature = data.features[0];
+					const properties = firstFeature.properties;
+
+					// Geoapify provides a pre-constructed address string in properties.formatted
+					const currentLocation = properties.formatted;
+
+					// 4. Safely extract GeoJSON coordinates: index [0] is Longitude, [1] is Latitude
+					setPickUpLongitude(firstFeature.geometry.coordinates[0]);
+					setPickUpLatitude(firstFeature.geometry.coordinates[1]);
+
+					setPickUpCountry(properties.country);
 					setPickUp(currentLocation);
 					setPickupSelected(true);
 					setPickupSuggestion([]);
 					setErrMsg("");
+				} else {
+					setErrMsg(
+						"No location details found for these coordinates.",
+					);
 				}
 			} catch (error) {
 				console.log(error);
@@ -123,8 +139,16 @@ const Page = () => {
 		}
 		try {
 			const { data } = await axios.get(
-				`https://photon.komoot.io/api/?q=${encodeURIComponent(q.trim())}&lang=en`,
+				"https://api.geoapify.com/v1/geocode/autocomplete",
+				{
+					params: {
+						text: q.trim(),
+						apiKey: process.env.NEXT_PUBLIC_GEOAPIFY_KEY,
+						filter: "countrycode:in", // India ke liye fixlimit: 5
+					},
+				},
 			);
+			console.log(data);
 			let places: place[] = (data.features ?? []).map((f: any) => ({
 				name: f.properties.name,
 				city: f.properties.city,
@@ -467,7 +491,7 @@ const Page = () => {
 											}}
 											onChange={(e) => {
 												setToFill(
-													"Either select pickup location via suggestions or use find me"
+													"Either select pickup location via suggestions or use find me",
 												);
 												setPickUp(e.target.value);
 												setPickupSelected(false);
@@ -543,10 +567,12 @@ const Page = () => {
 																	setPickUpLatitude(
 																		p.latitude!,
 																	);
-																	setPickUpLatitude(
+																	setPickUpLongitude(
 																		p.longitude!,
 																	);
-																	setPickupSelected(true);
+																	setPickupSelected(
+																		true,
+																	);
 																}}
 																initial={{
 																	opacity: 0,
@@ -658,7 +684,9 @@ const Page = () => {
 															setDropLongitude(
 																p.longitude!,
 															);
-															setDropSelected(true);
+															setDropSelected(
+																true,
+															);
 														}}
 														initial={{ opacity: 0 }}
 														animate={{ opacity: 1 }}
@@ -688,7 +716,9 @@ const Page = () => {
 						</motion.div>
 
 						{errMsg && (
-							<div className="text-red-500 text-sm -my-2 text-center ">*{errMsg}</div>
+							<div className="text-red-500 text-sm -my-2 text-center ">
+								*{errMsg}
+							</div>
 						)}
 
 						{/* Continue */}
@@ -705,11 +735,15 @@ const Page = () => {
 							}
 							onClick={() => {
 								if (!pickupSelected) {
-									setErrMsg("Please select pickup location from suggestions");
+									setErrMsg(
+										"Please select pickup location from suggestions",
+									);
 									return;
 								}
 								if (!dropSelected) {
-									setErrMsg("Please select drop location from suggestions");
+									setErrMsg(
+										"Please select drop location from suggestions",
+									);
 									return;
 								}
 								router.push(
