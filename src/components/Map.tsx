@@ -1,5 +1,10 @@
 "use client";
-import React, { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useState,
+} from "react";
 import L from "leaflet";
 import {
 	MapContainer,
@@ -129,7 +134,15 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 	const geoCoding = async (q: string): Promise<[number, number] | null> => {
 		try {
 			const { data } = await axios.get(
-				`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1`,
+				"https://api.geoapify.com/v1/geocode/autocomplete",
+				{
+					params: {
+						text: q.trim(),
+						apiKey: process.env.NEXT_PUBLIC_GEOAPIFY_KEY,
+						filter: "countrycode:in", // India ke liye fix
+						limit: 1,
+					},
+				},
 			);
 			const feature = data.features?.[0];
 			if (!feature?.geometry?.coordinates) return null;
@@ -142,41 +155,44 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 		}
 	};
 
-	const loadRoute = useCallback(async (
-		start: [number, number] | null,
-		end: [number, number] | null,
-	) => {
-		// start and end should be "lon,lat" strings
+	const loadRoute = useCallback(
+		async (
+			start: [number, number] | null,
+			end: [number, number] | null,
+		) => {
+			// start and end should be "lon,lat" strings
 
-		if (!start || !end) {
-			console.error("error: Missing start or end coordinates");
-			return;
-		}
-
-		try {
-			const url = `http://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson&steps=true`;
-
-			const { data } = await axios.get(url);
-
-			if (!data.routes || data.routes.length === 0) {
-				console.error({ error: "No route found" });
+			if (!start || !end) {
+				console.error("error: Missing start or end coordinates");
+				return;
 			}
 
-			// routes will receives as longitude, latitude, make them save as lat, lon
-			setRoute(
-				data.routes[0].geometry.coordinates.map(
-					([lon, lat]: number[]) => [lat, lon],
-				),
-			);
-			// compute new km value and set both local state and parent callback
-			const newKm = +(data.routes[0].distance / 1000).toFixed(2);
-			setKm(newKm);
-			setDistance(newKm);
-		} catch (err) {
-			console.error('error: "Failed to fetch route');
-			console.error(err);
-		}
-	}, [setDistance]);
+			try {
+				const url = `http://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson&steps=true`;
+
+				const { data } = await axios.get(url);
+
+				if (!data.routes || data.routes.length === 0) {
+					console.error({ error: "No route found" });
+				}
+
+				// routes will receives as longitude, latitude, make them save as lat, lon
+				setRoute(
+					data.routes[0].geometry.coordinates.map(
+						([lon, lat]: number[]) => [lat, lon],
+					),
+				);
+				// compute new km value and set both local state and parent callback
+				const newKm = +(data.routes[0].distance / 1000).toFixed(2);
+				setKm(newKm);
+				setDistance(newKm);
+			} catch (err) {
+				console.error('error: "Failed to fetch route');
+				console.error(err);
+			}
+		},
+		[setDistance],
+	);
 
 	const updateLocation = async (lat: number, lon: number) => {
 		if (!lat || !lon) {
@@ -187,8 +203,17 @@ const Map = ({ pickUp, drop, setPickUpDrop, setDistance }: props) => {
 		setLoading(true);
 
 		try {
+			const API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY;
 			const { data } = await axios.get(
-				`https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}`,
+				`https://api.geoapify.com/v1/geocode/reverse`,
+				{
+					params: {
+						lat,
+						lon,
+						apiKey: API_KEY,
+						filter: "countrycode: in",
+					},
+				},
 			);
 			if (data.features.length) {
 				const p = data.features[0].properties;

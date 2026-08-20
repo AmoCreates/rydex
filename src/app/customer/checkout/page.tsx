@@ -296,7 +296,6 @@ const CheckoutPageContent = () => {
 		const activeBooking = async () => {
 			try {
 				const { data } = await axios.get("/api/bookings/active-ride");
-				console.log(data);
 				setCurrBookingId(data._id.toString());
 				setStatus(data.bookingStatus);
 			}catch (error: unknown) {

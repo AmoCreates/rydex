@@ -89,12 +89,16 @@ const Page = () => {
 		navigator.geolocation.getCurrentPosition(async ({ coords }) => {
 			try {
 				const API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_KEY;
-
 				const { data } = await axios.get(
-					`https://api.geoapify.com/v1/geocode/reverse?lat=${coords.latitude}&lon=${coords.longitude}&filter=countrycode:in&apiKey=${API_KEY}`,
+					`https://api.geoapify.com/v1/geocode/reverse`, {
+						params: {
+							lat: coords.latitude,
+							lon: coords.longitude,
+							apiKey: API_KEY,
+							filter: "countrycode: in"
+						}
+					}
 				);
-
-				console.log(data);
 
 				// 2. Properly check array existence and length
 				if (data && data.features && data.features.length > 0) {
@@ -144,11 +148,10 @@ const Page = () => {
 					params: {
 						text: q.trim(),
 						apiKey: process.env.NEXT_PUBLIC_GEOAPIFY_KEY,
-						filter: "countrycode:in", // India ke liye fixlimit: 5
+						filter: "countrycode:in", // India ke liye fix
 					},
 				},
 			);
-			console.log(data);
 			let places: place[] = (data.features ?? []).map((f: any) => ({
 				name: f.properties.name,
 				city: f.properties.city,

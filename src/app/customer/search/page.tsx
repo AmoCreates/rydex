@@ -90,10 +90,7 @@ const SearchPageContent = () => {
 	};
 
 	useEffect(() => {
-		const controleFetch = () => {
 			void fetchVehicles();
-		};
-		controleFetch();
 	}, [fetchVehicles]);
 
 	return (

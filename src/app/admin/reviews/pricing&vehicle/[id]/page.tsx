@@ -42,7 +42,6 @@ const Page = () => {
 					`/api/admin/reviews/vehicle/${id}`,
 				);
 				if (data.success) {
-					console.log(data);
 					setVehicleData(data.vehicle);
 					setPartnerData(data.partner);
 					setErrMsg("");
