@@ -37,7 +37,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						return null;
 					}
 
-					const isMatch = await bcrypt.compare(password, user.password);
+					const isMatch = await bcrypt.compare(
+						password,
+						user.password,
+					);
 					if (!isMatch) {
 						return null;
 					}
@@ -72,7 +75,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						name: user.name,
 						email: user.email,
 						role: "customer",
+						isEmailVerified: true,
 					});
+				} else if (!dbUser.isEmailVerified) {
+					// If the user previously signed up via email/password without verifying,
+					// mark them verified now since they proved ownership via Google OAuth
+					dbUser.isEmailVerified = true;
+					await dbUser.save();
 				}
 
 				user.id = String(dbUser._id);
@@ -90,9 +99,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 				token.email = user.email;
 			}
 
-			if (trigger === "update" && session && typeof session === "object") {
+			if (
+				trigger === "update" &&
+				session &&
+				typeof session === "object"
+			) {
 				const updatedRole = (session as { role?: string })?.role;
-				if (updatedRole && ["customer", "partner", "admin"].includes(updatedRole)) {
+				if (
+					updatedRole &&
+					["customer", "partner", "admin"].includes(updatedRole)
+				) {
 					token.role = updatedRole as typeof token.role;
 				}
 			}
@@ -100,12 +116,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 			if (token.email) {
 				try {
 					await dbConnect();
-					const dbUser = await User.findOne({ email: token.email }).select("role");
+					const dbUser = await User.findOne({
+						email: token.email,
+					}).select("role");
 					if (dbUser?.role && dbUser.role !== token.role) {
 						token.role = dbUser.role;
 					}
 				} catch (error) {
-					console.error("Failed to refresh session role from DB:", error);
+					console.error(
+						"Failed to refresh session role from DB:",
+						error,
+					);
 				}
 			}
 
