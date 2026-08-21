@@ -15,6 +15,7 @@ import {
 	Phone,
 	Truck,
 	User,
+	XCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
@@ -365,19 +366,35 @@ const Page = () => {
 													<span className="text-xs text-gray-500">
 														Payment
 													</span>
-													<span
-														className={`text-xs px-2 py-1 rounded-full ${b.paymentStatus === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"} flex items-center gap-1`}
-													>
-														{b.paymentStatus ===
-														"paid" ? (
-															<RiCheckDoubleLine
+													{b.bookingStatus ===
+														"cancelled" ||
+													b.bookingStatus ===
+														"rejected" ||
+													b.bookingStatus ===
+														"expired" ? (
+														<span className="text-xs px-2 py-1 rounded-full flex items-center gap-1 bg-zinc-700 text-zinc-300 lowercase">
+															<XCircle
 																size={12}
-															/>
-														) : (
-															<Clock4 size={12} />
-														)}
-														{b.paymentStatus}
-													</span>
+															/>{" "}
+															not required
+														</span>
+													) : (
+														<span
+															className={`text-xs px-2 py-1 rounded-full ${b.paymentStatus === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"} flex items-center gap-1`}
+														>
+															{b.paymentStatus ===
+															"paid" ? (
+																<RiCheckDoubleLine
+																	size={12}
+																/>
+															) : (
+																<Clock4
+																	size={12}
+																/>
+															)}
+															{b.paymentStatus}
+														</span>
+													)}
 												</div>
 
 												{(b.bookingStatus ===
