@@ -1,3 +1,4 @@
+"use client";
 import { getSocket } from "@/lib/socket";
 import { useEffect, useRef } from "react";
 
@@ -5,9 +6,8 @@ const GeoUpdater = ({ userId }: { userId: string }) => {
 	const socketRef = useRef<any>(null);
 
 	useEffect(() => {
-		if (!userId) {
-			throw new Error("Bad request: no user found");
-		}
+		// Return early if session is still loading instead of throwing an error
+		if (!userId) return;
 
 		if (!navigator.geolocation) {
 			console.log("Sorry can't find navigator");
@@ -15,12 +15,15 @@ const GeoUpdater = ({ userId }: { userId: string }) => {
 		}
 
 		socketRef.current = getSocket();
-		socketRef.current.connect();
-		socketRef.current.emit("identity", userId);
+		if (socketRef.current && !socketRef.current.connected) {
+			socketRef.current.connect();
+		}
+		
+		socketRef.current?.emit("identity", userId);
 
 		const watcher = navigator.geolocation.watchPosition(
 			({ coords }) => {
-				socketRef.current.emit("update_coordinates", {
+				socketRef.current?.emit("update_coordinates", {
 					userId,
 					lon: coords.longitude,
 					lat: coords.latitude,
@@ -35,7 +38,9 @@ const GeoUpdater = ({ userId }: { userId: string }) => {
 			},
 		);
 
-    return ()=>{navigator.geolocation.clearWatch(watcher)}
+		return () => {
+			navigator.geolocation.clearWatch(watcher);
+		};
 	}, [userId]);
 
 	return null;
