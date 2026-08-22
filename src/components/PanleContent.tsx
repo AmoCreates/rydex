@@ -159,7 +159,6 @@ const PanleContent = ({
 				const { data } = await axios.post("/api/chat/get-chat", {
 					bookingId: booking?._id,
 				});
-				console.log("Chat data:", data);
 				setChat(data || []);
 			} catch (error: unknown) {
 				const axiosError = error as {

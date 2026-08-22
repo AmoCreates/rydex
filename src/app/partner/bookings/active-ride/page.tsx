@@ -562,8 +562,22 @@ const Page = () => {
 			setCashRequested(true);
 		});
 
+		socket?.on("ride-confirmed", () => {
+			setStatus("confirmed");
+			setBooking((prev) =>
+				prev
+					? {
+							...prev,
+							bookingStatus: "confirmed",
+							paymentStatus: "pending",
+						}
+					: prev,
+			);
+		});
+
 		return () => {
 			socket?.off("cash-requested");
+			socket?.off("ride-confirmed");
 		};
 	});
 
@@ -597,7 +611,7 @@ const Page = () => {
 		status,
 		booking,
 		paymentStatus,
-		currRole: "driver"
+		currRole: "driver",
 	};
 
 	return (

@@ -109,19 +109,22 @@ const CheckoutPageContent = () => {
 				setStatus("requested");
 				setErrMsg("");
 			}
-		}  catch (error: unknown) {
-				const axiosError = error as {
-					response?: {
-						data?: {
-							message?: string;
-						};
+		} catch (error: unknown) {
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
 					};
-					message?: string;
 				};
-				const serverMessage = axiosError?.response?.data?.message;
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
 
-				setErrMsg(serverMessage || "failed to create request, refresh the page and try again")
-			} finally {
+			setErrMsg(
+				serverMessage ||
+					"failed to create request, refresh the page and try again",
+			);
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -139,18 +142,21 @@ const CheckoutPageContent = () => {
 				setErrMsg("");
 			}
 		} catch (error: unknown) {
-				const axiosError = error as {
-					response?: {
-						data?: {
-							message?: string;
-						};
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
 					};
-					message?: string;
 				};
-				const serverMessage = axiosError?.response?.data?.message;
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
 
-				setErrMsg(serverMessage || "failed to cancel request, refresh the page and try again")
-			} finally {
+			setErrMsg(
+				serverMessage ||
+					"failed to cancel request, refresh the page and try again",
+			);
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -176,12 +182,14 @@ const CheckoutPageContent = () => {
 	const handleOnlinePayment = async () => {
 		if (!currBookingId || !payMode || payMode === "cash") return;
 		setLoading(true);
-		setErrMsg("")
+		setErrMsg("");
 		try {
 			if (payMode == "online") {
 				const razorpayLoaded = await loadRazorPayScript();
 				if (!razorpayLoaded) {
-					setErrMsg("Failed to load razor payment gateway, either try again or choose cash method")
+					setErrMsg(
+						"Failed to load razor payment gateway, either try again or choose cash method",
+					);
 					return;
 				}
 			}
@@ -195,7 +203,9 @@ const CheckoutPageContent = () => {
 				alert(
 					"Failed to create payment order - " + (data.message || ""),
 				);
-				setErrMsg("Failed to load razor payment gateway, either try again or choose cash method")
+				setErrMsg(
+					"Failed to load razor payment gateway, either try again or choose cash method",
+				);
 				return;
 			}
 
@@ -236,6 +246,10 @@ const CheckoutPageContent = () => {
 						if (data.success) {
 							window.location.href = `/customer/active-ride/${currBookingId}`;
 							setStatus("confirmed");
+							const socket = getSocket();
+							socket?.emit("ride-confirmed", {
+								bookingId: currBookingId,
+							});
 						} else {
 							setErrMsg("Payment verification failed");
 						}
@@ -262,19 +276,24 @@ const CheckoutPageContent = () => {
 			if (data.success) {
 				window.location.href = `/customer/active-ride/${currBookingId}`;
 				setStatus("confirmed");
+				const socket = getSocket();
+				socket?.emit("ride-confirmed", { bookingId: currBookingId });
 			}
 		} catch (error: unknown) {
-				const axiosError = error as {
-					response?: {
-						data?: {
-							message?: string;
-						};
+			const axiosError = error as {
+				response?: {
+					data?: {
+						message?: string;
 					};
-					message?: string;
 				};
-				const serverMessage = axiosError?.response?.data?.message;
-				setErrMsg(serverMessage || "failed to make cash ride, refresh the page and try again")
-			}
+				message?: string;
+			};
+			const serverMessage = axiosError?.response?.data?.message;
+			setErrMsg(
+				serverMessage ||
+					"failed to make cash ride, refresh the page and try again",
+			);
+		}
 	};
 
 	useEffect(() => {
@@ -298,7 +317,7 @@ const CheckoutPageContent = () => {
 				const { data } = await axios.get("/api/bookings/active-ride");
 				setCurrBookingId(data._id.toString());
 				setStatus(data.bookingStatus);
-			}catch (error: unknown) {
+			} catch (error: unknown) {
 				const axiosError = error as {
 					response?: {
 						data?: {
