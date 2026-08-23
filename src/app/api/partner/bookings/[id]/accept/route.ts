@@ -51,6 +51,9 @@ export async function POST(req: NextRequest, context:{params:Promise<{id:string}
     booking.paymentDeadline= new Date(Date.now() + 5*60*1000)
     await booking.save();
 
+		partner.activeRide = true;
+		await partner.save();
+
 		await axios.post(`${process.env.NEXT_PUBLIC_SOCKET_URL}/emit`, {
 			event:"accept-booking",
 			userId:booking.customer,

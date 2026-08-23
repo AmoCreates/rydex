@@ -30,6 +30,8 @@ export interface IUser extends mongoose.Document {
 	};
 	isOnline: boolean;
 
+	activeRide: boolean;
+
 	// no need to add these becaues extends above, only for more secureness
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -131,6 +133,11 @@ const userSchema = new mongoose.Schema<IUser>(
 			type: Boolean,
 			default: false,
 			index: true
+		},
+
+		activeRide: {
+			type: Boolean,
+			default: false,
 		}
 	},
 	{ timestamps: true },

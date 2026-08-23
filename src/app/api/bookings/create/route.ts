@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
 		if (!customerName || !customerMobile) {
 			return NextResponse.json(
-				{ message: "please add mobile number before book a ride" },
+				{success: false, message: "please add mobile number before book a ride" },
 				{ status: 400 },
 			);
 		}
@@ -71,6 +71,13 @@ export async function POST(req: NextRequest) {
 					message:
 						"Sorry!, driver not found, try to select any other vehicle",
 				},
+				{ status: 400 },
+			);
+		}
+
+		if(driver.activeRide) {
+			return NextResponse.json(
+				{ message: "This vehicle already have a booked ride" },
 				{ status: 400 },
 			);
 		}

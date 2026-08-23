@@ -70,6 +70,9 @@ export async function POST(req: Request) {
 		booking.dropOtpExpires = undefined;
 		await booking.save();
 
+		partner.activeRide = false;
+		await partner.save();
+
 		return NextResponse.json(
 			{ success: true, booking, message: "drop otp verified successfully" },
 			{ status: 200 },

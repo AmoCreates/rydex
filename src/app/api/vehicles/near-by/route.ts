@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       partnerStatus: "approved",
       partnerOnBoardingStep: 7,
       isOnline: true,
+      activeRide: false,
       location: {
         $near: {
           $geometry: {
