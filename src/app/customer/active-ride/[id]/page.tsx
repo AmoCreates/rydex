@@ -385,7 +385,7 @@ const Page = () => {
 					</div>
 				</div>
 
-				<div className="flex-1 flex-col overflow-hidden">
+				<div className="flex-1 flex-col overflow-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 					<div className="flex-1 overflow-y-auto">
 						<PanleContent {...panelProps} />
 					</div>

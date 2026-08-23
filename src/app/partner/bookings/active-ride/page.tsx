@@ -686,7 +686,7 @@ const Page = () => {
 				</div>
 
 				{/* Panel Content: Booking Details, Ride-Chat, OTP Verification */}
-				<div className="flex-1 flex-col overflow-hidden">
+				<div className="flex-1 flex-col overflow-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 					{/* Panel Content: Booking Details, Ride-Chat */}
 					<div className="flex-1 overflow-y-auto">
 						<PanleContent {...panelProps} />
