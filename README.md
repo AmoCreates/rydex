@@ -9,13 +9,37 @@
 [![Razorpay](https://img.shields.io/badge/Razorpay-Payment_Gateway-0C2340?style=for-the-badge&logo=razorpay&logoColor=white)](https://razorpay.com/)
 [![ZegoCloud](https://img.shields.io/badge/ZegoCloud-Video_KYC-0055FF?style=for-the-badge)](https://www.zegocloud.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI_Chat_Assistance-8E75B2?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_App-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://rydex-roan.vercel.app)
+[![Render Deployment](https://img.shields.io/badge/Render-Socket_Server-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://rydex-socket-server-rgmq.onrender.com)
 
-> **Rydex** is a modern, full-stack vehicle booking and ride-hailing web application built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. It delivers an end-to-end urban mobility platform connecting riders, verified driver-partners, and platform administrators in real time.
+> **Rydex** is a modern, full-stack vehicle booking and ride-hailing web platform built and architected by **Anmol Maurya (Amy)**. It delivers an end-to-end urban mobility ecosystem connecting riders, verified driver-partners, and platform administrators in real time.
+
+---
+
+## 🌐 Live Deployments & Demo
+
+| Service | Deployment Platform | Live URL | Status |
+| :--- | :--- | :--- | :---: |
+| **Rydex Web App (Client)** | **Vercel** | [https://rydex-roan.vercel.app](https://rydex-roan.vercel.app) | 🟢 Live |
+| **Rydex Socket Server** | **Render** | [https://rydex-socket-server-rgmq.onrender.com](https://rydex-socket-server-rgmq.onrender.com) | 🟢 Live |
+
+> 🚀 **Try it live**: Anyone can visit and test the live application at **[rydex-roan.vercel.app](https://rydex-roan.vercel.app)**!
+
+---
+
+## 👨‍💻 Creator & Author
+
+| Role | Details |
+| :--- | :--- |
+| **Creator & Full-Stack Architect** | **Anmol Maurya** (Amy) |
+| **Project Scope** | Conceptualized, designed, and developed the entire Rydex ecosystem end-to-end (Next.js 16 Client, Socket.IO Real-Time Engine, Cloudinary Asset Management, ZegoCloud Video KYC, Razorpay Digital Payments, Leaflet Geolocation Tracking, and Google Gemini AI In-Ride Assistance). |
 
 ---
 
 ## 📑 Table of Contents
 
+- [Live Deployments & Demo](#-live-deployments--demo)
+- [Creator & Author](#-creator--author)
 - [Overview](#-overview)
 - [Key User Roles & Workflows](#-key-user-roles--workflows)
   - [1. Rider / Customer](#1-rider--customer)
@@ -122,7 +146,7 @@ Integrated with Google Gemini to analyze recent chat history between rider and d
 
 ```mermaid
 flowchart TB
-    subgraph Client["Frontend Client (Next.js 16 App Router)"]
+    subgraph Client["Frontend Client (Next.js 16 App Router - Deployed on Vercel)"]
         A[Customer Portal]
         B[Partner Dashboard]
         C[Admin Console]
@@ -139,7 +163,7 @@ flowchart TB
         K[/api/chat/ai-suggestions]
     end
 
-    subgraph SocketServer["Dedicated Socket.IO Server"]
+    subgraph SocketServer["Dedicated Socket.IO Server (Deployed on Render)"]
         L[Live Room Dispatcher]
         M[GPS Coordinate Relay]
         N[In-Ride Live Chat]
@@ -171,7 +195,7 @@ flowchart TB
 
 | Category | Technology | Description |
 | :--- | :--- | :--- |
-| **Framework** | [Next.js 16 (App Router)](https://nextjs.org/) | Hybrid Server/Client Components, Server Actions & REST API routes |
+| **Frontend Platform** | [Next.js 16 (App Router)](https://nextjs.org/) | Hybrid Server/Client Components, Server Actions & REST API routes |
 | **UI Library** | [React 19](https://react.dev/) | High-performance reactive UI with modern React compiler support |
 | **Language** | [TypeScript 5.9](https://www.typescriptlang.org/) | End-to-end type safety across client, server, and data models |
 | **Styling & Motion**| [Tailwind CSS v4](https://tailwindcss.com/) & [Motion](https://motion.dev/) | Modern utility-first styling and smooth UI micro-animations |
@@ -185,6 +209,7 @@ flowchart TB
 | **Cloud Storage** | [Cloudinary](https://cloudinary.com/) | Secure cloud asset storage for driver licenses, vehicle RC & IDs |
 | **AI Intelligence** | [Google Gemini API](https://ai.google.dev/) | Contextual conversation analysis for smart in-ride suggestions |
 | **Charts** | [Recharts](https://recharts.org/) | Visual analytics for driver revenue and admin financial tracking |
+| **Hosting & Deploy**| [Vercel](https://vercel.com/) & [Render](https://render.com/) | Next.js Client on Vercel & Real-Time Socket Server on Render |
 | **Icons** | [Lucide React](https://lucide.dev/) & [Remix Icons](https://remixicon.com/) | Comprehensive, modern iconography |
 
 ---
@@ -252,7 +277,7 @@ Make sure you have the following installed on your system:
 - **Node.js** `>= 18.17.0` (LTS recommended)
 - **npm**, **pnpm**, **yarn**, or **bun**
 - A running **MongoDB** instance (Local or [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
-- Running instance of **Rydex Socket Server** (`socketServer/`)
+- Running instance of **Rydex Socket Server** (`socketServer/`) or connect directly to the live Render endpoint (`https://rydex-socket-server-rgmq.onrender.com`)
 
 ---
 
@@ -300,8 +325,9 @@ CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
 NEXT_PUBLIC_ZEGO_APP_ID=123456789
 NEXT_PUBLIC_ZEGO_SERVER_SECRET="your-zego-server-secret"
 
-# Real-Time Socket.IO Server URL
+# Real-Time Socket.IO Server URL (Local or Render Deployed Instance)
 NEXT_PUBLIC_SOCKET_URL="http://localhost:8000"
+# Or Live Render: NEXT_PUBLIC_SOCKET_URL="https://rydex-socket-server-rgmq.onrender.com"
 
 # Razorpay Payment Gateway
 RAZORPAY_KEY_ID="rzp_test_your_key_id"
@@ -332,7 +358,7 @@ Return to the `rydex/` directory and launch the Next.js development server:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your web browser to explore Rydex!
+Open [http://localhost:3000](http://localhost:3000) in your web browser to explore Rydex locally, or visit the live deployment at [https://rydex-roan.vercel.app](https://rydex-roan.vercel.app)!
 
 ---
 
@@ -351,7 +377,7 @@ Open [http://localhost:3000](http://localhost:3000) in your web browser to explo
 | `CLOUDINARY_API_SECRET`| **Yes** | Cloudinary API Secret | `Fz0v...` |
 | `NEXT_PUBLIC_ZEGO_APP_ID` | **Yes** | ZegoCloud App ID for Video KYC | Number (e.g., `54796158`) |
 | `NEXT_PUBLIC_ZEGO_SERVER_SECRET` | **Yes** | ZegoCloud Server Secret | Hex string |
-| `NEXT_PUBLIC_SOCKET_URL` | **Yes** | URL of the running Socket server | `http://localhost:8000` |
+| `NEXT_PUBLIC_SOCKET_URL` | **Yes** | URL of the running Socket server | `http://localhost:8000` or `https://rydex-socket-server-rgmq.onrender.com` |
 | `RAZORPAY_KEY_ID` | **Yes** | Razorpay Merchant Key ID | `rzp_test_...` |
 | `RAZORPAY_KEY_SECRET` | **Yes** | Razorpay Secret Key | `fS4K...` |
 | `NEXT_PUBLIC_RAZORPAY_KEY_ID` | **Yes** | Public Razorpay key for client modal | `rzp_test_...` |
@@ -444,5 +470,5 @@ Distributed under the **ISC License**. See `LICENSE` for more information.
 ---
 
 <p align="center">
-  Built with ❤️ for next-generation urban mobility.
+  Crafted with ❤️ by <b>Anmol Maurya (Amy)</b> for next-generation urban mobility.
 </p>
