@@ -20,7 +20,7 @@
 
 | Service | Deployment Platform | Live URL | Status |
 | :--- | :--- | :--- | :---: |
-| **Rydex Web App (Client)** | **Vercel** | [https://rydex-roan.vercel.app](https://rydex-roan.vercel.app) | 🟢 Live |
+| **Rydex Web App** | **Vercel** | [https://rydex-roan.vercel.app](https://rydex-roan.vercel.app) | 🟢 Live |
 | **Rydex Socket Server** | **Render** | [https://rydex-socket-server-rgmq.onrender.com](https://rydex-socket-server-rgmq.onrender.com) | 🟢 Live |
 
 > 🚀 **Try it live**: Anyone can visit and test the live application at **[rydex-roan.vercel.app](https://rydex-roan.vercel.app)**!
