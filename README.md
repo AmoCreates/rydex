@@ -50,17 +50,9 @@
 - [Tech Stack](#-tech-stack)
 - [Project Directory Structure](#-project-directory-structure)
 - [Getting Started & Local Setup](#-getting-started--local-setup)
-  - [Prerequisites](#prerequisites)
-  - [Step 1: Clone Repository](#step-1-clone-repository)
-  - [Step 2: Install Dependencies](#step-2-install-dependencies)
-  - [Step 3: Setup Environment Variables](#step-3-setup-environment-variables)
-  - [Step 4: Start the Socket Server](#step-4-start-the-socket-server)
-  - [Step 5: Run Next.js Client](#step-5-run-nextjs-client)
-- [Environment Variables Reference](#-environment-variables-reference)
 - [Real-Time Socket Events](#-real-time-socket-events)
 - [API Routes Overview](#-api-routes-overview)
 - [Security & Trust Highlights](#-security--trust-highlights)
-- [Contributing & License](#-contributing--license)
 
 ---
 
@@ -146,47 +138,56 @@ Integrated with Google Gemini to analyze recent chat history between rider and d
 
 ```mermaid
 flowchart TB
-    subgraph Client["Frontend Client (Next.js 16 App Router - Deployed on Vercel)"]
-        A[Customer Portal]
-        B[Partner Dashboard]
-        C[Admin Console]
-        D[Redux Toolkit State]
-        E[Leaflet Live Maps]
+    subgraph ClientLayer ["Frontend Client (Next.js 16 - Deployed on Vercel)"]
+        A["Customer Portal"]
+        B["Partner Dashboard"]
+        C["Admin Console"]
+        D["Redux State Management"]
+        E["Leaflet Live Maps"]
     end
 
-    subgraph Serverless["Next.js Backend (API Routes)"]
-        F[/api/auth]
-        G[/api/bookings]
-        H[/api/partner]
-        I[/api/payment]
-        J[/api/admin]
-        K[/api/chat/ai-suggestions]
+    subgraph BackendLayer ["Serverless Backend (Next.js API Routes)"]
+        F["Auth & OTP APIs (/api/auth)"]
+        G["Ride Bookings (/api/bookings)"]
+        H["Partner Portal (/api/partner)"]
+        I["Payments (/api/payment)"]
+        J["Admin Management (/api/admin)"]
+        K["AI Chat Assistant (/api/chat)"]
     end
 
-    subgraph SocketServer["Dedicated Socket.IO Server (Deployed on Render)"]
-        L[Live Room Dispatcher]
-        M[GPS Coordinate Relay]
-        N[In-Ride Live Chat]
+    subgraph RealtimeLayer ["Real-Time Socket Server (Deployed on Render)"]
+        L["Live Room Dispatcher"]
+        M["GPS Coordinate Relay"]
+        N["In-Ride Live Chat"]
     end
 
-    subgraph CloudServices["Cloud & Third-Party Services"]
-        O[(MongoDB Atlas)]
-        P[Cloudinary Storage]
-        Q[Razorpay Gateway]
-        R[ZegoCloud Video KYC]
-        S[Google Gemini API]
-        T[Geoapify Geocoding]
+    subgraph CloudLayer ["Cloud Infrastructure & External APIs"]
+        O[("MongoDB Atlas Database")]
+        P["Cloudinary Asset Storage"]
+        Q["Razorpay Payment Gateway"]
+        R["ZegoCloud Video KYC"]
+        S["Google Gemini AI"]
+        T["Geoapify Maps & Geocoding"]
     end
 
-    Client <-->|HTTP / REST| Serverless
-    Client <-->|WebSocket Events| SocketServer
-    Serverless <-->|Mongoose ODM| O
-    Serverless <-->|Media Uploads| P
-    Serverless <-->|Payment Orders & Webhooks| Q
-    Serverless <-->|AI Prompts| S
-    Client <-->|RTC Video Room| R
-    Client <-->|Geocoding / Tiles| T
-    SocketServer <-->|Driver Coordinate Persist| O
+    A -->|"Create Booking"| G
+    A -->|"Checkout"| I
+    B -->|"Driver Status"| H
+    C -->|"Audit & Review"| J
+
+    A <-->|"Live GPS & Chat"| N
+    B <-->|"GPS Broadcast"| M
+
+    G <-->|"Mongoose ODM"| O
+    H <-->|"Document Uploads"| P
+    I <-->|"Payment Verification"| Q
+    K <-->|"Smart AI Suggestions"| S
+
+    M <-->|"Driver Location Sync"| O
+
+    E <-->|"Tiles & Geocoding"| T
+    B <-->|"Video KYC Call"| R
+    C <-->|"Video KYC Audit"| R
 ```
 
 ---
@@ -262,7 +263,7 @@ rydex/
 │   ├── Toolkit/                # Redux Toolkit store & userSlice
 │   ├── auth.ts                 # NextAuth v5 configuration & callbacks
 │   └── proxy.ts                # Route handlers / proxy helpers
-├── .env                        # Environment variables (see reference below)
+├── .env                        # Environment variables
 ├── next.config.ts              # Next.js configuration
 ├── package.json                # Project dependencies and npm scripts
 └── tsconfig.json               # TypeScript compiler configuration
@@ -299,47 +300,7 @@ bun install
 ```
 
 ### Step 3: Setup Environment Variables
-Create a `.env.local` or `.env` file in the `rydex/` root directory:
-
-```env
-# Database
-MONGODB_URI="mongodb+srv://<username>:<password>@cluster0.mongodb.net/rydex"
-
-# NextAuth Configuration
-AUTH_SECRET="your-32-character-auth-secret"
-
-# Google OAuth (Optional / For Social Login)
-GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
-
-# SMTP Email Configuration (For Email OTP verification)
-SMTP_USER="your-email@gmail.com"
-SMTP_PASS="your-app-specific-password"
-
-# Cloudinary (Document & Vehicle Image Uploads)
-CLOUDINARY_CLOUD_NAME="your-cloud-name"
-CLOUDINARY_API_KEY="your-cloudinary-api-key"
-CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
-
-# ZegoCloud Video KYC
-NEXT_PUBLIC_ZEGO_APP_ID=123456789
-NEXT_PUBLIC_ZEGO_SERVER_SECRET="your-zego-server-secret"
-
-# Real-Time Socket.IO Server URL (Local or Render Deployed Instance)
-NEXT_PUBLIC_SOCKET_URL="http://localhost:8000"
-# Or Live Render: NEXT_PUBLIC_SOCKET_URL="https://rydex-socket-server-rgmq.onrender.com"
-
-# Razorpay Payment Gateway
-RAZORPAY_KEY_ID="rzp_test_your_key_id"
-RAZORPAY_KEY_SECRET="your_razorpay_secret"
-NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_your_key_id"
-
-# Geocoding & Maps
-NEXT_PUBLIC_GEOAPIFY_KEY="your-geoapify-api-key"
-
-# Google Gemini AI (Smart Chat Replies)
-GOOGLE_GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/interactions?key=YOUR_GEMINI_KEY"
-```
+Create a `.env.local` or `.env` file in the `rydex/` root directory and configure your credentials (MongoDB URI, Auth Secret, Cloudinary, ZegoCloud, Razorpay, and Socket URL).
 
 ### Step 4: Start the Socket Server
 In a separate terminal tab, navigate to the `socketServer` directory and start the socket engine:
@@ -359,30 +320,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your web browser to explore Rydex locally, or visit the live deployment at [https://rydex-roan.vercel.app](https://rydex-roan.vercel.app)!
-
----
-
-## 🔑 Environment Variables Reference
-
-| Variable Name | Required | Description | Example / Format |
-| :--- | :---: | :--- | :--- |
-| `MONGODB_URI` | **Yes** | MongoDB connection string | `mongodb+srv://user:pass@host/db` |
-| `AUTH_SECRET` | **Yes** | Encryption key used by NextAuth | `openssl rand -base64 32` |
-| `GOOGLE_CLIENT_ID` | Optional | Google OAuth App Client ID | `*.apps.googleusercontent.com` |
-| `GOOGLE_CLIENT_SECRET` | Optional | Google OAuth App Secret Key | `GOCSPX-...` |
-| `SMTP_USER` | **Yes** | Sender email address for OTPs | `support@rydex.com` |
-| `SMTP_PASS` | **Yes** | SMTP App Password | App password from Gmail/SendGrid |
-| `CLOUDINARY_CLOUD_NAME` | **Yes** | Cloudinary Cloud name | `drx6...` |
-| `CLOUDINARY_API_KEY` | **Yes** | Cloudinary API Key | `9839...` |
-| `CLOUDINARY_API_SECRET`| **Yes** | Cloudinary API Secret | `Fz0v...` |
-| `NEXT_PUBLIC_ZEGO_APP_ID` | **Yes** | ZegoCloud App ID for Video KYC | Number (e.g., `54796158`) |
-| `NEXT_PUBLIC_ZEGO_SERVER_SECRET` | **Yes** | ZegoCloud Server Secret | Hex string |
-| `NEXT_PUBLIC_SOCKET_URL` | **Yes** | URL of the running Socket server | `http://localhost:8000` or `https://rydex-socket-server-rgmq.onrender.com` |
-| `RAZORPAY_KEY_ID` | **Yes** | Razorpay Merchant Key ID | `rzp_test_...` |
-| `RAZORPAY_KEY_SECRET` | **Yes** | Razorpay Secret Key | `fS4K...` |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | **Yes** | Public Razorpay key for client modal | `rzp_test_...` |
-| `NEXT_PUBLIC_GEOAPIFY_KEY` | **Yes** | Geoapify Geocoding API key | Hex string |
-| `GOOGLE_GEMINI_API_URL`| Optional | Endpoint for Gemini AI chat suggestions | `https://generativelanguage...` |
 
 ---
 
@@ -452,20 +389,6 @@ Open [http://localhost:3000](http://localhost:3000) in your web browser to explo
 3. **Role-Based Access Control**: Strict route & API security ensuring customers cannot access partner dashboards or admin consoles.
 4. **Cryptographic Payment Integrity**: All Razorpay payment captures are verified on the server using HMAC SHA256 signatures before confirming booking status.
 5. **Private In-Ride Rooms**: Chat messages and live GPS coordinates are restricted strictly to the participants of that specific `ride-{id}` room.
-
----
-
-## 🤝 Contributing & License
-
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-Distributed under the **ISC License**. See `LICENSE` for more information.
 
 ---
 
