@@ -12,7 +12,7 @@ type Props = {
 	onClose: () => void;
 };
 
-type Steps = "login" | "signup" | "otp";
+type Steps = "login" | "signup" | "otp" | "forgot-password" | "reset-password";
 
 const AuthModel = ({ open, onClose }: Props) => {
 	const [step, setStep] = useState<Steps>("login");
@@ -126,11 +126,97 @@ const AuthModel = ({ open, onClose }: Props) => {
 		}
 	}
 
+	async function handleForgotPassword(formData: FormData) {
+		const emailInput = formData.get("email");
+		if (!emailInput) {
+			setErr("Email is required");
+			return;
+		}
+
+		const emailValue = String(emailInput).trim();
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+			setErr("Please enter a valid email address");
+			return;
+		}
+
+		setLoading(true);
+		setErr("");
+
+		try {
+			setEmail(emailValue);
+			const response = await axios.post("/api/auth/forgot-password", {
+				email: emailValue,
+			});
+			if (response.status === 200) {
+				setStep("reset-password");
+				setOtp(["", "", "", "", "", ""]);
+			}
+		} catch (error: unknown | any) {
+			const message =
+				error?.response?.data?.message ||
+				error?.response?.data?.error ||
+				error?.message ||
+				"Failed to send reset OTP";
+			setErr(message);
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	async function handleResetPassword(formData: FormData) {
+		const password = formData.get("password");
+
+		if (otp.some((digit) => digit.trim() === "")) {
+			setErr("Please enter the complete 6-digit OTP");
+			return;
+		}
+
+		if (!password) {
+			setErr("New password is required");
+			return;
+		}
+
+		const passwordValue = String(password);
+
+		if (passwordValue.length < 6) {
+			setErr("Password must be at least 6 characters long");
+			return;
+		}
+
+		setLoading(true);
+		setErr("");
+
+		try {
+			await axios.post("/api/auth/reset-password", {
+				email,
+				otp: otp.join(""),
+				password: passwordValue,
+			});
+			setErr("Password Reset Successfully");
+			setTimeout(() => {
+				setStep("login");
+			}, 1000);
+		} catch (error: unknown | any) {
+			const message =
+				error?.response?.data?.message ||
+				error?.response?.data?.error ||
+				error?.message ||
+				"Failed to reset password";
+			setErr(message);
+		} finally {
+			setLoading(false);
+			setOtp(["", "", "", "", "", ""]);
+		}
+	}
+
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		if (step === "login") await handleLogin(new FormData(e.currentTarget));
-		else if (step === "signup")
-			await handleSignup(new FormData(e.currentTarget));
+		const formData = new FormData(e.currentTarget);
+		if (step === "login") await handleLogin(formData);
+		else if (step === "signup") await handleSignup(formData);
+		else if (step === "forgot-password") await handleForgotPassword(formData);
+		else if (step === "reset-password") await handleResetPassword(formData);
 	};
 
 	async function verifyEmail() {
@@ -244,7 +330,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 								<hr className="grow border-black/20" />
 							</div>
 
-							<p className="text-[12px] text-zinc-400 -mt-3 text-center">
+							<p className="text-[12px] text-zinc-400 -mt-3 text-center mb-4">
 								dummy admin email | pass ::{" "}
 								<span className="font-bold text-zinc-500">
 									admin@mail.com | 123456
@@ -295,9 +381,21 @@ const AuthModel = ({ open, onClose }: Props) => {
 												className="w-full bg-transparent outline-none text-sm"
 											/>
 										</div>
+										<div className="flex justify-end -mt-1">
+											<button
+												type="button"
+												onClick={() => {
+													setStep("forgot-password");
+													setErr("");
+												}}
+												className="text-xs font-medium text-gray-500 hover:text-black hover:underline cursor-pointer"
+											>
+												Forgot Password?
+											</button>
+										</div>
 										{err && (
 											<div
-												className={`${err == "Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}
+												className={`${err.toLowerCase().includes("successfully") ? "text-green-700" : "text-red-500"}`}
 											>
 												*{err}
 											</div>
@@ -348,7 +446,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 												/>
 											</label>
 											<input
-												type="name"
+												type="text"
 												id="name"
 												placeholder="Name"
 												name="name"
@@ -394,7 +492,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 											</div>
 										)}
 										<button
-											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900  flex justify-center items-center transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
 											disabled={loading}
 										>
 											{loading
@@ -455,7 +553,7 @@ const AuthModel = ({ open, onClose }: Props) => {
 									</div>
 									{err && (
 										<div
-											className={`${err == "Email Verified Successfully" ? "text-green-700" : "text-red-500"}`}
+											className={`${err.toLowerCase().includes("successfully") ? "text-green-700" : "text-red-500"}`}
 										>
 											*{err}
 										</div>
@@ -477,6 +575,150 @@ const AuthModel = ({ open, onClose }: Props) => {
 											}}
 											disabled={loading}
 											className="font-semibold hover:underline cursor-pointer text-gray-500 disabled:no-underline disabled:cursor-not-allowed"
+										>
+											Re-Enter Email
+										</button>
+									</div>
+								</motion.div>
+							)}
+
+							{step === "forgot-password" && (
+								<motion.div
+									initial={{ opacity: 0, x: 20 }}
+									animate={{ opacity: 1, x: 0 }}
+								>
+									<h1 className="text-xl font-semibold">
+										Forgot Password
+									</h1>
+									<p className="text-gray-500 text-sm mt-1">
+										Enter your registered email address to receive a password reset OTP.
+									</p>
+									<form
+										onSubmit={handleSubmit}
+										className="mt-5 space-y-4"
+									>
+										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
+											<label htmlFor="forgot-email">
+												<Mail
+													size={18}
+													className="text-gray-500"
+												/>
+											</label>
+											<input
+												type="email"
+												id="forgot-email"
+												placeholder="Email"
+												name="email"
+												className="w-full bg-transparent outline-none text-sm"
+											/>
+										</div>
+										{err && (
+											<div className="text-red-500">
+												*{err}
+											</div>
+										)}
+										<button
+											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center transition ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+											disabled={loading}
+										>
+											{loading
+												? "Sending OTP..."
+												: "Send Reset OTP"}
+										</button>
+									</form>
+									<div className="flex mt-5 items-center flex-col text-[15px]">
+										<button
+											className="font-semibold hover:underline cursor-pointer text-gray-500"
+											onClick={() => {
+												setStep("login");
+												setErr("");
+											}}
+										>
+											Back to Login
+										</button>
+									</div>
+								</motion.div>
+							)}
+
+							{step === "reset-password" && (
+								<motion.div
+									key="reset-password"
+									initial={{ opacity: 0, x: 20 }}
+									animate={{ opacity: 1, x: 0 }}
+									exit={{ opacity: 0, x: -20 }}
+								>
+									<h1 className="text-xl font-semibold">
+										Reset Password
+									</h1>
+									<p className="text-gray-500 text-sm">
+										Sent OTP to{" "}
+										<span className="text-green-600 font-medium">
+											{email}
+										</span>
+									</p>
+									<form
+										onSubmit={handleSubmit}
+										className="mt-5 space-y-4"
+									>
+										<div className="flex justify-between gap-2">
+											{otp.map((digit, idx) => (
+												<input
+													key={idx}
+													id={`otp-${idx}`}
+													value={digit}
+													name={`otp-${idx}`}
+													maxLength={1}
+													onChange={(e) =>
+														handleChangeOtp(
+															idx,
+															e.target.value,
+														)
+													}
+													className="w-10 h-10 sm:w-12 text-center text-lg font-semibold rounded-xl bg-white border border-black/20 outline-none"
+												/>
+											))}
+										</div>
+										<div className="flex items-center gap-3 border border-black/20 rounded-xl px-4 py-3">
+											<label htmlFor="new-pass">
+												<Lock
+													size={18}
+													className="text-gray-500"
+												/>
+											</label>
+											<input
+												type="password"
+												id="new-pass"
+												placeholder="New Password"
+												name="password"
+												maxLength={16}
+												minLength={6}
+												className="w-full bg-transparent outline-none text-sm"
+											/>
+										</div>
+										{err && (
+											<div
+												className={`${err.toLowerCase().includes("successfully") ? "text-green-700" : "text-red-500"}`}
+											>
+												*{err}
+											</div>
+										)}
+										<button
+											className={`w-full h-11 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer ${loading ? "cursor-not-allowed bg-gray-900" : "cursor-pointer active:scale-95 transition"}`}
+											disabled={loading}
+										>
+											{loading
+												? "Resetting Password..."
+												: "Reset Password"}
+										</button>
+									</form>
+									<div className="flex mt-3 items-center flex-col text-[15px]">
+										<button
+											onClick={() => {
+												setStep("forgot-password");
+												setErr("");
+											}}
+											disabled={loading}
+											className="font-semibold hover:underline cursor-pointer text-gray-500 disabled:no-underline disabled:cursor-not-allowed text-sm"
 										>
 											Re-Enter Email
 										</button>

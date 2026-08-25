@@ -119,7 +119,7 @@ const AdminDashboard = () => {
 									initial={{ opacity: 0, scale: 0.95 }}
 									animate={{ opacity: 1, scale: 1 }}
 									exit={{ opacity: 0, scale: 0.95 }}
-									className="absolute hidden md:block right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200"
+									className={`absolute ${profileOpen ? "visible" : "hidden"} right-0 top-14 w-75 bg-white text-black rounded-lg shadow-xl py-2 px-2 z-50 border border-gray-200`}
 								>
 									<div className="py-2 text-center border-b border-gray-200 mb-1">
 										<p className="text-lg font-semibold">
