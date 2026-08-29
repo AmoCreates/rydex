@@ -103,11 +103,11 @@ const getStatusStyle = (status: string | undefined) => {
 				sublabel: "Trip has ended successfully",
 				dot: "bg-zinc-400",
 			};
-		case "awaiting payment":
-			return {
-				label: "Payment Pending",
-				sublabel: "Customer payment is pending",
-				dot: "bg-purple-400",
+			case "awaiting payment":
+				return {
+					label: "Payment Pending",
+					sublabel: "Customer payment is pending",
+					dot: "bg-purple-400",
 			};
 			case "cancelled":
 				return {
@@ -132,15 +132,15 @@ const getStatusStyle = (status: string | undefined) => {
 					label: "Unexpected",
 					sublabel: "Try again",
 					dot: "bg-slate-400",
-			};
-	}
-};
-
-const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
-	idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
-	requested: {
-		label: "Cash Requested",
-		cls: "bg-blue-100 text-blue-700",
+				};
+			}
+		};
+		
+		const PAYMENT_BADGE: Record<PaymentStatus, { label: string; cls: string }> = {
+			idle: { label: "N/A", cls: "bg-zinc-100 text-zinc-700" },
+			requested: {
+				label: "Cash Requested",
+				cls: "bg-blue-100 text-blue-700",
 	},
 	pending: { label: "Pending", cls: "bg-amber-100 text-amber-700" },
 	paid: { label: "Paid", cls: "bg-emerald-100 text-emerald-700" },
@@ -638,18 +638,18 @@ const Page = () => {
 						setEstPickUpTime(estPickUpTime);
 						setEstDropTime(estDropTime);
 					}}
-				/>
+					/>
 
 				<motion.div
 					initial={{ opacity: 0, y: -16 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.3, duration: 0.5 }}
 					className="absolute top-4 left-1/2 -translate-x-1/2 z-500 pointer-events-none"
-				>
+					>
 					<div className="flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-zinc-100">
 						<span
 							className={`w-2 h-2 rounded-full animate-pulse ${cfg.dot}`}
-						/>
+							/>
 						<span className="text-xs font-semibold tracking-wide text-zinc-900">
 							{cfg.label}
 						</span>
@@ -664,7 +664,7 @@ const Page = () => {
 				animate={{ x: 0, opacity: 1 }}
 				transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
 				className="hidden lg:flex w-[420px] lg:w-[460px] xl:w-[500px] bg-white border-l border-zinc-100 flex-col"
-			>
+				>
 				{/* Panel Header */}
 				<div className="bg-zinc-950 px-6 py-5 shrink-0">
 					<p className="text-zinc-500 text-[10px] tracking-[0.2em] uppercase font-semibold mb-1">
@@ -715,7 +715,7 @@ const Page = () => {
 									<ArrowRight
 										size={15}
 										className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
-									/>
+										/>
 								</motion.button>
 							)}
 
@@ -727,8 +727,8 @@ const Page = () => {
 								initial={{ opacity: 0, y: 6 }}
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0, y: -6 }}
-									className={`w-full ${loadingOtp ? "bg-emerald-300" : "bg-emerald-600 hover:bg-emerald-500 active:scale-97 cursor-pointer"} text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
-									disabled={loadingOtp}
+								className={`w-full ${loadingOtp ? "bg-emerald-300" : "bg-emerald-600 hover:bg-emerald-500 active:scale-97 cursor-pointer"} text-white py-4 rounded-xl font-bold text-sm tracking-wider transition-all flex items-center justify-center gap-2 disabled-cursor-not-allowed disabled-pointer-events-none`}
+								disabled={loadingOtp}
 								>
 									{!loadingOtp && (
 										<RiSendPlaneFill size={16} />
@@ -741,7 +741,7 @@ const Page = () => {
 									<ArrowRight
 										size={15}
 										className={`${loadingOtp ? "hidden" : "flex"} ml-1`}
-									/>
+										/>
 								</motion.button>
 							)}
 						</AnimatePresence>
@@ -854,10 +854,10 @@ const Page = () => {
 												desktopOtpInputsRef.current[
 													idx
 												] = el;
-												}}
-												className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
-												/>
-											))}
+											}}
+											className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
+											/>
+										))}
 									</div>
 
 									{/* Verify OTP: Pickup/Drop  */}
@@ -1114,46 +1114,46 @@ const Page = () => {
 												) {
 													mobileOtpInputsRef.current[
 														idx + 1
-														]?.focus();
-													}
-												}}
-												onKeyDown={(e) => {
-													if (
-														e.key === "Backspace" &&
-														!digit &&
-														idx > 0
-													) {
-														mobileOtpInputsRef.current[
-															idx - 1
-														]?.focus();
-													}
-													if (
-														e.key === "ArrowLeft" &&
-														idx > 0
-													) {
-														mobileOtpInputsRef.current[
-															idx - 1
-														]?.focus();
-													}
-													if (
-														e.key ===
-														"ArrowRight" &&
-														idx <
-														otpDigits.length - 1
-													) {
-														mobileOtpInputsRef.current[
-															idx + 1
-														]?.focus();
-													}
-												}}
-												ref={(el) => {
+													]?.focus();
+												}
+											}}
+											onKeyDown={(e) => {
+												if (
+													e.key === "Backspace" &&
+													!digit &&
+													idx > 0
+												) {
 													mobileOtpInputsRef.current[
-														idx
-													] = el;
-												}}
-												className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
-												/>
-											))}
+														idx - 1
+													]?.focus();
+												}
+												if (
+													e.key === "ArrowLeft" &&
+													idx > 0
+												) {
+													mobileOtpInputsRef.current[
+														idx - 1
+													]?.focus();
+												}
+												if (
+													e.key ===
+													"ArrowRight" &&
+													idx <
+													otpDigits.length - 1
+												) {
+													mobileOtpInputsRef.current[
+														idx + 1
+													]?.focus();
+												}
+											}}
+											ref={(el) => {
+												mobileOtpInputsRef.current[
+													idx
+												] = el;
+											}}
+											className="h-14 w-full rounded-2xl border border-zinc-200 bg-white text-center text-lg font-semibold tracking-[0.48em] text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-100"
+											/>
+										))}
 									</div>
 
 									{/* Verify OTP: Pickup/Drop */}

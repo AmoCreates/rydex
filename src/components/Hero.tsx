@@ -1,7 +1,7 @@
 "use client";
 import { RootState } from "@/Toolkit/store";
 import axios from "axios";
-import { Bike, Bus, Car, Truck } from "lucide-react";
+import { Bike, Bus, Car, Play, Truck } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,7 +15,7 @@ const Hero = ({ onOpen }: Props) => {
 	const { userData } = useSelector((state: RootState) => state.user);
 	const router = useRouter();
 	const [isActiveRide, setIsActiveRide] = useState(false);
-	const [activeRideId, setActiveRideId] = useState("")
+	const [activeRideId, setActiveRideId] = useState("");
 
 	useEffect(() => {
 		const isActiveBooking = async () => {
@@ -72,18 +72,50 @@ const Hero = ({ onOpen }: Props) => {
 					<Bus size={30} />
 					<Truck size={30} />
 				</motion.div>
-				<motion.button
-					className="cursor-pointer active:scale-95 mt-12 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition"
-					onClick={() => {
-						if (!userData) onOpen();
-						else {
-							if(isActiveRide) router.push(`/customer/active-ride/${activeRideId}`);
-							else router.push('/customer/book')
-						}
-					}}
-				>
-					{isActiveRide ? "Track My Ride" : "Book Now"}
-				</motion.button>
+				<div className="mt-12 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
+					<motion.button
+						className="cursor-pointer active:scale-95 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition"
+						onClick={() => {
+							if (!userData) onOpen();
+							else {
+								if (isActiveRide)
+									router.push(
+										`/customer/active-ride/${activeRideId}`,
+									);
+								else router.push("/customer/book");
+							}
+						}}
+					>
+						{isActiveRide ? "Track My Ride" : "Book Now"}
+					</motion.button>
+
+					{/* Video Guide Buttons */}
+					<motion.a
+						href="https://lnkd.in/p/dFW4pVes"
+						target="_blank"
+						rel="noopener noreferrer"
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.7, duration: 0.5 }}
+						className="flex items-center gap-2 px-6 py-4 bg-black/50 hover:bg-black/80 text-white rounded-full font-medium text-base border border-white/25 backdrop-blur-md hover:scale-105 transition active:scale-95 shadow-lg"
+					>
+						<Play size={16} className="text-sky-400 fill-current" />
+						Book Ride Guide ↗
+					</motion.a>
+
+					<motion.a
+						href="https://lnkd.in/p/dddUSgHQ"
+						target="_blank"
+						rel="noopener noreferrer"
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.8, duration: 0.5 }}
+						className="flex items-center gap-2 px-6 py-4 bg-black/50 hover:bg-black/80 text-white rounded-full font-medium text-base border border-white/25 backdrop-blur-md hover:scale-105 transition active:scale-95 shadow-lg"
+					>
+						<Play size={16} className="text-emerald-400 fill-current" />
+						Partner Guide ↗
+					</motion.a>
+				</div>
 			</div>
 		</div>
 	);
