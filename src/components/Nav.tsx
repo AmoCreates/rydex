@@ -14,7 +14,7 @@ import { getSocket } from "@/lib/socket";
 
 const publicNav = [
 	{ label: "Home", route: "/" },
-	{ label: "Bookings", route: "/bookings" },
+	{ label: "Book", route: "/customer/book" },
 	{ label: "About Us", route: "/about" },
 	{ label: "Contact Us", route: "/contact" },
 ];
@@ -259,6 +259,23 @@ const Nav = ({ onOpen }: Props) => {
 								{publicNav.map((item, index) => {
 									const href = item.route;
 									const active = pathName === href;
+									if (item.label === "Book" && !userData) {
+										return (
+											<button
+												key={index}
+												type="button"
+												onClick={() => {
+													if (typeof window !== "undefined") {
+														window.localStorage.setItem("redirectAfterLogin", "/customer/book");
+													}
+													onOpen();
+												}}
+												className={`text-[11px] sm:text-sm text-center font-medium transition pl-2 cursor-pointer ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
+											>
+												{item.label}
+											</button>
+										);
+									}
 									return (
 										<Link
 											key={index}

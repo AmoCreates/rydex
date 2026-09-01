@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "./auth";
 
-const PUBLIC_ROUTES = ["/"];
+const PUBLIC_ROUTES = ["/", "/about", "/contact"];
 
 function isPublicRoute(pathname: string) {
 	return PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/auth");

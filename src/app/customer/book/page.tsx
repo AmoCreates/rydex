@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
 	ArrowLeft,
@@ -19,6 +19,7 @@ import { RiSendPlaneFill, RiUserLine } from "@remixicon/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
+import { useSession } from "next-auth/react";
 
 const stepVariants = {
 	hidden: { opacity: 0, y: 16 },
@@ -46,6 +47,7 @@ const VEHICLES = [
 ];
 
 const Page = () => {
+	const { data: session, status } = useSession();
 	const { userData } = useSelector((state: RootState) => state.user);
 	const [vehicle, setVehicle] = useState("");
 	const [name, setName] = useState(userData?.name ? `${userData.name}` : "");
@@ -73,6 +75,21 @@ const Page = () => {
 		!!drop,
 	].filter(Boolean).length;
 	const router = useRouter();
+
+	useEffect(() => {
+		if (status === "unauthenticated") {
+			if (typeof window !== "undefined") {
+				window.localStorage.setItem("redirectAfterLogin", "/customer/book");
+			}
+			router.push("/?auth=true");
+		}
+	}, [status, router]);
+
+	useEffect(() => {
+		if (userData?.name && !name) {
+			setName(userData.name);
+		}
+	}, [userData?.name, name]);
 
 	const getCurrentLocation = async () => {
 		setLoading(true);

@@ -6,13 +6,22 @@ import Nav from "@/components/Nav";
 import PartnerDashboard from "@/components/PartnerDashboard";
 import PublicHome from "@/components/PublicHome";
 import { RootState } from "@/Toolkit/store";
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "next/navigation";
 
-export default function Home() {
+function HomeContent() {
 	const [authOpen, setAuthOpen] = useState(false);
 	const { userData } = useSelector((state: RootState) => state.user);
 	const role = userData?.role;
+	const searchParams = useSearchParams();
+
+	useEffect(() => {
+		if (searchParams.get("auth") === "true") {
+			setAuthOpen(true);
+		}
+	}, [searchParams]);
+
 	return (
 		<div className="w-full min-h-screen bg-white">
 			{userData?.role !== "admin" && userData?._id && (
@@ -35,5 +44,13 @@ export default function Home() {
 
 			<Footer />
 		</div>
+	);
+}
+
+export default function Home() {
+	return (
+		<Suspense fallback={null}>
+			<HomeContent />
+		</Suspense>
 	);
 }

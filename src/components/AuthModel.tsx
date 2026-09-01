@@ -113,7 +113,14 @@ const AuthModel = ({ open, onClose }: Props) => {
 
 			if (res?.ok) {
 				onClose();
-				router.push("/");
+				const targetUrl =
+					typeof window !== "undefined"
+						? window.localStorage.getItem("redirectAfterLogin") || "/"
+						: "/";
+				if (typeof window !== "undefined") {
+					window.localStorage.removeItem("redirectAfterLogin");
+				}
+				router.push(targetUrl);
 				return;
 			}
 
@@ -302,8 +309,15 @@ const AuthModel = ({ open, onClose }: Props) => {
 								disabled={loading}
 								onClick={async () => {
 									setLoading(true);
+									const targetUrl =
+										typeof window !== "undefined"
+											? window.localStorage.getItem("redirectAfterLogin") || "/"
+											: "/";
+									if (typeof window !== "undefined") {
+										window.localStorage.removeItem("redirectAfterLogin");
+									}
 									await signIn("google", {
-										callbackUrl: "/",
+										callbackUrl: targetUrl,
 									});
 									setLoading(false);
 								}}
