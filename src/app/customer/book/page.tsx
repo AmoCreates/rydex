@@ -66,7 +66,7 @@ const Page = () => {
 	const [toFill, setToFill] = useState("Select a vehicle");
 	const [pickupSelected, setPickupSelected] = useState(false);
 	const [dropSelected, setDropSelected] = useState(false);
-	const isBusy = loading;
+	const isBusy = loading || status === "loading";
 	const progress = [
 		!!vehicle,
 		!!name,
@@ -747,6 +747,7 @@ const Page = () => {
 							animate={{ y: 0 }}
 							className="mt-5 w-full p-3 rounded-xl bg-black text-white font-semibold hover:bg-gray-900 flex justify-center items-center gap-3 active:scale-95 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
 							disabled={
+								isBusy ||
 								mobile.length != 10 ||
 								!name ||
 								!vehicle ||
@@ -771,7 +772,13 @@ const Page = () => {
 								);
 							}}
 						>
-							Continue <Bike size={16} />
+							{status === "loading" ? (
+								<span className="w-20 h-4 bg-zinc-700 rounded animate-pulse inline-block" />
+							) : (
+								<>
+									Continue <Bike size={16} />
+								</>
+							)}
 						</motion.button>
 
 						{/* Field indicator */}

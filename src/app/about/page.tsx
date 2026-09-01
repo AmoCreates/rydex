@@ -24,6 +24,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import { useRouter } from "next/navigation";
 
+import { useSession } from "next-auth/react";
+
 const stats = [
 	{ label: "Successful Rides", value: "10k+", icon: CheckCircle2 },
 	{ label: "Verified Partners", value: "500+", icon: Users },
@@ -61,6 +63,7 @@ const features = [
 const AboutPage = () => {
 	const [authOpen, setAuthOpen] = useState(false);
 	const { userData } = useSelector((state: RootState) => state.user);
+	const { status } = useSession();
 	const router = useRouter();
 
 	const handleBookClick = () => {
@@ -263,12 +266,21 @@ const AboutPage = () => {
 							Join thousands of satisfied riders and verified vehicle partners on RYDEX today.
 						</p>
 						<div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-							<button
-								onClick={handleBookClick}
-								className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-black text-white font-semibold text-base hover:bg-gray-900 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-lg cursor-pointer"
-							>
-								Book a Ride <ChevronRight size={18} />
-							</button>
+							{status === "loading" ? (
+								<button
+									disabled
+									className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-zinc-800 text-zinc-400 font-semibold text-base cursor-not-allowed pointer-events-none flex items-center justify-center gap-2 shadow-lg opacity-80"
+								>
+									<span className="w-24 h-5 bg-zinc-700 rounded animate-pulse inline-block" />
+								</button>
+							) : (
+								<button
+									onClick={handleBookClick}
+									className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-black text-white font-semibold text-base hover:bg-gray-900 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+								>
+									Book a Ride <ChevronRight size={18} />
+								</button>
+							)}
 							<Link
 								href="/partner/onboarding/vehicle"
 								className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gray-200 text-black font-semibold text-base hover:bg-gray-300 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"

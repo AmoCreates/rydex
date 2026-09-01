@@ -209,9 +209,14 @@ const VehicleCard = ({
 							</motion.div>
 						</div>
 						<motion.button
-							whileTap={{ scale: 0.92 }}
-							whileHover={{ scale: 1.04 }}
-							className="flex items-center gap-1.5 bg-zinc-900 hover:bg-black text-white text-sm font-black px-6 py-3 rounded-2xl transition-colors shadow-md cursor-pointer group"
+							whileTap={isDistanceReady ? { scale: 0.92 } : {}}
+							whileHover={isDistanceReady ? { scale: 1.04 } : {}}
+							disabled={!isDistanceReady}
+							className={`flex items-center gap-1.5 text-white text-sm font-black px-6 py-3 rounded-2xl transition-colors shadow-md group ${
+								!isDistanceReady
+									? "bg-zinc-800 text-zinc-400 cursor-not-allowed pointer-events-none opacity-80"
+									: "bg-zinc-900 hover:bg-black cursor-pointer"
+							}`}
 							onClick={onBook}
 						>
 							{isDistanceReady ? (
@@ -223,7 +228,9 @@ const VehicleCard = ({
 									/>
 								</>
 							) : (
-								"Calculating..."
+								<div className="flex items-center gap-2">
+									<span className="w-16 h-4 bg-zinc-700 rounded animate-pulse inline-block" />
+								</div>
 							)}
 						</motion.button>
 					</div>

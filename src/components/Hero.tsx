@@ -3,6 +3,7 @@ import { RootState } from "@/Toolkit/store";
 import axios from "axios";
 import { Bike, Bus, Car, Play, Truck } from "lucide-react";
 import { motion } from "motion/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -13,9 +14,11 @@ type Props = {
 
 const Hero = ({ onOpen }: Props) => {
 	const { userData } = useSelector((state: RootState) => state.user);
+	const { status } = useSession();
 	const router = useRouter();
 	const [isActiveRide, setIsActiveRide] = useState(false);
 	const [activeRideId, setActiveRideId] = useState("");
+	const [fetchingRide, setFetchingRide] = useState(true);
 
 	useEffect(() => {
 		const isActiveBooking = async () => {
@@ -32,10 +35,14 @@ const Hero = ({ onOpen }: Props) => {
 					return;
 				}
 				console.log(error);
+			} finally {
+				setFetchingRide(false);
 			}
 		};
 		isActiveBooking();
 	}, []);
+
+	const isDataLoading = status === "loading" || fetchingRide;
 
 	return (
 		<div className="relative min-h-screen w-full overflow-hidden">
@@ -73,21 +80,30 @@ const Hero = ({ onOpen }: Props) => {
 					<Truck size={30} />
 				</motion.div>
 				<div className="mt-12 flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
-					<motion.button
-						className="cursor-pointer active:scale-95 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition"
-						onClick={() => {
-							if (!userData) onOpen();
-							else {
-								if (isActiveRide)
-									router.push(
-										`/customer/active-ride/${activeRideId}`,
-									);
-								else router.push("/customer/book");
-							}
-						}}
-					>
-						{isActiveRide ? "Track My Ride" : "Book Now"}
-					</motion.button>
+					{isDataLoading ? (
+						<button
+							disabled
+							className="px-10 py-4 bg-zinc-800 text-zinc-400 rounded-full font-semibold text-[18px] shadow-xl cursor-not-allowed pointer-events-none flex items-center justify-center gap-2 opacity-80 border border-zinc-700/50"
+						>
+							<span className="w-24 h-5 bg-zinc-700 rounded animate-pulse inline-block" />
+						</button>
+					) : (
+						<motion.button
+							className="cursor-pointer active:scale-95 px-10 py-4 bg-white text-black rounded-full font-semibold text-[18px] shadow-xl hover:scale-105 transition"
+							onClick={() => {
+								if (!userData) onOpen();
+								else {
+									if (isActiveRide)
+										router.push(
+											`/customer/active-ride/${activeRideId}`,
+										);
+									else router.push("/customer/book");
+								}
+							}}
+						>
+							{isActiveRide ? "Track My Ride" : "Book Now"}
+						</motion.button>
+					)}
 
 					{/* Video Guide Buttons */}
 					<motion.a

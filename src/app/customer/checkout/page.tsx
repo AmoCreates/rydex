@@ -31,6 +31,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/Toolkit/store";
 import { getSocket } from "@/lib/socket";
 import ApiErrorBanner from "@/components/ApiErrorBanner";
+import { useSession } from "next-auth/react";
 
 const VEHICE_META: any = {
 	bike: { label: "Bike", Icon: Bike },
@@ -78,6 +79,7 @@ const CheckoutPageContent = () => {
 	const [currBookingId, setCurrBookingId] = useState<string | null>(null);
 	const [payMode, setPayMode] = useState<"cash" | "online">("cash");
 	const { userData } = useSelector((state: RootState) => state.user);
+	const { status: sessionStatus } = useSession();
 	const [bar, setBar] = useState(true);
 	const [errMsg, setErrMsg] = useState("");
 
@@ -577,11 +579,17 @@ const CheckoutPageContent = () => {
 											onClick={handleBookRequest}
 											whileTap={{ scale: 0.97 }}
 											whileHover={{ scale: 1.02 }}
-											className={`w-full h-14 mt-8 bg-zinc-900 hover:bg-black ${loading && "opacity-80"} disabled:pointer-events-none text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md cursor-pointer group overflow-x-hidden`}
-											disabled={loading}
+											className={`w-full h-14 mt-8 bg-zinc-900 hover:bg-black ${(loading || sessionStatus === "loading") && "opacity-80"} disabled:pointer-events-none disabled:cursor-not-allowed text-white font-black text-sm rounded-2xl flex items-center justify-center gap-2.5 transition-colors shadow-md cursor-pointer group overflow-x-hidden`}
+											disabled={loading || sessionStatus === "loading"}
 										>
-											Request Ride{" "}
-											<Icon className="group-hover:translate-x-2 group-focus:translate-x-96 transition-transform duration-700" />
+											{sessionStatus === "loading" ? (
+												<span className="w-24 h-4 bg-zinc-700 rounded animate-pulse inline-block" />
+											) : (
+												<>
+													Request Ride{" "}
+													<Icon className="group-hover:translate-x-2 group-focus:translate-x-96 transition-transform duration-700" />
+												</>
+											)}
 										</motion.button>
 									</motion.div>
 								)}

@@ -43,7 +43,7 @@ const Nav = ({ onOpen }: Props) => {
 	const [pendingRequestCount, setPendingRequestCount] = useState(0);
 	const [isActiveRide, setIsActiveRide] = useState(false);
 	const [activeRideId, setActiveRideId] = useState<string | null>(null);
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 	const userData = session?.user;
 	const router = useRouter();
 	const customerNav = [
@@ -259,22 +259,36 @@ const Nav = ({ onOpen }: Props) => {
 								{publicNav.map((item, index) => {
 									const href = item.route;
 									const active = pathName === href;
-									if (item.label === "Book" && !userData) {
-										return (
-											<button
-												key={index}
-												type="button"
-												onClick={() => {
-													if (typeof window !== "undefined") {
-														window.localStorage.setItem("redirectAfterLogin", "/customer/book");
-													}
-													onOpen();
-												}}
-												className={`text-[11px] sm:text-sm text-center font-medium transition pl-2 cursor-pointer ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
-											>
-												{item.label}
-											</button>
-										);
+									if (item.label === "Book") {
+										if (status === "loading") {
+											return (
+												<button
+													key={index}
+													type="button"
+													disabled
+													className="text-[11px] sm:text-sm text-center font-medium transition pl-2 text-gray-500 cursor-not-allowed pointer-events-none opacity-60 flex items-center justify-center"
+												>
+													<span className="w-10 h-3.5 bg-zinc-700/80 rounded animate-pulse inline-block" />
+												</button>
+											);
+										}
+										if (!userData) {
+											return (
+												<button
+													key={index}
+													type="button"
+													onClick={() => {
+														if (typeof window !== "undefined") {
+															window.localStorage.setItem("redirectAfterLogin", "/customer/book");
+														}
+														onOpen();
+													}}
+													className={`text-[11px] sm:text-sm text-center font-medium transition pl-2 cursor-pointer ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
+												>
+													{item.label}
+												</button>
+											);
+										}
 									}
 									return (
 										<Link
@@ -416,6 +430,13 @@ const Nav = ({ onOpen }: Props) => {
 										)}
 									</AnimatePresence>
 								</>
+							) : status === "loading" ? (
+								<button
+									disabled
+									className="px-4 py-1.5 rounded-full bg-zinc-800 text-zinc-400 text-sm cursor-not-allowed pointer-events-none flex items-center justify-center opacity-80"
+								>
+									<span className="w-10 h-4 bg-zinc-700 rounded animate-pulse inline-block" />
+								</button>
 							) : (
 								<button
 									className=" px-4 py-1.5 rounded-full bg-white text-black text-sm cursor-pointer transition active:scale-95"
