@@ -54,12 +54,26 @@ const ContactPage = () => {
 		setTimeout(() => setCopied(false), 2000);
 	};
 
-	const handleSubmit = (e: React.FormEvent) => {
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!formData.name || !formData.email || !formData.message) return;
 		setLoading(true);
-		setTimeout(() => {
-			setLoading(false);
+
+		try {
+			const response = await fetch("/api/contact/send", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(formData),
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || "Failed to send email");
+			}
+
 			setSubmitted(true);
 			setFormData({
 				name: "",
@@ -67,7 +81,16 @@ const ContactPage = () => {
 				subject: "General Inquiry",
 				message: "",
 			});
-		}, 800);
+		} catch (error) {
+			console.error("Error sending message:", error);
+			alert(
+				error instanceof Error
+					? error.message
+					: "Failed to send message. Please try again."
+			);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
