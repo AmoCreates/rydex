@@ -50,7 +50,9 @@ const Nav = ({ onOpen }: Props) => {
 		{ label: "Home", route: "/" },
 		{
 			label: isActiveRide ? "Track My Ride" : "Book Vehicle",
-			route: activeRideId ? `/customer/active-ride/${activeRideId}` : "/customer/book",
+			route: activeRideId
+				? `/customer/active-ride/${activeRideId}`
+				: "/customer/book",
 		},
 		{ label: "My Bookings", route: "/customer/bookings" },
 	];
@@ -58,7 +60,9 @@ const Nav = ({ onOpen }: Props) => {
 		{ label: "Profile", route: "/customer/profile" },
 		{
 			label: isActiveRide ? "Track My Ride" : "Book Vehicle",
-			route: activeRideId ? `/customer/active-ride/${activeRideId}` : "/customer/book",
+			route: activeRideId
+				? `/customer/active-ride/${activeRideId}`
+				: "/customer/book",
 		},
 		{ label: "My Bookings", route: "/customer/bookings" },
 	];
@@ -165,7 +169,7 @@ const Nav = ({ onOpen }: Props) => {
 	useEffect(() => {
 		const socket = getSocket();
 		socket?.on("new-booking", (data) => {
-			setPendingRequestCount((prev) => prev+1);
+			setPendingRequestCount((prev) => prev + 1);
 		});
 		return () => {
 			socket?.off("new-booking");
@@ -216,7 +220,8 @@ const Nav = ({ onOpen }: Props) => {
 									const href = item.route;
 									const active = pathName === href;
 									const isDisabledActiveRide =
-										item.label === "Active Ride" && !isActiveRide;
+										item.label === "Active Ride" &&
+										!isActiveRide;
 
 									if (isDisabledActiveRide) {
 										return (
@@ -236,7 +241,8 @@ const Nav = ({ onOpen }: Props) => {
 											className={`relative text-[12px] sm:text-sm text-center font-medium transition pl-2 ${active ? "text-white" : "text-gray-400 hover:text-white"}`}
 										>
 											{item.label}
-											{item.label === "Pending Request" ? (
+											{item.label ===
+											"Pending Request" ? (
 												<span
 													className={`${item.label === "Pending Request" && (pendingRequestCount > 0 ? "absolute" : "hidden")} -top-1.5 -right-2 w-4 h-4 bg-white text-black text-[9px] rounded-full flex items-center justify-center font-bold`}
 												>
@@ -245,10 +251,12 @@ const Nav = ({ onOpen }: Props) => {
 														pendingRequestCount}
 												</span>
 											) : (
-												item.label === "Active Ride" &&
-												<span
-													className={`${isActiveRide ? "absolute" : "hidden"} -top-1.5 -right-2 w-4 h-4 bg-green-500 text-[9px] rounded-full flex items-center justify-center font-bold`}
-												/>
+												item.label ===
+													"Active Ride" && (
+													<span
+														className={`${isActiveRide ? "absolute" : "hidden"} -top-1.5 -right-2 w-4 h-4 bg-green-500 text-[9px] rounded-full flex items-center justify-center font-bold`}
+													/>
+												)
 											)}
 										</Link>
 									);
@@ -278,8 +286,14 @@ const Nav = ({ onOpen }: Props) => {
 													key={index}
 													type="button"
 													onClick={() => {
-														if (typeof window !== "undefined") {
-															window.localStorage.setItem("redirectAfterLogin", "/customer/book");
+														if (
+															typeof window !==
+															"undefined"
+														) {
+															window.localStorage.setItem(
+																"redirectAfterLogin",
+																"/customer/book",
+															);
 														}
 														onOpen();
 													}}
@@ -337,7 +351,10 @@ const Nav = ({ onOpen }: Props) => {
 													<p className="text-lg font-semibold">
 														{userData.name}
 													</p>
-													<p className="text-xs -mt-1 text-gray-500">
+													<p className="text-xs text-zinc-400 -mt-1">
+														{userData.email}
+													</p>
+													<p className="text-xs text-gray-500">
 														{userData.role}
 													</p>
 													{userData.role ==
@@ -393,29 +410,41 @@ const Nav = ({ onOpen }: Props) => {
 													)}
 
 												{userData?.role === "partner" &&
-										partnerMenu.map((item, idx) => {
-											if (item.label === "Active Ride" && !isActiveRide) {
-												return (
-													<button
-														key={idx}
-														type="button"
-														className="w-full px-4 py-2 rounded-lg text-sm text-left text-gray-500 opacity-40 pointer-events-none select-none"
-													>
-														{item.label}
-													</button>
-												);
-											}
+													partnerMenu.map(
+														(item, idx) => {
+															if (
+																item.label ===
+																	"Active Ride" &&
+																!isActiveRide
+															) {
+																return (
+																	<button
+																		key={
+																			idx
+																		}
+																		type="button"
+																		className="w-full px-4 py-2 rounded-lg text-sm text-left text-gray-500 opacity-40 pointer-events-none select-none"
+																	>
+																		{
+																			item.label
+																		}
+																	</button>
+																);
+															}
 
-											return (
-												<Link
-													key={idx}
-													href={item.route}
-													className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
-												>
-													{item.label}
-												</Link>
-											);
-										})}
+															return (
+																<Link
+																	key={idx}
+																	href={
+																		item.route
+																	}
+																	className="block px-4 py-2 rounded-lg text-sm text-black hover:bg-gray-200"
+																>
+																	{item.label}
+																</Link>
+															);
+														},
+													)}
 												<button
 													className="w-full  px-4 py-2 rounded-lg text-sm text-black cursor-pointer hover:bg-gray-400 flex gap-1 items-center"
 													onClick={handleSignOut}
@@ -461,8 +490,11 @@ const Nav = ({ onOpen }: Props) => {
 						className="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl z-50 md:hidden"
 					>
 						<div className="py-2 text-center border-b border-gray-200 mb-1">
-							<p className="text-lg font-semibold">
+							<p className="text-md font-semibold">
 								{userData.name}
+							</p>
+							<p className="text-xs text-zinc-400 -mt-1">
+								{userData.email}
 							</p>
 							<p className="text-xs -mt-1 text-gray-500">
 								{userData.role}
@@ -513,7 +545,10 @@ const Nav = ({ onOpen }: Props) => {
 
 						{userData?.role === "partner" &&
 							partnerMenu.map((item, idx) => {
-								if (item.label === "Active Ride" && !isActiveRide) {
+								if (
+									item.label === "Active Ride" &&
+									!isActiveRide
+								) {
 									return (
 										<button
 											key={idx}
@@ -521,7 +556,8 @@ const Nav = ({ onOpen }: Props) => {
 											className="w-full px-4 py-2 rounded-lg text-sm text-left text-gray-500 opacity-40 pointer-events-none select-none"
 										>
 											<div className="flex items-center justify-between">
-												{item.label} <RiArrowRightSLine />
+												{item.label}{" "}
+												<RiArrowRightSLine />
 											</div>
 										</button>
 									);

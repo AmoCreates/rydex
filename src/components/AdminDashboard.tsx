@@ -125,6 +125,9 @@ const AdminDashboard = () => {
 										<p className="text-lg font-semibold">
 											{userData?.name}
 										</p>
+										<p className="text-xs text-zinc-400 -mt-1">
+											{userData?.email}
+										</p>
 										<p className="text-xs -mt-1 text-gray-500">
 											{userData?.role}
 										</p>
