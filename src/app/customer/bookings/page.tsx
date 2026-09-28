@@ -201,6 +201,8 @@ const Page = () => {
 		}
 	};
 
+	console.log(filterBookings)
+
 	return (
 		<div className="relative min-h-screen bg-gray-50">
 			<div className=" absolute top-7 left-1/2 -translate-x-1/2 z-[9999]">
@@ -301,7 +303,7 @@ const Page = () => {
 												<div className="flex-1">
 													<div className="flex items-center justify-between">
 														<h3 className="font-semibold text-gray-900">
-															{b.driver.name.toUpperCase() ||
+															{b.driver?.name.toUpperCase() ||
 																"Customer"}
 														</h3>
 														<span
@@ -314,7 +316,7 @@ const Page = () => {
 													</div>
 													<div className="flex items-center  gap-1 mt-1 text-xs text-white">
 														<Phone className="w-3 h-3" />
-														{b.driver.mobile}
+														{b.driver?.mobile}
 													</div>
 												</div>
 											</div>
@@ -322,12 +324,12 @@ const Page = () => {
 											{/* VEHICLE DATA */}
 											<div className="px-4 pt-3">
 												<div className="bg-gray-50 rounded-lg p-2 flex items-center gap-2">
-													{getIcon(b.vehicle.type)}
+													{getIcon(b.vehicle?.type)}
 													<div className="text-xs text-gray-600">
-														{b.vehicle.vehicleModel}{" "}
+														{b.vehicle?.vehicleModel}{" "}
 														•{" "}
 														{b.vehicle
-															.vehicleNumber ||
+															?.vehicleNumber ||
 															"Not assigned"}
 													</div>
 												</div>
