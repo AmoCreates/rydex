@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import Provider from "@/lib/Provider";
 import ReduxProvider from "@/Toolkit/ReduxProvider";
 import InitUser from "@/InitUser";
+import ApiErrorBanner from "@/components/ApiErrorBanner";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -37,6 +38,12 @@ export default function RootLayout({
 					<ReduxProvider>
 						{/* Initialize user session on app load */}
 						<InitUser />
+						<ApiErrorBanner
+							title="A quick heads-up"
+							message="Some features may be limited because our free API keys have expired. You can still explore the rest of the project."
+							variant="notice"
+							autoDismissMs={5000}
+						/>
 						{children}
 					</ReduxProvider>
 				</Provider>
